@@ -2,21 +2,24 @@
   <div class="home">
     <!-- home-header -->
     <header class="home-header clearfix">
-      <a href="/" class="site-logo-landing-desktop hidden-xs">
+      <router-link to="/" class="site-logo-landing-desktop hidden-xs">
         <img src="../assets/images/logo.png" width="320" height="60">
-      </a>
-      <a href="/" class="site-logo-landing-mobile hidden-sm hidden-md hidden-lg">
+      </router-link>
+      <router-link to="/" class="site-logo-landing-mobile hidden-sm hidden-md hidden-lg">
         <img src="../assets/images/logo-mob.svg" width="135" height="49">
-      </a>
+      </router-link>
       <nav class="site-menu-custom">
-        <div class="btn btn-default btn-lg hidden-xs">
-          <a href="https://exchange.pancakeswap.finance/#/swap?outputCurrency=0x8F0528cE5eF7B51152A59745bEfDD91D97091d2F">Buy ALPACA</a>
-        </div>
-        <div class="btn btn-success btn-lg">
-          <router-link to="/app">Launch App</router-link>
-            <a href="http://app.alpacafinance.org" target="blank"></a>
-        </div>
-    </nav>
+        <a href="https://exchange.pancakeswap.finance/#/swap?outputCurrency=0x8F0528cE5eF7B51152A59745bEfDD91D97091d2F">
+          <div class="btn btn-default btn-lg hidden-xs">
+            Buy ALPACA
+          </div>
+        </a>
+        <router-link to="/app">
+          <div class="btn btn-success btn-lg">
+            Launch App
+          </div>
+        </router-link>
+      </nav>
     </header>
     <!-- home-landing -->
     <div id="home-landing">
@@ -30,14 +33,18 @@
         <div class="spacer-35"></div>
         <p class="text-info">Let this majestic South American mammal take your yield to new heights</p>
         <div class="spacer-35"></div>
-        <div class="btn btn-success btn-lg">
-          <router-link to="/app">Use Alpaca</router-link>
-        </div>
-        <div class="btn btn-default btn-lg">
-          <router-link to="/docs">Documentation</router-link>
-        </div>
-        <div class="btn btn-default btn-lg">
-          <a href="#section5-landing">FAQs</a>
+        <router-link to="/app">
+          <div class="btn btn-success btn-lg">
+            Use Alpaca
+          </div>
+        </router-link>
+        <router-link to="/docs">
+          <div class="btn btn-default btn-lg">
+            Documentation
+          </div>
+        </router-link>
+        <div class="btn btn-default btn-lg" @click="scrollToQuestion">
+          <span>FAQs</span>
         </div>
       </div>
     </div>
@@ -147,7 +154,7 @@
       <div class="container text-center">
         <h2>Our Partners </h2>
         <div class="row">
-          <div class="column4">
+          <div class="col-sm-3 col-md-3 col-lg-3">
             <a href="https://wault.finance/" target="blank">
               <div class="icon-box">
                 <img src="../assets/images/wault.svg">
@@ -155,7 +162,7 @@
               </div>
             </a>
           </div>
-          <div class="column4">
+          <div class="col-sm-3 col-md-3 col-lg-3">
             <a href="https://pancakeswap.finance/" target="blank">
               <div class="icon-box">
                 <img src="../assets/images/cake.svg">
@@ -163,7 +170,7 @@
               </div>
             </a>
           </div>
-          <div class="column4">
+          <div class="col-sm-3 col-md-3 col-lg-3">
             <a href="https://dodoex.io/" target="blank">
               <div class="icon-box">
                 <img src="../assets/images/dodo.svg">
@@ -171,7 +178,7 @@
               </div>
             </a>
           </div>
-          <div class="column4">
+          <div class="col-sm-3 col-md-3 col-lg-3">
             <a href="https://multiplier.finance/" target="blank">
               <div class="icon-box">
                 <img src="../assets/images/multiplier.svg">
@@ -179,7 +186,7 @@
               </div>
             </a>
           </div>
-          <div class="column4">
+          <div class="col-sm-3 col-md-3 col-lg-3">
             <a href="https://belt.fi/bsc/" target="blank">
               <div class="icon-box">
                 <img src="../assets/images/belt.svg">
@@ -187,7 +194,7 @@
               </div>
             </a>
           </div>
-          <div class="column4">
+          <div class="col-sm-3 col-md-3 col-lg-3">
             <a href="https://www.boringdao.com/" target="blank">
               <div class="icon-box">
                 <img src="../assets/images/borring.svg">
@@ -198,12 +205,88 @@
         </div>
       </div>
     </div>
+    <!-- section6-landing -->
+    <div id="section6-landing">
+      <div class="container text-center">
+        <h2>Join our community</h2>
+        <div class="row">
+          <div class="col-lg-3 col-md-3 col-sm-6 col-xs-6">
+          <a href="https://twitter.com/AlpacaFinance" target="blank">
+            <div class="icon-box">
+              <i class="iconfont icon-twitter"></i>
+              <h4>Twitter</h4>
+              <p>Follow @AlpacaFinance<br>for the latest<br>news and updates</p>
+            </div>
+          </a>
+          </div>
+          <div class="col-lg-3 col-md-3 col-sm-6 col-xs-6">
+            <a href="https://t.me/alpacafinance" target="blank">
+              <div class="icon-box">
+                <i class="iconfont icon-telegram"></i>
+                <h4>Telegram</h4>
+                <p>Mix and mingle with<br>your fellow Alpacas</p>
+              </div>
+            </a>
+          </div>
+          <div class="col-lg-3 col-md-3 col-sm-6 col-xs-6">
+            <a href="https://discord.gg/WnUWeRNTwk" target="blank">
+            <div class="icon-box">
+              <i class="iconfont icon-discord "></i>
+              <h4>Discord</h4>
+              <p>Meet your fellow<br>community members,<br>and chat with them<br>in real time</p>
+            </div>
+            </a>
+          </div>
+          <div class="col-lg-3 col-md-3 col-sm-6 col-xs-6">
+            <a href="https://github.com/liaolonghui/Alpaca" target="blank">
+            <div class="icon-box">
+              <i class="iconfont icon-GitHub"></i>
+              <h4>Github</h4>
+              <p>Review our code</p>
+            </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- section7-landing -->
+    <div id="section7-landing" ref="questions">
+      <div class="container text-center">
+        <h2>Frequently asked questions</h2>
+        <div class="spacer-70"></div>
+        <div class="accordion-main">
+          <button class="accordion" @click="touchQuestion">What is Alpaca Finance?</button>
+          <div class="panel">
+            <p>Alpaca Finance is the largest lending protocol allowing leveraged yield farming on Binance Smart Chain. It helps lenders to earn safe and stable yields, and offers borrowers undercollateralized loans for leveraged yield farming positions, vastly multiplying their farming principals and resulting profits.‌</p>
+            <p>Furthermore, Alpacas are a virtuous breed. That’s why, we are a fair-launch project with no pre-sale, no investor, and no pre-mine. So from the beginning, this has always been a product built by the people, for the people. Or as we like to say: <b>by the Alpacas, for the Alpacas.</b></p>
+          </div>
+        </div>
+        <div class="accordion-main">
+          <button class="accordion" @click="touchQuestion">What is yield farming?</button>
+          <div class="panel">
+            <p>Yield farming is an innovative DeFi concept where users stake or lend their crypto assets, providing liquidity in order to receive returns.</p>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'Home'
+  name: 'Home',
+  methods: {
+    // 点击问题，展示回答
+    touchQuestion(e) {
+      $(e.target).toggleClass('active')
+      $(e.target).parent().find('.panel').toggle()
+    },
+    // 滚动到问题
+    scrollToQuestion() {
+      const questions = this.$refs.questions
+      $("html,body").animate({ scrollTop: questions.offsetTop }, 500);
+    }
+  },
 }
 </script>
 
@@ -335,14 +418,159 @@ export default {
   width: 400px;
   height: 100px;
 }
-@media screen and (max-width: 1000px) {
+@media screen and (max-width: 1024px) {
   #section4-landing img {
     width: 300px;
     height: 75px;
   }
 }
+@media screen and (max-width: 765px) {
+  #section4-landing img {
+    width: 200px;
+    height: 50px;
+  }
+}
 /*  section5-landing  */
 #section5-landing {
   padding: 70px 0;
+  background-color: #f4f4f4;
+}
+#section5-landing h2 {
+    font-size: 44px;
+}
+#section5-landing img {
+    width: 40px;
+    margin-top: -5px;
+}
+#section5-landing .icon-box {
+  background-color: #fff;
+  border: 1px solid #80808047;
+  border-radius: 10px;
+  min-height: 60px;
+  text-align: left;
+  padding-left: 15px;
+  margin: 10px 0;
+}
+#section5-landing .icon-box:hover {
+  border-color: #31C77F;
+}
+#section5-landing .icon-box h4 {
+  font-size: 20px;
+  color: #0F1228;
+  margin-top: 15px;
+  margin-left: 5px;
+  font-weight: 200;
+  display: inline-block;
+}
+@media only screen and (max-width: 767px){
+  #section5-landing img {
+    width: 35px;
+  }
+  #section5-landing .icon-box {
+    margin: 10px 70px;
+  }
+  #section5-landing h2 {
+    font-size: 42px;
+  }
+}
+/* section6-landing */
+#section6-landing {
+  padding: 70px 0;
+}
+#section6-landing h2 {
+  font-size: 44px;
+}
+#section6-landing .icon-box {
+  border: 2px solid #F6F4F5;
+  background: #F6F4F5;
+  border-radius: 10px;
+  padding: 80px 20px 0px 20px;
+  border-radius: 10px;
+  height: 410px;
+  margin: 20px;
+}
+#section6-landing .icon-box:hover {
+  border-color: #31C77F;
+}
+#section6-landing .icon-box h4 {
+  font-size: 24px;
+  color: #0F1228;
+  font-weight: 600;
+  margin: 30px 0px;
+  text-decoration: none;
+}
+#section6-landing .icon-box:hover>h4 {
+  color: #31C77F;
+}
+#section6-landing i {
+  font-size: 70px;
+}
+#section6-landing a {
+  color: #0F1228 !important;
+}
+/* section7-landing */
+.spacer-70 {
+  margin-bottom: 70px;
+}
+#section7-landing {
+  padding: 70px 0;
+  background: #f4f4f4;
+}
+#section7-landing h2 {
+  font-size: 44px;
+}
+.accordion-main {
+  border: 1px solid #E2E2E2;
+  box-sizing: border-box;
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+.accordion {
+  cursor: pointer;
+  width: 100%;
+  outline: none;
+  transition: 0.4s;
+  font-size: 21px;
+  font-weight: 500;
+  background-color: transparent;
+  border: 0px;
+  text-align: left;
+}
+.accordion:before {
+  content: '\25CF';
+  font-size: 23px;
+  color: #31C77F;
+  margin-right: 15px;
+}
+.accordion:after {
+  content: '\002B';
+  font-size: 23px;
+  color: #31C77F;
+  margin-left: 5px;
+  float: right;
+}
+.active:after {
+  content: "\002D";
+  color: #31C77F;
+}
+.active, .accordion:hover {
+  background-color: transparent;
+  color: #0F1228;
+}
+.panel {
+  padding: 0px 32px;
+  display: none;
+  overflow: hidden;
+  font-size: 16px;
+  font-weight: 500;
+  text-align: left;
+  background: transparent !important;
+  border: 0px;
+  box-shadow: none;
+}
+.panel p {
+  opacity: 1;
+  padding: 20px 0px 0px 0px;
 }
 </style>

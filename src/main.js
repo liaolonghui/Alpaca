@@ -10,6 +10,9 @@ import $ from 'jquery'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap/dist/js/bootstrap.min.js'
 
+// iconfont
+import './assets/font/iconfont.css'
+
 Vue.config.productionTip = false
 
 new Vue({
