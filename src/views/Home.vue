@@ -9,7 +9,7 @@
         <img src="../assets/images/logo-mob.svg" width="135" height="49">
       </router-link>
       <nav class="site-menu-custom">
-        <a href="https://exchange.pancakeswap.finance/#/swap?outputCurrency=0x8F0528cE5eF7B51152A59745bEfDD91D97091d2F">
+        <a href="https://exchange.pancakeswap.finance/#/swap?outputCurrency=0x8F0528cE5eF7B51152A59745bEfDD91D97091d2F" style="margin-right: 10px;">
           <div class="btn btn-default btn-lg hidden-xs">
             Buy ALPACA
           </div>
@@ -550,7 +550,7 @@ export default {
   margin-left: 5px;
   float: right;
 }
-.active:after {
+.accordion.active:after {
   content: "\002D";
   color: #31C77F;
 }
