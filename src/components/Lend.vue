@@ -25,45 +25,108 @@
         </p>
       </div>
     </header>
-    <article class="lend-body">
+    <article class="lend-body"  v-if="availableLendingPools">
       <h2 class="hidden-md hidden-lg">Available Lending Pools</h2>
       <!-- table 在md lg时候表格展示数据 -->
       <div class="table-responsive hidden-xs hidden-sm">
-        <table class="table">
-          <caption>响应式表格布局</caption>
+        <table class="table table-hover">
           <thead>
             <tr>
-              <th>产品</th>
-              <th>付款日期</th>
-              <th>状态</th></tr>
+              <th></th>
+              <th>APY</th>
+              <th>Total Supply</th>
+              <th>Total Borrowed</th>
+              <th>Utilization</th>
+              <th>Your Balance</th>
+              <th></th>
+            </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>产品1</td>
-              <td>23/11/2013</td>
-              <td>待发货</td></tr>
-            <tr>
-              <td>产品2</td>
-              <td>10/11/2013</td>
-              <td>发货中</td></tr>
-            <tr>
-              <td>产品3</td>
-              <td>20/10/2013</td>
-              <td>待确认</td></tr>
-            <tr>
-              <td>产品4</td>
-              <td>20/10/2013</td>
-              <td>已退货</td></tr>
+            <tr v-for="pool in availableLendingPools" :key="pool.name">
+              <td class="pool-title">
+                <img :src="pool.icon" alt="icon" width="40" height="40">
+                <h4>{{pool.name}}</h4>
+                <p>1 ib{{pool.name}} = {{pool.ratio}} {{pool.name}}</p>
+              </td>
+              <td class="APR">
+                <p>
+                  <span>Lending APR: </span>
+                  <span>{{pool.LendingAPR}}</span>
+                </p>
+                <p>
+                  <span>Staking APR: </span>
+                  <span>{{pool.StakingAPR}}</span>
+                </p>
+                <p v-if="pool.ProtocolAPR">
+                  <span>Protocol APR: </span>
+                  <span>{{pool.ProtocolAPR}}</span>
+                </p>
+                <p>
+                  <span>Total APR: </span>
+                  <span>{{pool.TotalAPR}}</span>
+                </p>
+                <p class="text-green">
+                  <span>Total APY: </span>
+                  <span>{{pool.TotalAPY}}</span>
+                </p>
+              </td>
+              <td>{{pool.TotalSupply}}</td>
+              <td>{{pool.TotalBorrowed}}</td>
+              <td>{{pool.Utilization}}</td>
+              <td>
+                <p>0.00 ib{{pool.name}}</p>
+                <p>0.00 {{pool.name}}</p>
+              </td>
+              <td class="operate-btn">
+                <router-link to="/deposit" tag="div" class="btn btn-success">Deposit</router-link>
+                <br />
+                <router-link to="/withdraw" tag="div" class="btn btn-success" style="margin-top: 10px;">Withdraw</router-link>
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>
       <!-- list  在xs sm时候列表展示数据 -->
       <ul class="list-group hidden-md hidden-lg">
-        <li class="list-group-item">免费域名注册</li>
-        <li class="list-group-item">免费 Window 空间托管</li>
-        <li class="list-group-item">图像的数量</li>
-        <li class="list-group-item">24*7 支持</li>
-        <li class="list-group-item">每年更新成本</li>
+        <li
+          class="list-group-item"
+          v-for="pool in availableLendingPools"
+          :key="pool.name">
+          <div class="li-left">
+            <p>1 ib{{pool.name}} = 1.0026 {{pool.name}}</p>
+            <p>Lending APR:</p>
+            <p>Staking APR:</p>
+            <p v-if="pool.ProtocolAPR">Protocol APR:</p>
+            <p>Total APR:</p>
+            <p class="text-green">Total APY</p>
+            <p>Total Supply</p>
+            <p>Total Borrowed</p>
+            <p>Utilization</p>
+            <p class="balance">Your Balance</p>
+            <!-- deposit -->
+            <router-link to="/deposit" tag="div" class="btn btn-success">Deposit</router-link>
+          </div>
+          <div class="li-right">
+            <p>
+              <img :src="pool.icon" alt="icon" width="28" height="28">
+              <span style="margin-left: 10px;">{{pool.name}}</span>
+            </p>
+            <p>{{pool.LendingAPR}}</p>
+            <p>{{pool.StakingAPR}}</p>
+            <p v-if="pool.ProtocolAPR">{{pool.ProtocolAPR}}</p>
+            <p>{{pool.TotalAPR}}</p>
+            <p class="text-green">{{pool.TotalAPY}}</p>
+            <p>{{pool.TotalSupply}}</p>
+            <p>{{pool.TotalBorrowed}}</p>
+            <p>{{pool.Utilization}}</p>
+            <p class="balance">
+              <span>0.00 ib{{pool.name}}</span>
+              <span>0.00 {{pool.name}}</span>
+            </p>
+            <!-- Withdraw -->
+            <router-link to="/withdraw" tag="div" class="btn btn-success">Withdraw</router-link>
+          </div>
+        </li>
       </ul>
     </article>
     <!-- spacer -->
@@ -71,9 +134,57 @@
   </div>
 </template>
 
+<script>
+export default {
+  data() {
+    return {
+      availableLendingPools: [
+        {
+          name: 'Alpaca',
+          icon: 'https://alpaca-app-asset.s3-ap-southeast-1.amazonaws.com/icons/coins/alpaca.svg',
+          ratio: '1.0026',
+          LendingAPR: '1.05%',
+          StakingAPR: '18.02%',
+          ProtocolAPR: '2.23%',
+          TotalAPR: '21.3%',
+          TotalAPY: '23.74%',
+          TotalSupply: '67.75M ALPACA',
+          TotalBorrowed: '11.57M ALPACA',
+          Utilization: '17.07%'
+        },
+        {
+          name: 'BNB',
+          icon: 'https://alpaca-app-asset.s3-ap-southeast-1.amazonaws.com/icons/coins/bnb.svg',
+          ratio: '1.0361',
+          LendingAPR: '11.38%',
+          StakingAPR: '3.4%',
+          TotalAPR: '14.78%',
+          TotalAPY: '15.93%',
+          TotalSupply: '741.42k BNB',
+          TotalBorrowed: '468.91k BNB',
+          Utilization: '63.24%'
+        },
+        {
+          name: 'BNBBB',
+          icon: 'https://alpaca-app-asset.s3-ap-southeast-1.amazonaws.com/icons/coins/bnb.svg',
+          ratio: '1.0361',
+          LendingAPR: '11.38%',
+          StakingAPR: '3.4%',
+          TotalAPR: '14.78%',
+          TotalAPY: '15.93%',
+          TotalSupply: '741.42k BNB',
+          TotalBorrowed: '468.91k BNB',
+          Utilization: '63.24%'
+        }
+      ]
+    }
+  },
+}
+</script>
+
 <style>
   .lend {
-    padding: 5px 30px 0 0;
+    padding: 5px 50px 0 0;
   }
   /* header */
   .lend-header {
@@ -118,7 +229,6 @@
   }
   /* body */
   .lend-body {
-    height: 500px;
     padding: 15px;
     margin-top: 10px;
     background-color: #fff;
@@ -133,5 +243,100 @@
   }
   .spacer-50 {
     height: 50px;
+  }
+  /* lend table */
+  .lend-body .table {
+    margin-top: 20px;
+  }
+  .lend-body .table td {
+    vertical-align: middle;
+    padding-top: 15px;
+  }
+  .lend-body .table td:nth-of-type(3) {
+    font-size: 18px;
+    color: #0f1228;
+  }
+  .lend-body .table td:nth-of-type(4) {
+    font-size: 18px;
+    color: #0f1228;
+  }
+  .lend-body .table td:nth-of-type(5) {
+    font-size: 18px;
+    color: #0f1228;
+  }
+  .lend-body .list-group {
+    margin-top: 20px;
+  }
+  .pool-title p {
+    color: #828282;
+    background-color: #f4f4f4;
+  }
+  .operate-btn .btn {
+    width: 100px;
+    border-radius: 15px;
+  }
+  .pool-title {
+    width: 200px;
+  }
+  .APR {
+    width: 210px;
+    padding-right: 35px !important;
+  }
+  .APR p {
+    display: flex;
+    justify-content: space-between;
+    margin: 0;
+  }
+  .APR .text-green {
+    color: #31C77F;
+  }
+  /* lend list */
+  .lend-body .list-group-item {
+    display: flex;
+    justify-content: space-between;
+  }
+  .list-group-item .li-left {
+    flex: 1;
+  }
+  .li-left p:nth-of-type(1) {
+    max-width: 200px;
+    max-height: 40px;
+    text-align: center;
+    color: #828282;
+    background-color: #f4f4f4;
+  }
+  .list-group-item .li-right {
+    flex: 1;
+    text-align: right;
+  }
+  .li-right p:nth-of-type(1) {
+    margin: 0;
+  }
+  @media screen and (max-width: 500px) {
+    .li-left p:nth-of-type(1) {
+      height: 40px;
+    }
+    .li-right p:nth-of-type(1) {
+      margin: 11px 0;
+    }
+  }
+  .li-right p.balance span {
+    display: block;
+  }
+  .li-left p.balance,
+  .li-right p.balance {
+    height: 40px;
+  }
+  .li-left p.balance {
+    line-height: 40px;
+  }
+  .list-group-item .text-green {
+    color: #31C77F;
+  }
+  .list-group-item .btn {
+    width: 98%;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border-radius: 15px;
   }
 </style>
