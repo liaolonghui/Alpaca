@@ -10,6 +10,8 @@ import $ from 'jquery'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap/dist/js/bootstrap.min.js'
 
+$(function () { $("[data-toggle='tooltip']").tooltip(); })
+
 // iconfont
 import './assets/font/iconfont.css'
 

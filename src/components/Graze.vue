@@ -8,4 +8,7 @@
 .graze {
   background-color: #fff;
 }
+h1 {
+  margin: 0;
+}
 </style>
