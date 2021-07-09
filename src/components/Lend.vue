@@ -89,7 +89,7 @@
       <!-- list  在xs sm时候列表展示数据 -->
       <ul class="list-group hidden-md hidden-lg">
         <li
-          class="list-group-item"
+          class="list-group-item lend-list"
           v-for="pool in availableLendingPools"
           :key="pool.name">
           <div class="li-left">
@@ -291,11 +291,11 @@ export default {
     color: #31C77F;
   }
   /* lend list */
-  .lend-body .list-group-item {
+  .lend-body .lend-list {
     display: flex;
     justify-content: space-between;
   }
-  .list-group-item .li-left {
+  .lend-list .li-left {
     flex: 1;
   }
   .li-left p:nth-of-type(1) {
@@ -305,7 +305,7 @@ export default {
     color: #828282;
     background-color: #f4f4f4;
   }
-  .list-group-item .li-right {
+  .lend-list .li-right {
     flex: 1;
     text-align: right;
   }
@@ -330,10 +330,10 @@ export default {
   .li-left p.balance {
     line-height: 40px;
   }
-  .list-group-item .text-green {
+  .lend-list .text-green {
     color: #31C77F;
   }
-  .list-group-item .btn {
+  .lend-list .btn {
     width: 98%;
     padding-top: 10px;
     padding-bottom: 10px;
