@@ -146,7 +146,7 @@
                 <h5>I want to stake</h5>
                 <p>Available ibALPACA Balance: 0.00</p>
                 <div class="num">
-                  <input type="number" :value="stakeAmount" placeholder="Deposit Amount" />
+                  <input type="number" :value="stakeAmount" placeholder="Stake Amount" />
                   <div class="btn btn-success">MAX</div>
                 </div>
                 <div
@@ -161,7 +161,7 @@
                 <h5>I want to unstake</h5>
                 <p>Staked ibALPACA Balance: 0.00</p>
                 <div class="num">
-                  <input type="number" :value="unstakeAmount" placeholder="Deposit Amount" />
+                  <input type="number" :value="unstakeAmount" placeholder="Unstake Amount" />
                   <div class="btn btn-success">MAX</div>
                 </div>
                 <div
@@ -199,7 +199,7 @@
             v-for="graze in grazingRangeData"
             :key="graze.name"
             >
-            <li class="list-group-item graze-m-list"  v-if="graze.state == grazeType">
+            <li @click="showOrHideMStake" class="list-group-item graze-m-list"  v-if="graze.state == grazeType">
               <!-- mobile header -->
               <header>
                 <img :src="graze.icon" alt="" width="36" height="36">
@@ -271,6 +271,51 @@
                 </p>
               </article>
             </li>
+            <!-- approve/unstake -->
+            <div class="graze-m-stake" v-if="graze.state == grazeType">
+              <div class="stake">
+                <h5>I want to stake</h5>
+                <p>Available ibALPACA Balance: 0.00</p>
+                <div class="num">
+                  <input type="number" :value="stakeAmount" placeholder="Stake Amount" />
+                  <div class="btn btn-success">MAX</div>
+                </div>
+                <div
+                  class="btn btn-success btn-group-justified"
+                  :disabled="graze.state=='Completed'"
+                  style="margin-top: 20px;"
+                  >
+                  Approve
+                </div>
+              </div>
+              <div class="unstake">
+                <h5>I want to unstake</h5>
+                <p>Staked ibALPACA Balance: 0.00</p>
+                <div class="num">
+                  <input type="number" :value="stakeAmount" placeholder="Unstake Amount" />
+                  <div class="btn btn-success">MAX</div>
+                </div>
+                <div
+                  class="btn btn-success btn-group-justified"
+                  :disabled="graze.state=='Completed'"
+                  style="margin-top: 20px;"
+                  >
+                  Approve
+                </div>
+              </div>
+              <div class="total-rewards text-center">
+                <h5>Total ODDZ Rewards:</h5>
+                <p>
+                  <img :src="graze.icon" alt="" width="48" height="48">
+                  <span>0.00</span>
+                </p>
+                <div class="btn btn-success btn-group-justified">Claim</div>
+              </div>
+            </div>
+            <!-- show/hide -->
+            <div v-if="graze.state == grazeType" @click="showOrHideMStake" class="showOrHideMStake">
+              <svg viewBox="64 64 896 896" focusable="false" data-icon="down" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M884 256h-75c-5.1 0-9.9 2.5-12.9 6.6L512 654.2 227.9 262.6c-3-4.1-7.8-6.6-12.9-6.6h-75c-6.5 0-10.3 7.4-6.5 12.7l352.6 486.1c12.8 17.6 39 17.6 51.7 0l352.6-486.1c3.9-5.3.1-12.7-6.4-12.7z"></path></svg>
+            </div>
           </div>
         </ul>
       </article>
@@ -348,6 +393,10 @@ export default {
     // showOrHideStake
     showOrHideStake(e) {
       $(e.currentTarget).parent().find('.graze-pc-stake').slideToggle()
+    },
+    // showOrHideMStake
+    showOrHideMStake(e) {
+      $(e.currentTarget).parent().find('.graze-m-stake').slideToggle()
     },
     // 将时间戳差值转化为: 天，时，分，秒(以后可能有用)
     transformTime(RewardsEnd) {
@@ -682,6 +731,54 @@ export default {
     font-weight: 700;
     font-size: 1.25em;
 }
+.graze-m-stake {
+  display: none;
+  padding: 0 15px 20px 15px;
+  background-color: #f4f4f4;
+}
+.graze-m-stake>div {
+  background-color: #f4f4f4;
+  margin-bottom: 10px;
+}
+.graze-m-stake h5 {
+  margin: 0;
+  padding: 10px 0 5px 0;
+  font-weight: 600;
+}
+.graze-m-stake .num {
+  display: flex;
+  margin: 10px 0 15px 0;
+}
+.graze-m-stake .num>input {
+  flex: 1;
+  margin-right: -2px;
+  outline: none;
+}
+.graze-m-stake .total-rewards {
+  border-top: 1px solid #aaa;
+  padding-top: 20px;
+}
+.graze-m-stake .total-rewards p {
+  margin-top: 10px;
+}
+.graze-m-stake .total-rewards p>span {
+  font-size: 36px;
+  color: #31c77f;
+  vertical-align: -10px;
+}
+.showOrHideMStake {
+  position: relative;
+  z-index: 6;
+  width: 40px;
+  height: 40px;
+  margin: 0 auto;
+  margin-top: -20px;
+  line-height: 40px;
+  text-align: center;
+  border-radius: 50%;
+  border: 1px solid #aaa;
+  background-color: #fff;
+}
 
 @media screen and (max-width: 1270px) {
   .graze-pc-title {
@@ -756,6 +853,9 @@ export default {
   .switch-box {
     margin-left: 0;
     float: right;
+  }
+  .num .btn {
+    padding: 8px 15px;
   }
 }
 </style>
