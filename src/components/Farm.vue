@@ -1,14 +1,10 @@
 <template>
   <div class="farm">
-    <h1>farm</h1>
+    <header class="farm-header">
+      <img src="../assets/images/FarmerAlpaca.svg" alt="FarmerAlpaca">
+    </header>
   </div>
 </template>
 
 <style>
-.farm {
-  background-color: #fff;
-}
-h1 {
-  margin: 0;
-}
 </style>
