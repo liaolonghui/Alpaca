@@ -137,6 +137,8 @@
                 <h4>ODDZ Earned :</h4>
                 <p>0.00</p>
               </div>
+              <!-- Completed? -->
+            <div v-if="graze.state == 'Completed'" class="completed">Completed</div>
             </li>
             <!-- approve/unstake -->
             <div class="graze-pc-stake row" style="margin: 0;" v-if="graze.state == grazeType">
@@ -180,7 +182,17 @@
             </div>
           </div>
         </ul>
-        <!-- mobile -->
+        <!-- mobile-body -->
+        <!-- graze-type -->
+        <div class="graze-type hidden-lg hidden-md">
+          <div @click="changeGrazeType" :class="{'active': grazeType==='Live'}">Live</div>
+          <div @click="changeGrazeType" :class="{'active': grazeType==='Completed'}">Completed</div>
+          <!-- switch -->
+          <div class="switch-box">
+            <switches v-model="stakedOnly" theme="bootstrap" color="success"></switches>
+            <span>Staked only</span>
+          </div>
+        </div>
         <ul class="list-group hidden-md hidden-lg graze-m-body">
           <div
             class="graze-m-box"
@@ -188,7 +200,76 @@
             :key="graze.name"
             >
             <li class="list-group-item graze-m-list"  v-if="graze.state == grazeType">
-              {{graze}}
+              <!-- mobile header -->
+              <header>
+                <img :src="graze.icon" alt="" width="36" height="36">
+                <span class="graze-name">{{graze.name}}</span>
+                <span
+                  data-toggle="tooltip"
+                  data-placement="top"
+                  title="Add Oddz to Metamask"
+                  class="btn btn-success btn-xs"
+                  style="height: 24px; padding: 4px;"
+                  >
+                  <svg style="width: 16px; height: 16px;" viewBox="64 64 896 896" focusable="false" data-icon="plus" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M482 152h60q8 0 8 8v704q0 8-8 8h-60q-8 0-8-8V160q0-8 8-8z"></path><path d="M176 474h672q8 0 8 8v60q0 8-8 8H176q-8 0-8-8v-60q0-8 8-8z"></path></svg>
+                  <img src="../assets/images/AAVE.png" width="16" height="16" style="vertical-align: 0px;">
+                </span>
+                <a :href="graze.URL" target="blank">View project site</a>
+              </header>
+              <!-- mobile article -->
+              <article class="m-article">
+                <!-- completed -->
+                <div class="completed" v-if="graze.state == 'Completed'">Completed</div>
+                <p class="m-APY">
+                  <span>APY</span>
+                  <span class="label" :class="[graze.APR ? 'label-success' : 'label-grey']">
+                    {{graze.APY ? graze.APY : '0.00%'}}
+                  </span>
+                </p>
+                <p class="m-APR">
+                  <span>APR</span>
+                  <span class="label" :class="[graze.APR ? 'label-green' : 'label-grey']">
+                    {{graze.APR ? graze.APR : '0.00%'}}
+                  </span>
+                </p>
+                <P class="m-reward">
+                  <span>{{graze.name}} reward</span>
+                  <span>0.00</span>
+                </P>
+                <p class="m-yourstaked">
+                  <span>Your ibALPACA staked</span>
+                  <span>0.00</span>
+                </p>
+                <p class="m-shareofpool">
+                  <span>% share of pool</span>
+                  <span>0.00%</span>
+                </p>
+                <p class="m-TVL">
+                  <span>TVL (USD)</span>
+                  <span>{{graze.TVL}}</span>
+                </p>
+                <p class="m-time">
+                  <span>Rewards end in</span>
+                  <span class="m-rewards-end-time">
+                    <span class="days">
+                      <span>6</span>
+                      <span>days</span>
+                    </span>
+                    <span class="hrs">
+                      <span>6</span>
+                      <span>hrs</span>
+                    </span>
+                    <span class="mins">
+                      <span>26</span>
+                      <span>mins</span>
+                    </span>
+                    <span class="secs">
+                      <span>46</span>
+                      <span>secs</span>
+                    </span>
+                  </span>
+                </p>
+              </article>
             </li>
           </div>
         </ul>
@@ -385,6 +466,7 @@ export default {
   margin-top: 20px;
   min-height: 110px;
   cursor: pointer;
+  overflow: hidden;
 }
 .graze-pc-body .graze-pc-list>div {
   display: inline-block;
@@ -479,6 +561,19 @@ export default {
   color: #31c77f;
   background-color: #f4f4f4;
 }
+.graze-pc-body .completed {
+  position: absolute;
+  top: 25px;
+  right: -30px;
+  width: 150px;
+  background-color: #000;
+  color: #fff;
+  z-index: 1;
+  transform: rotate(45deg);
+  text-align: center;
+  font-weight: 700;
+  font-size: 1.25em;
+}
 /* graze-pc-stake */
 .graze-pc-stake {
   display: none;
@@ -519,6 +614,74 @@ export default {
   outline: none;
 }
 
+/* graze-m-body */
+.graze-m-body {
+  margin-top: 10px;
+}
+.graze-m-list {
+  margin-top: 30px;
+  overflow: hidden;
+}
+.graze-m-list header {
+  height: 48px;
+  line-height: 40px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #aaa;
+}
+.graze-m-list header .graze-name {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 7px;
+}
+.graze-m-list header>a {
+  float: right;
+  font-weight: 550;
+  color: #31c77f !important;
+}
+.graze-m-list .m-article p {
+  display: flex;
+  justify-content: space-between;
+  margin: 10px 0;
+}
+.graze-m-list .m-reward {
+  font-weight: 600;
+}
+.graze-m-list .label {
+  display: block;
+  padding: 5px 15px;
+  font-size: 12px;
+}
+.graze-m-list .label-green {
+  background-color: #2dea8f;
+}
+.graze-m-list .label-grey {
+  background-color: #BBBBBB;
+}
+.graze-m-list .m-rewards-end-time {
+  display: flex;
+}
+.graze-m-list .m-rewards-end-time>span {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-right: 1px;
+  text-align: center;
+  color: #31c77f;
+  background-color: #f4f4f4;
+}
+.graze-m-list .completed {
+    position: absolute;
+    top: 20px;
+    right: -35px;
+    width: 140px;
+    background-color: #000;
+    color: #fff;
+    z-index: 1;
+    transform: rotate(45deg);
+    text-align: center;
+    font-weight: 700;
+    font-size: 1.25em;
+}
 
 @media screen and (max-width: 1270px) {
   .graze-pc-title {
@@ -575,6 +738,24 @@ export default {
   }
   .graze-pc-detail {
     padding-left: 0px;
+  }
+}
+@media screen and (max-width: 992px) {
+  .graze-body {
+    margin-top: 10px;
+  }
+  .graze .content {
+    padding: 10px;
+  }
+  .graze-type {
+    margin-top: 0;
+  }
+  .graze-type>div {
+    padding: 5px 10px;
+  }
+  .switch-box {
+    margin-left: 0;
+    float: right;
   }
 }
 </style>
