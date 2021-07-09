@@ -102,7 +102,7 @@ export default {
   }
   @media screen and (max-width: 992px) {
     .deposit .btn-boxs>div {
-      bottom: 10px;
+      bottom: -70px;
     }
   }
 </style>
