@@ -11,7 +11,7 @@
       <!-- btn -->
       <span class="btn-box">
         <!-- connect-btn pc -->
-        <div @click="connectWallet" class="btn btn-default connect-btn hidden-xs">
+        <div @click="showConnectDialog" class="btn btn-default connect-btn hidden-xs">
           {{publicAddress ? 'Connected as '+publicAddress : 'Connect to a wallet'}}
         </div>
         <!-- <button class="set-btn">
@@ -27,7 +27,7 @@
         </button>
       </span>
       <!-- connect-btn mobile -->
-      <div @click="connectWallet" class="btn btn-default connect-btn hidden-lg hidden-md hidden-sm center-h">
+      <div @click="showConnectDialog" class="btn btn-default connect-btn hidden-lg hidden-md hidden-sm center-h">
         {{publicAddress ? 'Connected as '+publicAddress : 'Connect to a wallet'}}
       </div>
       <!-- routers -->
@@ -111,6 +111,28 @@
       <!-- content -->
       <router-view class="app-content" @click="showOrHideLink"></router-view>
     </article>
+    <!-- connect dialog -->
+    <div class="modal fade connect-dialog" id="connectModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">连接钱包</h4>
+                </div>
+                <div class="modal-body">
+                  <div @click="connectWallet" class="connect-item">
+                    <div>MetaMask</div>
+                    <div>
+                      <img src="../assets/images/metamask.png" width="24" height="24" />
+                    </div>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal -->
+    </div>
   </div>
 </template>
 
@@ -134,8 +156,11 @@ export default {
       $(this.$refs.routers).slideToggle()
     },
     // 用于控制Set模态框的显示隐藏
-    showSetDialog() {
-      this.setDialogVisibly = true
+    showConnectDialog() {
+      if (this.publicAddress) {
+        this.publicAddress = ''
+      }
+      $('#connectModal').modal('show')
     },
     // 连接钱包
     connectWallet() {
@@ -147,19 +172,27 @@ export default {
           window.ethereum.enable();
         } catch (error) {
           // 用户不授权时
-          console.error("User denied account access")
+          alert("User denied account access")
         }
       }
-      const web3js = new Web3(web3Provider);//web3js就是你需要的web3实例
+      const web3 = new Web3(web3Provider);//web3js就是你需要的web3实例
   
       const that = this
-      web3js.eth.getAccounts(function (error, result) {
+      web3.eth.getAccounts(function (error, result) {
         if (!error) {
           //授权成功后result能正常获取到账号了
           that.publicAddress = result[0]
-          console.log(that.publicAddress)
+          // 获取eth数量
+          const balance = web3.eth.get_balance(result[0])
+          console.log(balance)
         }
       })
+      $('#connectModal').modal('hide')
+    },
+    // 显示setDialog
+    showSetDialog() {
+      window.alert('还没完成')
+      // setDialogVisibly
     }
   }
 }
@@ -314,9 +347,27 @@ export default {
   }
 }
 .connect-btn {
-  max-width: 225px;
+  max-width: 200px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+/* connect-dialog */
+.connect-dialog .connect-item {
+  display: flex;
+  justify-content: space-between;
+  margin: 10px 0;
+  padding: 10px;
+  border: 1px solid #aaa;
+  background-color: #f4f4f4;
+  cursor: pointer;
+}
+.connect-dialog .connect-item:hover {
+  border-color: red;
+}
+@media screen and (min-width: 992px) {
+  .connect-dialog .modal-dialog {
+    width: 400px;
+  }
 }
 </style>
