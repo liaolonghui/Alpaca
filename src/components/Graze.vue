@@ -292,7 +292,7 @@
                 <h5>I want to unstake</h5>
                 <p>Staked ibALPACA Balance: 0.00</p>
                 <div class="num">
-                  <input type="number" :value="stakeAmount" placeholder="Unstake Amount" />
+                  <input type="number" :value="unstakeAmount" placeholder="Unstake Amount" />
                   <div class="btn btn-success">MAX</div>
                 </div>
                 <div
