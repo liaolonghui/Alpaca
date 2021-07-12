@@ -16,6 +16,10 @@ li {
   background-color: transparent;
 }
 
+#app .btn-default[disabled] {
+  background-color: #f4f4f4;
+}
+
 img {
   vertical-align: middle;
   border-style: none;

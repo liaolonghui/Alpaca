@@ -66,7 +66,9 @@
                   <svg style="color: 31c77f; font-size: 18px;" viewBox="64 64 896 896" focusable="false" data-icon="wallet" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M880 112H144c-17.7 0-32 14.3-32 32v736c0 17.7 14.3 32 32 32h736c17.7 0 32-14.3 32-32V144c0-17.7-14.3-32-32-32zm-40 464H528V448h312v128zm0 264H184V184h656v200H496c-17.7 0-32 14.3-32 32v192c0 17.7 14.3 32 32 32h344v200zM580 512a40 40 0 1080 0 40 40 0 10-80 0z"></path></svg>
                 </div>
                 <div>Balance:</div>
-                <div class="myBalance">0.00</div>
+                <div class="myBalance">
+                  {{balance ? balance : '0.00'}}
+                </div>
               </div>
             </div>
             <!-- Where the Chatter -->
@@ -113,25 +115,25 @@
     </article>
     <!-- connect dialog -->
     <div class="modal fade connect-dialog" id="connectModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    <h4 class="modal-title" id="myModalLabel">连接钱包</h4>
-                </div>
-                <div class="modal-body">
-                  <div @click="connectWallet" class="connect-item">
-                    <div>MetaMask</div>
-                    <div>
-                      <img src="../assets/images/metamask.png" width="24" height="24" />
-                    </div>
-                  </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                </div>
-            </div><!-- /.modal-content -->
-        </div><!-- /.modal -->
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title" id="myModalLabel">连接钱包</h4>
+          </div>
+          <div class="modal-body">
+            <div @click="connectWallet" class="connect-item">
+              <div>MetaMask</div>
+              <div>
+                <img src="../assets/images/metamask.png" width="24" height="24" />
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal -->
     </div>
   </div>
 </template>
@@ -146,8 +148,6 @@ export default {
       setDialogVisibly: false,
       // Slippage tolerance (Set里的)
       SlippageTolerance: '0.25',
-      // 保存钱包地址
-      publicAddress: ''
     }
   },
   methods: {
@@ -158,7 +158,7 @@ export default {
     // 用于控制Set模态框的显示隐藏
     showConnectDialog() {
       if (this.publicAddress) {
-        this.publicAddress = ''
+        this.$store.dispatch('saveAddress', '')
       }
       $('#connectModal').modal('show')
     },
@@ -175,16 +175,18 @@ export default {
           alert("User denied account access")
         }
       }
-      const web3 = new Web3(web3Provider);//web3js就是你需要的web3实例
+      const web3 = new Web3(web3Provider);//web3就是你需要的web3实例
   
       const that = this
       web3.eth.getAccounts(function (error, result) {
         if (!error) {
           //授权成功后result能正常获取到账号了
-          that.publicAddress = result[0]
+          console.log(result)
+          that.$store.dispatch('saveAddress', result[0])
           // 获取eth数量
-          const balance = web3.eth.get_balance(result[0])
-          console.log(balance)
+          web3.eth.getBalance(result[0], (balance)=> {
+            that.$store.dispatch('savaBalance', balance)
+          })
         }
       })
       $('#connectModal').modal('hide')
@@ -193,6 +195,16 @@ export default {
     showSetDialog() {
       window.alert('还没完成')
       // setDialogVisibly
+    }
+  },
+  computed: {
+    // 地址
+    publicAddress(){
+      return this.$store.state.publicAddress
+    },
+    // 余额,
+    balance() {
+      return this.$store.state.balance
     }
   }
 }

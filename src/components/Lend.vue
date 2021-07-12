@@ -78,9 +78,11 @@
                 <p>0.00 {{pool.name}}</p>
               </td>
               <td class="operate-btn">
-                <router-link to="/deposit" tag="div" class="btn btn-success">Deposit</router-link>
+                <router-link v-if="publicAddress" to="/deposit" tag="div" class="btn btn-success">Deposit</router-link>
+                <div v-else class="btn btn-default" disabled>Deposit</div>
                 <br />
-                <router-link to="/withdraw" tag="div" class="btn btn-success" style="margin-top: 10px;">Withdraw</router-link>
+                <router-link v-if="publicAddress" to="/withdraw" tag="div" class="btn btn-success" style="margin-top: 10px;">Withdraw</router-link>
+                <div v-else class="btn btn-default" disabled style="margin-top: 10px;">Withdraw</div>
               </td>
             </tr>
           </tbody>
@@ -104,7 +106,8 @@
             <p>Utilization</p>
             <p class="balance">Your Balance</p>
             <!-- deposit -->
-            <router-link to="/deposit" tag="div" class="btn btn-success">Deposit</router-link>
+            <router-link v-if="publicAddress" to="/deposit" tag="div" class="btn btn-success">Deposit</router-link>
+            <div v-else class="btn btn-default" disabled>Deposit</div>
           </div>
           <div class="li-right">
             <p>
@@ -124,7 +127,8 @@
               <span>0.00 {{pool.name}}</span>
             </p>
             <!-- Withdraw -->
-            <router-link to="/withdraw" tag="div" class="btn btn-success">Withdraw</router-link>
+            <router-link v-if="publicAddress" to="/withdraw" tag="div" class="btn btn-success">Withdraw</router-link>
+            <div v-else class="btn btn-default" disabled>Withdraw</div>
           </div>
         </li>
       </ul>
@@ -179,6 +183,11 @@ export default {
       ]
     }
   },
+  computed: {
+    publicAddress(){
+      return this.$store.state.publicAddress
+    }
+  }
 }
 </script>
 

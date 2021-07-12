@@ -15,9 +15,12 @@ $(function () { $("[data-toggle='tooltip']").tooltip(); })
 // iconfont
 import './assets/font/iconfont.css'
 
+import store from './store'
+
 Vue.config.productionTip = false
 
 new Vue({
   router,
+  store,
   render: h => h(App)
 }).$mount('#app')
