@@ -104,11 +104,30 @@
                   </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                    <button @click="addCollection" v-if="collection.img && collection.name" type="button" class="btn btn-primary">Create</button>
-                    <button v-else class="btn btn-default" disabled>Create</button>                </div>
+                  <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                  <button @click="addCollection" v-if="collection.img && collection.name" type="button" class="btn btn-primary">Create</button>
+                  <button v-else class="btn btn-default" disabled>Create</button>
+                </div>
             </div><!-- /.modal-content -->
         </div><!-- /.modal -->
+    </div>
+    <!-- creating box -->
+    <div class="modal fade" id="creatingModal" tabindex="-1" role="dialog" aria-labelledby="creatingModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header text-center">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <!-- <h4 class="modal-title">Please wait...</h4> -->
+            <h4>{{collection.name}} has been created</h4>
+          </div>
+          <div class="modal-body text-center">
+            <img :src="collection.img" style="max-width: 100%; max-height: 100%; min-width: 300px; min-height: 300px;" />
+          </div>
+          <div class="text-center" style="margin-bottom: 20px;">
+            <button @click="addItems" type="button" class="btn btn-primary btn-lg">Add Items</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal -->
     </div>
   </div>
 </template>
@@ -205,8 +224,13 @@ export default {
     // 添加新collection
     addCollection() {
       this.collections.push(this.collection)
-      this.collection = {} // collection置空
       $('#createModal').modal('hide')
+      $('#creatingModal').modal('show')
+    },
+    // addItems
+    addItems() {
+      $('#creatingModal').modal('hide')
+      this.$router.history.push(`/collection/${this.collection.name}/assets/edit`)
     }
   },
 }

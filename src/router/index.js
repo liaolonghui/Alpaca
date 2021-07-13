@@ -16,7 +16,7 @@ import Withdraw from '../components/Lend/Withdraw.vue'
 // collection
 import VisitCollection from '../components/Collection/VisitCollection.vue'
 import ItemsCollection from '../components/Collection/ItemsCollection.vue'
-
+import AddItem from '../components/Collection/AddItem.vue'
 
 Vue.use(VueRouter)
 
@@ -42,6 +42,7 @@ const routes = [
       // collection
       { path: '/collection/:name', component: VisitCollection, props: true },
       { path: '/collection/:name/assets/edit', component: ItemsCollection, props: true },
+      { path: '/collection/:name/assets/create', component: AddItem, props: true },
       // 重定向
       { path: '/', redirect: '/lend' }
     ]

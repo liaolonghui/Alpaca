@@ -21,19 +21,36 @@
       </div>
     </header>
     <!-- items -->
-    <div class="collection-items">
+    <div class="collection-items clearfix">
       <h4>
         <i class="iconfont icon-menu"></i>
         ITEMS
       </h4>
-      <button class="btn btn-primary btn-lg">Add Item</button>
+      <!-- add-item -->
+      <button @click="addItem" class="btn btn-primary btn-lg">Add Item</button>
+      <div class="row">
+        <div class="search-box col-xs-12 col-sm-12 col-md-8 col-lg-8">
+          <i class="iconfont icon-search"></i>
+          <input autocapitalize="off" autocomplete="off" autocorrect="off" data-testid="Input" placeholder="Search" spellcheck="false" type="text" />
+        </div>
+        <div class="select-box col-xs-12 col-sm-12 col-md-4 col-lg-4">
+          <select name="order" id="order">
+            <option value="EndingSoon">Ending Soon</option>
+            <option value="RecentlySold">Recently Sold</option>
+          </select>
+        </div>
+      </div>
       <!-- items-content -->
-      <div class="items-content row">
+      <div v-if="collection.items.length" class="items-content row">
         <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12" v-for="item in collection.items" :key="item.name">
           <img :src="item.img" class="text-center" />
           <p>{{collection.name}}</p>
           <p>{{item.name}}</p>
         </div>
+      </div>
+      <!-- no items -->
+      <div v-else class="no-items">
+        <h1>No items to display</h1>
       </div>
     </div>
   </div>
@@ -66,6 +83,12 @@ export default {
           },          
         ]
       }
+    }
+  },
+  methods: {
+    // addItem
+    addItem() {
+      this.$router.history.push(`/collection/${this.collection.name}/assets/create`)
     }
   },
 }
@@ -131,8 +154,40 @@ export default {
 .collection-items h4 {
   font-size: 18px;
 }
+.collection-items>div.row {
+  height: 60px;
+}
+.collection-items .search-box {
+  position: relative;
+  height: 48px;
+  margin: 10px 0;
+}
+.collection-items .search-box>i {
+  position: absolute;
+  left: 16px;
+  top: 2px;
+  display: inline-block;
+  width: 57px;
+  height: 44px;
+  line-height: 45px;
+  text-align: center;
+  font-size: 24px;
+  border-radius: 5px;
+  border-right: 1px solid #aaa;
+  background-color: #fbfdff;
+}
+.collection-items .search-box>input {
+  width: 100%;
+  height: 48px;
+  padding-left: 65px;
+}
+.collection-items .select-box>select {
+  width: 70%;
+  height: 48px;
+  margin: 10px 0;
+}
 .items-content {
-  margin-top: 30px;
+  margin-top: 20px;
   padding-bottom: 20px;
 }
 .items-content>div {
@@ -176,5 +231,13 @@ export default {
     width: 95%;
   }
 }
-
+/* no-items */
+.no-items {
+  height: 200px;
+  text-align: center;
+}
+.no-items h1 {
+  height: 200px;
+  line-height: 200px;
+}
 </style>
