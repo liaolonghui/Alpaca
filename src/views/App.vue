@@ -12,7 +12,7 @@
       <span class="btn-box">
         <!-- connect-btn pc -->
         <div @click="showConnectDialog" class="btn btn-default connect-btn hidden-xs">
-          {{publicAddress ? 'Connected as '+publicAddress : 'Connect to a wallet'}}
+          {{this.$store.state.publicAddress ? 'Connected as '+this.$store.state.publicAddress : 'Connect to a wallet'}}
         </div>
         <!-- <button class="set-btn">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="1em" height="1em" fill="currentColor" aria-hidden="true" focusable="false" class=""><path d="M29.56,19.36a1,1,0,0,0-1.21.07A10.49,10.49,0,0,1,21.51,22,10.17,10.17,0,0,1,11.2,12a9.94,9.94,0,0,1,4.28-8.1,1,1,0,0,0,.36-1.17,1,1,0,0,0-1-.64A14.1,14.1,0,0,0,2,16,14.21,14.21,0,0,0,16.37,30a14.34,14.34,0,0,0,13.57-9.44A1,1,0,0,0,29.56,19.36ZM16.37,28A12.2,12.2,0,0,1,4,16,12,12,0,0,1,11.57,4.89,11.82,11.82,0,0,0,9.2,12,12.17,12.17,0,0,0,21.51,24a12.49,12.49,0,0,0,4.89-1A12.5,12.5,0,0,1,16.37,28Z" data-name="Layer 46"></path></svg>
@@ -28,7 +28,7 @@
       </span>
       <!-- connect-btn mobile -->
       <div @click="showConnectDialog" class="btn btn-default connect-btn hidden-lg hidden-md hidden-sm center-h">
-        {{publicAddress ? 'Connected as '+publicAddress : 'Connect to a wallet'}}
+        {{this.$store.state.publicAddress ? 'Connected as '+this.$store.state.publicAddress : 'Connect to a wallet'}}
       </div>
       <!-- routers -->
       <ul class="routers hidden-md hidden-lg" style="display: none;" ref="routers">
@@ -36,6 +36,7 @@
         <router-link to="/grazing-range" tag="li">Graze</router-link>
         <router-link to="/farm" tag="li">Farm</router-link>
         <router-link to="/stake" tag="li">Stake</router-link>
+        <router-link to="/collection" tag="li">Collection</router-link>
       </ul>
     </header>
     <!--nav与content -->
@@ -47,6 +48,7 @@
           <router-link to="/grazing-range" tag="li">Graze</router-link>
           <router-link to="/farm" tag="li">Farm</router-link>
           <router-link to="/stake" tag="li">Stake</router-link>
+          <router-link to="/collection" tag="li">Collection</router-link>
         </ul>
         <div class="other-nav">
           <div>
@@ -67,7 +69,7 @@
                 </div>
                 <div>Balance:</div>
                 <div class="myBalance">
-                  {{balance ? balance : '0.00'}}
+                  {{this.$store.state.balance ? this.$store.state.balance : '0.00'}}
                 </div>
               </div>
             </div>
@@ -147,7 +149,7 @@ export default {
       // 控制显示/隐藏Set模态框
       setDialogVisibly: false,
       // Slippage tolerance (Set里的)
-      SlippageTolerance: '0.25',
+      SlippageTolerance: '0.25'
     }
   },
   methods: {
@@ -178,15 +180,14 @@ export default {
       const web3 = new Web3(web3Provider);//web3就是你需要的web3实例
   
       const that = this
-      web3.eth.getAccounts(function (error, result) {
+      web3.eth.getAccounts(async function (error, result) {
         if (!error) {
           //授权成功后result能正常获取到账号了
           console.log(result)
           that.$store.dispatch('saveAddress', result[0])
           // 获取eth数量
-          web3.eth.getBalance(result[0], (balance)=> {
-            that.$store.dispatch('savaBalance', balance)
-          })
+          const balance = await web3.eth.getBalance(result[0])
+          that.$store.dispatch('savaBalance', balance)
         }
       })
       $('#connectModal').modal('hide')
@@ -195,16 +196,6 @@ export default {
     showSetDialog() {
       window.alert('还没完成')
       // setDialogVisibly
-    }
-  },
-  computed: {
-    // 地址
-    publicAddress(){
-      return this.$store.state.publicAddress
-    },
-    // 余额,
-    balance() {
-      return this.$store.state.balance
     }
   }
 }
@@ -337,6 +328,9 @@ export default {
 }
 .balance div.myBalance {
   width: 50px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 /* chatter */
 .chatter {

@@ -8,9 +8,15 @@ import Lend from '../components/Lend.vue'
 import Graze from '../components/Graze.vue'
 import Farm from '../components/Farm.vue'
 import Stake from '../components/Stake.vue'
+import Collection from '../components/Collection.vue'
 // deposit和withdraw（lend的子功能）
 import Deposit from '../components/Lend/Deposit.vue'
 import Withdraw from '../components/Lend/Withdraw.vue'
+
+// collection
+import VisitCollection from '../components/Collection/VisitCollection.vue'
+import ItemsCollection from '../components/Collection/ItemsCollection.vue'
+
 
 Vue.use(VueRouter)
 
@@ -29,9 +35,13 @@ const routes = [
       { path: '/grazing-range', component: Graze },
       { path: '/farm', component: Farm },
       { path: '/stake', component: Stake },
+      { path: '/collection', component: Collection },
       // deposit和withdraw（lend的子功能）
       { path: '/deposit', component: Deposit},
       { path: '/withdraw', component: Withdraw },
+      // collection
+      { path: '/collection/:name', component: VisitCollection, props: true },
+      { path: '/collection/:name/assets/edit', component: ItemsCollection, props: true },
       // 重定向
       { path: '/', redirect: '/lend' }
     ]
