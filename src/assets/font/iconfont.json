@@ -6,6 +6,69 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "15179916",
+      "name": "right",
+      "font_class": "right",
+      "unicode": "e65c",
+      "unicode_decimal": 58972
+    },
+    {
+      "icon_id": "21169520",
+      "name": "time-lapse",
+      "font_class": "time-lapse",
+      "unicode": "e602",
+      "unicode_decimal": 58882
+    },
+    {
+      "icon_id": "15378329",
+      "name": "ethereum",
+      "font_class": "ethereum",
+      "unicode": "eb8a",
+      "unicode_decimal": 60298
+    },
+    {
+      "icon_id": "562654",
+      "name": "star",
+      "font_class": "star",
+      "unicode": "e60e",
+      "unicode_decimal": 58894
+    },
+    {
+      "icon_id": "1704655",
+      "name": "add",
+      "font_class": "add",
+      "unicode": "e6fd",
+      "unicode_decimal": 59133
+    },
+    {
+      "icon_id": "5524675",
+      "name": "chart",
+      "font_class": "chart",
+      "unicode": "e601",
+      "unicode_decimal": 58881
+    },
+    {
+      "icon_id": "6986808",
+      "name": "list",
+      "font_class": "list",
+      "unicode": "e8a4",
+      "unicode_decimal": 59556
+    },
+    {
+      "icon_id": "6986926",
+      "name": "warning",
+      "font_class": "warning",
+      "unicode": "e8da",
+      "unicode_decimal": 59610
+    },
+    {
+      "icon_id": "9052131",
+      "name": "lock",
+      "font_class": "lock",
+      "unicode": "e611",
+      "unicode_decimal": 58897
+    },
+    {
       "icon_id": "587090",
       "name": "search",
       "font_class": "search",

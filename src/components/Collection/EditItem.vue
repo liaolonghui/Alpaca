@@ -1,8 +1,8 @@
 <template>
-  <div class="add-item">
+  <div class="edit-item-box">
     <div>
       <header>
-        <h1 class="CollectionManager--header-title">Create new item</h1>
+        <h1 class="CollectionManager--header-title">Edit {{Item.name}}</h1>
       </header>
       <div>
         <form>
@@ -15,9 +15,16 @@
             <div class="media-box">
               <div style="height: 100%;">
                 <div id="preview" style="height: 100%;">
-                  <i class="iconfont icon-img"></i>
-                  <header class="MediaInput-header">Drag &amp; drop file</header>
-                  <div>or <span class="text-blue">browse media on your device</span></div>
+                  <!-- 有media则显示 -->
+                  <div v-if="Item.media" style="height: 100%;">
+                    <img v-if="Item.mediaType === 'img'" :src="Item.media" />
+                    <video v-else-if="Item.mediaType === 'video'" :src="Item.media"></video>
+                  </div>
+                  <div v-else>
+                    <i class="iconfont icon-img"></i>
+                    <header class="MediaInput-header">Drag &amp; drop file</header>
+                    <div>or <span class="text-blue">browse media on your device</span></div>
+                  </div>
                 </div>
                 <input @change="getItemMedia" id="media" name="media" type="file">
               </div>
@@ -68,6 +75,10 @@
                 <option value="xxxx555555">
                   <img src="https://lh3.googleusercontent.com/kUziKkTQ0j4HwOtO_3ICVBCuUaIGmGyDCW1fxLWalwofupjR6BMMcPwolsvH94bWU-rYtUa2IhItNBr5m7MejT92jltYn-opDYSIjQ=s48" alt="" size="24">
                   <span>xxxx555555</span>
+                </option>
+                <option value="xxxxx">
+                  <img src="https://lh3.googleusercontent.com/kUziKkTQ0j4HwOtO_3ICVBCuUaIGmGyDCW1fxLWalwofupjR6BMMcPwolsvH94bWU-rYtUa2IhItNBr5m7MejT92jltYn-opDYSIjQ=s48" alt="" size="24">
+                  <span>xxxxx</span>
                 </option>
               </select>
             </div>
@@ -155,18 +166,6 @@
               </div>
             </div>
           </section>
-          <!-- Supply -->
-          <section class="AssetForm-section">
-            <label for="supply">Supply</label>
-            <header class="AssetForm-input-header">
-              The number of copies that can be minted. No gas cost to you! Quantities above one coming soon.
-            </header>
-            <div>
-              <div class="supply-input-box">
-                <input autocapitalize="off" autocomplete="off" autocorrect="off" class="browser-default Input--input" data-testid="Input" disabled="" inputmode="numeric" required="" spellcheck="false" type="text" value="1">
-              </div>
-            </div>
-          </section>
           <!-- blockchain -->
           <section class="AssetForm-section">
             <label for="Blockchain">Blockchain</label>
@@ -184,15 +183,15 @@
               Freezing your metadata will allow you to permanently lock and store all of this item's content in decentralized file storage.
             </header>
             <div>
-              <div class="label-box">
-                To freeze your metadata, you must create your item first.
-              </div>
+              <switches v-model="Item.freezemetadata" theme="bootstrap" color="success"></switches>
             </div>
           </section>
           <hr />
-          <!-- create -->
-          <button @click="addItem" v-if="Item.media && Item.name" class="btn btn-primary btn-lg add-item-btn">Create</button>
-          <button v-else class="btn btn-default add-item-btn" disabled>Create</button>
+          <!-- edit -->
+          <button @click="editItem" v-if="Item.media && Item.name" class="btn btn-primary btn-lg edit-item-box-btn">Submit Changes</button>
+          <button v-else class="btn btn-default edit-item-box-btn" disabled>Submit Changes</button>
+          <!-- delete -->
+          <button @click="deleteItem" class="btn btn-danger btn-lg delete-item-btn">Delete Item</button>
         </form>
       </div>
     </div>
@@ -210,16 +209,15 @@ export default {
   data() {
     return {
       Item: {
-        media: '',
-        mediaType: '',
-        name: '',
+        media: 'https://testnets.opensea.io/static/images/no-history-data.svg',
+        mediaType: 'img',
+        name: 'xxxxxxxx',
         externalLink: '',
         description: '',
         collection: this.name,
         // labels
         secret: false,
         // other
-        supply: 1,
         blockchain: 'Rinkeby',
         freezemetadata: false
       }
@@ -261,52 +259,49 @@ export default {
         this.Item.media = dataURl
       }
     },
-    // addItem
-    addItem(e) {
-      e.preventDefault()
-      $('#AddItemModal').modal('show')
-    },
-    // visitItem
-    visitItem() {
-      alert('马上安排')
-    },
     // editItem
-    editItem() {
-      alert('马上安排')
+    editItem(e) {
+      e.preventDefault()
+      alert('提交修改。。。等后端')
+    },
+    // deleteItem
+    deleteItem() {
+      const isDelete = confirm('Are you sure you want to delete this item? This can only be done if you own all copies in circulation.')
+      alert('你选了'+isDelete)
     }
   },
 }
 </script>
 
 <style>
-.AddItemModal-body {
+.editItemModal-body {
   height: 300px;
   padding-top: 20px;
   text-align: center;
 }
-.AddItemModal-body video {
+.editItemModal-body video {
   max-width: 100%;
   max-height: 100%;
 }
-.AddItemModal-body img {
+.editItemModal-body img {
   max-width: 100%;
   max-height: 100%;
 }
-.AddItemModal-footer {
+.editItemModal-footer {
   text-align: center;
 }
-.AddItemModal-footer button {
+.editItemModal-footer button {
   margin: 5px;
   width: 100px;
 }
-.add-item {
+.edit-item-box {
   background-color: #fff;
   padding: 20px 20px 150px 20px;
 }
-.add-item .text-blue {
+.edit-item-box .text-blue {
   color: #039be5 !important;
 }
-.add-item .media-box {
+.edit-item-box .media-box {
   position: relative;
   width: 350px;
   height: 250px;
@@ -315,14 +310,14 @@ export default {
   border-radius: 10px;
   border: 3px dashed #ccc;
 }
-.add-item .media-box .icon-img {
+.edit-item-box .media-box .icon-img {
   font-size: 80px;
 }
 .MediaInput-header {
   font-size: 20px;
   color: #ccc;
 }
-.add-item .media-box input {
+.edit-item-box .media-box input {
   position: absolute;
   top: 0;
   left: 0;
@@ -331,12 +326,12 @@ export default {
   opacity: 0;
   cursor: pointer;
 }
-.add-item .text-input {
+.edit-item-box .text-input {
   width: 60%;
   height: 50px;
   padding-left: 10px;
 }
-.add-item .textarea-input {
+.edit-item-box .textarea-input {
   width: 60%;
   padding: 10px;
 }
@@ -344,7 +339,7 @@ export default {
   width: 60%;
   height: 50px;
 }
-.add-item .supply-input-box input {
+.edit-item-box .supply-input-box input {
   width: 60%;
   height: 50px;
   padding-left: 10px;
@@ -378,17 +373,17 @@ export default {
   background-color: #fbfdff;
   border: 1px solid #ccc;
 }
-.add-item .add-item-btn {
-  padding: 10px 45px;
+.edit-item-box .edit-item-box-btn {
+  padding: 10px 20px;
   margin-top: 30px;
 }
 .AssetFormTraitSection--content i {
   font-size: 24px;
 }
-.AssetFormTraitSection--side .add-btn {
+.AssetFormTraitSection--side .edit-btn {
   border-color: #2081e2;
 }
-.AssetFormTraitSection--side .add-btn:hover {
+.AssetFormTraitSection--side .edit-btn:hover {
   background-color: #fff;
   box-shadow: 0 0 10px #aaa;
 }
@@ -430,14 +425,17 @@ export default {
 .icon-lock {
   color: #987df0;
 }
+.delete-item-btn {
+  margin: 30px 0 0 300px;
+}
 @media screen and (max-width: 768px) {
-  .add-item {
+  .edit-item-box {
     padding: 10px 20px 70px 20px;
   }
-  .add-item .text-input {
+  .edit-item-box .text-input {
     width: 90%;
   }
-  .add-item .textarea-input {
+  .edit-item-box .textarea-input {
     width: 90%;
   }
   .AssetForm-section select {
@@ -446,11 +444,11 @@ export default {
   .label-section {
     width: 100%;
   }
-  .add-item .media-box {
+  .edit-item-box .media-box {
     width: 320px;
     height: 240px;
   }
-  .add-item .supply-input-box input {
+  .edit-item-box .supply-input-box input {
     width: 90%;
   }
   .AssetForm-section .blockchain-box {
@@ -459,6 +457,9 @@ export default {
   .AssetForm-section .label-box {
     white-space: wrap;
     width: 90%;
+  }
+  .delete-item-btn {
+    margin-left: 10px;
   }
 }
 </style>

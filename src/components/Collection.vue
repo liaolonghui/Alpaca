@@ -18,8 +18,22 @@
                 <div class="other">
                   <i class="iconfont icon-more"></i>
                   <div class="more-operate">
-                    <router-link :to="`/collection/${item.name}`">Visit</router-link>
-                    <router-link :to="`/collection/${item.name}/assets/edit`">Items</router-link>
+                    <router-link :to="`/collection/${item.name}`">
+                      <i class="iconfont icon-visit"></i>
+                      Visit
+                    </router-link>
+                    <router-link :to="`/collection/${item.name}/edit`">
+                      <i class="iconfont icon-edit"></i>
+                      Edit
+                    </router-link>
+                    <router-link :to="`/collection/${item.name}/assets/edit`">
+                      <i class="iconfont icon-list"></i>
+                      Items
+                    </router-link>
+                    <router-link :to="`/collection/${item.name}/payouts`">
+                      <i class="iconfont icon-menu"></i>
+                      Royalties
+                    </router-link>
                   </div>
                 </div>
               </div>
@@ -205,7 +219,7 @@ export default {
       imgObj.src = url;
       const that = this
       imgObj.onload = function () {
-        that.collection.img = url
+        that.$set(that.collection, 'img', url)
       }
     },
     //获取file文件的访问地址

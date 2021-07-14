@@ -15,8 +15,12 @@ import Withdraw from '../components/Lend/Withdraw.vue'
 
 // collection
 import VisitCollection from '../components/Collection/VisitCollection.vue'
+import EditCollection from '../components/Collection/EditCollection.vue'
+import Royalties from '../components/Collection/Royalties.vue'
 import ItemsCollection from '../components/Collection/ItemsCollection.vue'
 import AddItem from '../components/Collection/AddItem.vue'
+import VisitItem from '../components/Collection/VisitItem.vue'
+import EditItem from '../components/Collection/EditItem.vue'
 
 Vue.use(VueRouter)
 
@@ -40,9 +44,13 @@ const routes = [
       { path: '/deposit', component: Deposit},
       { path: '/withdraw', component: Withdraw },
       // collection
-      { path: '/collection/:name', component: VisitCollection, props: true },
+      { path: '/collection/:name', component: VisitCollection, props: true }, // 查看collection
+      { path: '/collection/:name/edit', component: EditCollection, props: true }, // 编辑collection
+      { path: '/collection/:name/payouts', component: Royalties, props: true }, // Royalties
       { path: '/collection/:name/assets/edit', component: ItemsCollection, props: true },
-      { path: '/collection/:name/assets/create', component: AddItem, props: true },
+      { path: '/collection/:name/assets/create', component: AddItem, props: true }, // 创建item
+      { path: '/assets/:id', component: VisitItem, props: true }, // 查看item
+      { path: '/collection/:name/assets/:id/edit', component: EditItem, props: true }, // 编辑item
       // 重定向
       { path: '/', redirect: '/lend' }
     ]

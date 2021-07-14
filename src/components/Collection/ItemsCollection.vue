@@ -5,7 +5,7 @@
       <div class="info">
         <h1>{{collection.name}}</h1>
         <div id="category-actions">
-          <router-link tag="div" :to="`/collection/${collection.name}`">
+          <router-link tag="div" :to="`/collection/${collection.name}/edit`">
             <i class="iconfont icon-edit"></i>
             <div>Edit</div>
           </router-link>
@@ -13,7 +13,7 @@
             <i class="iconfont icon-visit"></i>
             <div>Visit</div>
           </router-link>
-          <router-link tag="div" :to="`/collection/${collection.name}`">
+          <router-link tag="div" :to="`/collection/${collection.name}/payouts`">
             <i class="iconfont icon-menu"></i>
             <div>Royalties</div>
           </router-link>
@@ -42,11 +42,21 @@
       </div>
       <!-- items-content -->
       <div v-if="collection.items.length" class="items-content row">
-        <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12" v-for="item in collection.items" :key="item.name">
+        <router-link
+          tag="div"
+          class="col-lg-3 col-md-3 col-sm-6 col-xs-12 item-content"
+          v-for="item in collection.items"
+          :key="item.name"
+          :to="`/assets/${item.id}`"
+        >
+          <router-link :to="`/collection/${collection.name}/assets/${item.id}/edit`" class="edit-item">
+            <i class="iconfont icon-edit"></i>
+            Edit
+          </router-link>
           <img :src="item.img" class="text-center" />
           <p>{{collection.name}}</p>
           <p>{{item.name}}</p>
-        </div>
+        </router-link>
       </div>
       <!-- no items -->
       <div v-else class="no-items">
@@ -67,19 +77,23 @@ export default {
         items: [
           {
             img: 'https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fb-ssl.duitang.com%2Fuploads%2Fitem%2F201509%2F15%2F20150915135644_dBiyk.thumb.700_0.png&refer=http%3A%2F%2Fb-ssl.duitang.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1628750176&t=44066056850c15a99472e81f787ddb65',
-            name: 'itemssssss1'
+            name: 'itemssssss1',
+            id: '1100110'
           },
           {
             img: 'https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fb-ssl.duitang.com%2Fuploads%2Fitem%2F201509%2F15%2F20150915135644_dBiyk.thumb.700_0.png&refer=http%3A%2F%2Fb-ssl.duitang.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1628750176&t=44066056850c15a99472e81f787ddb65',
-            name: 'itemssssss2'
+            name: 'itemssssss2',
+            id: '0022000'
           },
           {
             img: 'https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fb-ssl.duitang.com%2Fuploads%2Fitem%2F201509%2F15%2F20150915135644_dBiyk.thumb.700_0.png&refer=http%3A%2F%2Fb-ssl.duitang.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1628750176&t=44066056850c15a99472e81f787ddb65',
-            name: 'itemssssss3'
+            name: 'itemssssss3',
+            id: '2563420'
           },
           {
             img: 'https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fb-ssl.duitang.com%2Fuploads%2Fitem%2F201509%2F15%2F20150915135644_dBiyk.thumb.700_0.png&refer=http%3A%2F%2Fb-ssl.duitang.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1628750176&t=44066056850c15a99472e81f787ddb65',
-            name: 'itemssssss4'
+            name: 'itemssssss4',
+            id: '854545'
           },          
         ]
       }
@@ -95,6 +109,25 @@ export default {
 </script>
 
 <style>
+.item-content {
+  position: relative;
+}
+.edit-item {
+  position: absolute;
+  z-index: 666;
+  top: 5px;
+  right: 10px;
+  width: 60px;
+  height: 30px;
+  line-height: 30px;
+  text-align: center;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #fff !important;
+}
+.edit-item:hover {
+  box-shadow: 0 0 10px #aaa;
+}
 .items-collection header {
   display: flex;
 }
