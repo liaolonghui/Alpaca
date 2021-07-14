@@ -74,7 +74,7 @@
           </section>
           <!-- labels -->
           <section class="AssetForm-section label-section">
-            <!-- Levels -->
+            <!-- Properties -->
             <div class="label-item">
               <div class="AssetFormTraitSection--item">
                 <div class="AssetFormTraitSection--content">
@@ -89,9 +89,47 @@
                   </div>
                 </div>
                 <div class="AssetFormTraitSection--side">
-                  <button class="btn btn-default add-btn">
+                  <div @click="(e) => showAddDialog(e, 'Properties')" class="btn btn-default add-btn">
                     <i class="iconfont icon-add"></i>
-                  </button>
+                  </div>
+                </div>
+              </div>
+              <!-- content -->
+              <div v-if="Item.Properties" class="properties-content row">
+                <div v-for="(p, i) in Object.keys(Item.Properties)" :key="i" class="col-xs-6 col-sm-3 col-md-3 col-lg-3 text-center property">
+                  <p>{{p}}</p>
+                  <p>{{Item.Properties[p]}}</p>
+                </div>
+              </div>
+            </div>
+            <!-- Levels -->
+            <div class="label-item">
+              <div class="AssetFormTraitSection--item">
+                <div class="AssetFormTraitSection--content">
+                  <i class="iconfont icon-star"></i>
+                  <div class="AssetFormTraitSection--content-main">
+                    <span class="AssetFormTraitSection-input-label">
+                      Levels
+                    </span>
+                    <p class="AssetFormTraitSection--input-header">
+                      Numerical traits that show as a progress bar
+                    </p>
+                  </div>
+                </div>
+                <div class="AssetFormTraitSection--side">
+                  <div @click="(e) => showAddDialog(e, 'Levels')" class="btn btn-default add-btn">
+                    <i class="iconfont icon-add"></i>
+                  </div>
+                </div>
+              </div>
+              <!-- content -->
+              <div v-if="Item.Levels" class="levels-content row">
+                <div v-for="(l, i) in Object.keys(Item.Levels)" :key="i" class="col-xs-12 col-sm-8 col-md-7 col-lg-7 levels">
+                  <p style="display: flex; justify-content: space-between;">
+                    <span>{{l}}</span>
+                    <span>{{Item.Levels[l][0]}} of {{Item.Levels[l][1]}}</span>
+                  </p>
+                  <progress style="width: 100%;" :value="Item.Levels[l][0]" :max="Item.Levels[l][1]"></progress>
                 </div>
               </div>
             </div>
@@ -99,7 +137,7 @@
             <div class="label-item">
               <div class="AssetFormTraitSection--item">
                 <div class="AssetFormTraitSection--content">
-                  <i class="iconfont icon-star"></i>
+                  <i class="iconfont icon-chart"></i>
                   <div class="AssetFormTraitSection--content-main">
                     <span class="AssetFormTraitSection-input-label">
                       Stats
@@ -110,9 +148,18 @@
                   </div>
                 </div>
                 <div class="AssetFormTraitSection--side">
-                  <button class="btn btn-default add-btn">
+                  <div @click="(e) => showAddDialog(e, 'Stats')" class="btn btn-default add-btn">
                     <i class="iconfont icon-add"></i>
-                  </button>
+                  </div>
+                </div>
+              </div>
+              <!-- content -->
+              <div v-if="Item.Stats" class="stats-content row">
+                <div v-for="(l, i) in Object.keys(Item.Stats)" :key="i" class="col-xs-12 col-sm-8 col-md-7 col-lg-7 stats">
+                  <p style="display: flex; justify-content: space-between;">
+                    <span>{{l}}</span>
+                    <span>{{Item.Stats[l][0]}} of {{Item.Stats[l][1]}}</span>
+                  </p>
                 </div>
               </div>
             </div>
@@ -131,9 +178,10 @@
                   </div>
                 </div>
                 <div class="AssetFormTraitSection--side">
-                  <switches v-model="Item.secret" theme="bootstrap" color="success"></switches>
+                  <switches v-model="lock" theme="bootstrap" color="success"></switches>
                 </div>
               </div>
+              <textarea v-if="lock" v-model="Item.UnlockableContent" style="width: 100%; padding: 10px;" rows="6" id="description" name="description" placeholder="Enter content (access key, code to redeem, link to a file, etc.)"></textarea>
             </div>
             <!-- Explicit & Sensitive Content -->
             <div class="label-item">
@@ -196,6 +244,24 @@
         </form>
       </div>
     </div>
+    <!-- addLabel的dialog -->
+    <div class="modal fade" id="labelModal" tabindex="-1" role="dialog" aria-labelledby="labelModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title text-center">
+                      Add {{LabelType}}
+                    </h4>
+                </div>
+                <div class="modal-body">在这里添加一些文本</div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary">提交更改</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal -->
+    </div>
   </div>
 </template>
 
@@ -217,15 +283,34 @@ export default {
         description: '',
         collection: this.name,
         // labels
+        Properties: {}, // Properties
+        Levels: {},
+        Stats: {}, // Stats
+        UnlockableContent: '',
         secret: false,
         // other
         supply: 1,
         blockchain: 'Rinkeby',
         freezemetadata: false
-      }
+      },
+      // label-type
+      LabelType: '',
+      // lock
+      lock: false
     }
   },
   methods: {
+    // showaddDialog
+    showAddDialog(e, type) {
+      e.preventDefault()
+      this.LabelType = type
+      $('#labelModal').modal('show')
+    },
+    // addLabels
+    addLabels() {
+      $('#labelModal').modal('show')
+    },
+    // getItemMedia
     getItemMedia() {
       const file = $('#media')[0]
       const fileObj = file.files[0]
@@ -460,5 +545,31 @@ export default {
     white-space: wrap;
     width: 90%;
   }
+}
+/* label */
+.properties-content .property {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  border-radius: 5px;
+  border: 1px solid rgb(21, 178, 229);
+  background-color: rgba(21, 178, 229, 0.06);
+  cursor: pointer;
+}
+.properties-content .property>p:nth-of-type(1) {
+  color: #039be5;
+}
+.levels-content .levels {
+  margin-top: 10px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.stats-content .stats {
+  margin-top: 10px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  cursor: pointer;
 }
 </style>
