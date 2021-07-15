@@ -515,6 +515,15 @@ export default {
 .icon-lock {
   color: #987df0;
 }
+.add-item .text-input:focus,
+.add-item .textarea-input:focus,
+.AssetForm-section select:focus,
+.label-item>textarea:focus {
+  box-shadow: 0 0 10px #aaa;
+  outline: none;
+  border: none;
+}
+
 @media screen and (max-width: 768px) {
   .add-item {
     padding: 10px 20px 70px 20px;

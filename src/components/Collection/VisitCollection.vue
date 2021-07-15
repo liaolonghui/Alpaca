@@ -50,8 +50,10 @@
               Edit
             </router-link>
             <img :src="item.img" class="text-center" />
-            <p>{{collection.name}}</p>
-            <p>{{item.name}}</p>
+            <div class="item-info">
+              <p>{{collection.name}}</p>
+              <p>{{item.name}}</p>
+            </div>
           </router-link>
         </div>
       </div>
@@ -66,7 +68,7 @@ export default {
     return {
       collection: {
         name: 'xxxxx',
-        img: 'https://img1.baidu.com/it/u=3336530449,450899241&fm=26&fmt=auto&gp=0.jpg',
+        img: require('../../assets/images/belt.svg'),
         item: 5,
         owner: 1,
         floorPrice: '----',
@@ -74,27 +76,27 @@ export default {
         items: [
           {
             name: 'xx1',
-            img: 'https://img1.baidu.com/it/u=3336530449,450899241&fm=26&fmt=auto&gp=0.jpg',
+            img: require('../../assets/images/alpaca.svg'),
             id: '5555'
           },
           {
             name: 'xx11',
-            img: 'https://img1.baidu.com/it/u=3336530449,450899241&fm=26&fmt=auto&gp=0.jpg',
+            img: require('../../assets/images/belt.svg'),
             id: '5555'
           },
           {
             name: 'xx2',
-            img: 'https://img1.baidu.com/it/u=3336530449,450899241&fm=26&fmt=auto&gp=0.jpg',
+            img: require('../../assets/images/alpaca.svg'),
             id: '5555'
           },
           {
             name: 'xx4',
-            img: 'https://img1.baidu.com/it/u=3336530449,450899241&fm=26&fmt=auto&gp=0.jpg',
+            img: require('../../assets/images/belt.svg'),
             id: '5555'
           },
           {
             name: 'xx66',
-            img: 'https://img1.baidu.com/it/u=3336530449,450899241&fm=26&fmt=auto&gp=0.jpg',
+            img: require('../../assets/images/alpaca.svg'),
             id: '5555'
           },
         ]

@@ -54,8 +54,10 @@
             Edit
           </router-link>
           <img :src="item.img" class="text-center" />
-          <p>{{collection.name}}</p>
-          <p>{{item.name}}</p>
+          <div class="item-info">
+            <p>{{collection.name}}</p>
+            <p>{{item.name}}</p>
+          </div>
         </router-link>
       </div>
       <!-- no items -->
@@ -73,25 +75,25 @@ export default {
     return {
       collection: {
         name: 'xxxxx',
-        img: 'https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fb-ssl.duitang.com%2Fuploads%2Fitem%2F201509%2F15%2F20150915135644_dBiyk.thumb.700_0.png&refer=http%3A%2F%2Fb-ssl.duitang.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1628750176&t=44066056850c15a99472e81f787ddb65',
+        img: require('../../assets/images/belt.svg'),
         items: [
           {
-            img: 'https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fb-ssl.duitang.com%2Fuploads%2Fitem%2F201509%2F15%2F20150915135644_dBiyk.thumb.700_0.png&refer=http%3A%2F%2Fb-ssl.duitang.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1628750176&t=44066056850c15a99472e81f787ddb65',
+            img: require('../../assets/images/alpaca.svg'),
             name: 'itemssssss1',
             id: '1100110'
           },
           {
-            img: 'https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fb-ssl.duitang.com%2Fuploads%2Fitem%2F201509%2F15%2F20150915135644_dBiyk.thumb.700_0.png&refer=http%3A%2F%2Fb-ssl.duitang.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1628750176&t=44066056850c15a99472e81f787ddb65',
+            img: require('../../assets/images/alpaca.svg'),
             name: 'itemssssss2',
             id: '0022000'
           },
           {
-            img: 'https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fb-ssl.duitang.com%2Fuploads%2Fitem%2F201509%2F15%2F20150915135644_dBiyk.thumb.700_0.png&refer=http%3A%2F%2Fb-ssl.duitang.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1628750176&t=44066056850c15a99472e81f787ddb65',
+            img: require('../../assets/images/alpaca.svg'),
             name: 'itemssssss3',
             id: '2563420'
           },
           {
-            img: 'https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fb-ssl.duitang.com%2Fuploads%2Fitem%2F201509%2F15%2F20150915135644_dBiyk.thumb.700_0.png&refer=http%3A%2F%2Fb-ssl.duitang.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1628750176&t=44066056850c15a99472e81f787ddb65',
+            img: require('../../assets/images/alpaca.svg'),
             name: 'itemssssss4',
             id: '854545'
           },          
@@ -224,6 +226,7 @@ export default {
   padding-bottom: 20px;
 }
 .items-content>div {
+  position: relative;
   min-height: 300px;
   padding: 40px 30px;
   margin-top: 10px;
@@ -236,12 +239,17 @@ export default {
 }
 .items-content img {
   display: inline-block;
-  width: auto;
-  height: auto;
+  min-width: 90px;
+  min-height: 90px;
   max-width: 100%;
   max-height: 100%;
   border-radius: 5px;
   object-fit: contain;
+}
+.items-content .item-info {
+  position: absolute;
+  bottom: 10px;
+  left: 30px;
 }
 .items-content p {
   margin: 10px 0;
@@ -253,6 +261,7 @@ export default {
 .items-content .col-md-3 {
   width: 22%;
   margin: 10px;
+  text-align: center;
 }
 @media screen and (max-width: 970px) {
   .items-content .col-sm-6 {

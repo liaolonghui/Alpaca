@@ -53,7 +53,7 @@ export default {
     return {
       collection: {
         name: 'xxxxxxxx',
-        img: 'https://img1.baidu.com/it/u=3336530449,450899241&fm=26&fmt=auto&gp=0.jpg',
+        img: require('../../assets/images/belt.svg'),
         description: '',
         blockchain: 'Rinkeby'
       }

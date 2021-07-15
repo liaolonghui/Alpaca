@@ -155,14 +155,14 @@ export default {
       // 已经存在的collections
       collections: [
         {
-          img: 'https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fimage.biaobaiju.com%2Fuploads%2F20191105%2F11%2F1572926195-WhFwRLpcYX.jpg&refer=http%3A%2F%2Fimage.biaobaiju.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1628736462&t=ff1b5167eccdda3c91bc69b1c270c322',
+          img: require('../assets/images/belt.svg'),
           name: 'xxa',
           description: '我是假数据',
           blockchain: 'Rinkeby',
           items: 5
         },
         {
-          img: 'https://gimg2.baidu.com/image_search/src=http%3A%2F%2Fimage.biaobaiju.com%2Fuploads%2F20191105%2F11%2F1572926195-WhFwRLpcYX.jpg&refer=http%3A%2F%2Fimage.biaobaiju.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fmt=jpeg?sec=1628736462&t=ff1b5167eccdda3c91bc69b1c270c322',
+          img: require('../assets/images/belt.svg'),
           name: 'xxb',
           description: '我是假数据',
           blockchain: 'Rinkeby',
@@ -400,10 +400,11 @@ export default {
   line-height: 40px;
   text-align: center;
   border: 1px solid #aaa;
+  border-radius: 5px;
   background-color: #fff !important;
 }
 .more-operate a:hover {
-  box-shadow: 0 0 5px #aaa;
+  box-shadow: 0 0 10px #aaa;
 }
 
 /* not-connect */
