@@ -11,6 +11,7 @@
     "bootstrap": "^3.4.1",
     "core-js": "^3.6.5",
     "jquery": "^2.1.1",
+    "lodash": "^4.17.21",
     "vue": "^2.6.11",
     "vue-router": "^3.2.0",
     "vue-switches": "^2.0.1",

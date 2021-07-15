@@ -96,9 +96,9 @@
               </div>
               <!-- content -->
               <div v-if="Item.Properties" class="properties-content row">
-                <div v-for="(p, i) in Object.keys(Item.Properties)" :key="i" class="col-xs-6 col-sm-3 col-md-3 col-lg-3 text-center property">
-                  <p>{{p}}</p>
-                  <p>{{Item.Properties[p]}}</p>
+                <div v-for="(p, i) in Item.Properties" :key="i" class="col-xs-6 col-sm-3 col-md-3 col-lg-3 text-center property">
+                  <p>{{p.type}}</p>
+                  <p>{{p.name}}</p>
                 </div>
               </div>
             </div>
@@ -124,12 +124,12 @@
               </div>
               <!-- content -->
               <div v-if="Item.Levels" class="levels-content row">
-                <div v-for="(l, i) in Object.keys(Item.Levels)" :key="i" class="col-xs-12 col-sm-8 col-md-7 col-lg-7 levels">
+                <div v-for="(l, i) in Item.Levels" :key="i" class="col-xs-12 col-sm-8 col-md-7 col-lg-7 levels">
                   <p style="display: flex; justify-content: space-between;">
-                    <span>{{l}}</span>
-                    <span>{{Item.Levels[l][0]}} of {{Item.Levels[l][1]}}</span>
+                    <span>{{l.name}}</span>
+                    <span>{{l.value}} of {{l.max}}</span>
                   </p>
-                  <progress style="width: 100%;" :value="Item.Levels[l][0]" :max="Item.Levels[l][1]"></progress>
+                  <progress style="width: 100%;" :value="l.value" :max="l.max"></progress>
                 </div>
               </div>
             </div>
@@ -155,10 +155,10 @@
               </div>
               <!-- content -->
               <div v-if="Item.Stats" class="stats-content row">
-                <div v-for="(l, i) in Object.keys(Item.Stats)" :key="i" class="col-xs-12 col-sm-8 col-md-7 col-lg-7 stats">
+                <div v-for="(s, i) in Item.Stats" :key="i" class="col-xs-12 col-sm-8 col-md-7 col-lg-7 stats">
                   <p style="display: flex; justify-content: space-between;">
-                    <span>{{l}}</span>
-                    <span>{{Item.Stats[l][0]}} of {{Item.Stats[l][1]}}</span>
+                    <span>{{s.name}}</span>
+                    <span>{{s.value}} of {{s.max}}</span>
                   </p>
                 </div>
               </div>
@@ -254,10 +254,94 @@
                       Add {{LabelType}}
                     </h4>
                 </div>
-                <div class="modal-body">在这里添加一些文本</div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                    <button type="button" class="btn btn-primary">提交更改</button>
+                <div class="modal-body">
+                  <!-- Properties -->
+                  <div v-if="LabelType==='Properties'">
+                    <p style="color: #777;">Properties show up underneath your item, are clickable, and can be filtered in your collection's sidebar.</p>
+                    <!-- Properties table -->
+                    <table class="properties-table">
+                      <thead>
+                        <tr>
+                          <th style="padding: 20px 0 0 60px;">Type</th>
+                          <th style="padding: 20px 0 0 0;">Name</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="(prop, i) in Properties" :key="i">
+                          <td>
+                            <i @click="deleteLabels(i)" class="iconfont icon-baseline-close-px"></i>
+                            <input v-model="prop.type" class="type-input" type="text" placeholder="Character">
+                          </td>
+                          <td>
+                            <input v-model="prop.name" type="text" placeholder="Male">
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <!-- add more -->
+                    <div @click="addMoreProperties" class="btn btn-default add-more-btn">Add more</div>
+                  </div>
+                  <!-- Levels或Stats -->
+                  <div v-else>
+                    <p style="color: #777;" v-if="LabelType==='Levels'">Levels show up underneath your item, are clickable, and can be filtered in your collection's sidebar.</p>
+                    <p style="color: #777;" v-if="LabelType==='Stats'">Stats show up underneath your item, are clickable, and can be filtered in your collection's sidebar.</p>
+                    <!-- Levels或Stats table -->
+                    <table class="L-S-table">
+                      <thead>
+                        <tr>
+                          <th style="padding: 20px 0 0 60px;">Name</th>
+                          <th style="padding: 20px 0 0 0;">Value</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <!-- Levels -->
+                        <template v-if="LabelType==='Levels'">
+                          <tr v-for="(le, i) in Levels" :key="i">
+                            <td>
+                              <i @click="deleteLabels(i)" class="iconfont icon-baseline-close-px"></i>
+                              <input v-model="le.name" class="type-input" type="text" placeholder="Speed">
+                            </td>
+                            <td class="of-box">
+                              <input style="width: 60%; padding-right: 40px;" v-model="le.value" type="number" value="3" :max="le.max">
+                              <span class="of">Of</span>
+                              <input style="width: 40%;" v-model="le.max" type="number" value="5">
+                            </td>
+                          </tr>
+                        </template>
+                        <!-- Stats -->
+                        <template v-else-if="LabelType==='Stats'">
+                          <tr v-for="(stat, i) in Stats" :key="i">
+                            <td>
+                              <i @click="deleteLabels(i)" class="iconfont icon-baseline-close-px"></i>
+                              <input v-model="stat.name" class="type-input" type="text" placeholder="Speed">
+                            </td>
+                            <td class="of-box">
+                              <input
+                                style="width: 60%; padding-right: 40px;"
+                                v-model="stat.value"
+                                type="number"
+                                :max="stat.max"
+                              />
+                              <span class="of">Of</span>
+                              <input
+                                style="width: 40%;"
+                                v-model="stat.max"
+                                type="number"
+                              />
+                            </td>
+                          </tr>
+                        </template>
+                      </tbody>
+                    </table>
+                    <!-- add more -->
+                    <div v-if="LabelType==='Levels'" @click="addMoreLevels" class="btn btn-default add-more-btn">Add more</div>
+                    <div v-if="LabelType==='Stats'" @click="addMoreStats" class="btn btn-default add-more-btn">Add more</div>
+                  </div>
+                </div>
+                <div class="modal-footer" style="text-align: center;">
+                    <button @click="addLabels" type="button" class="btn btn-primary btn-lg">
+                      Save
+                    </button>
                 </div>
             </div><!-- /.modal-content -->
         </div><!-- /.modal -->
@@ -267,6 +351,7 @@
 
 <script>
 import Switches from 'vue-switches'
+import _ from 'lodash'
 
 export default {
   props: ['name'],
@@ -276,6 +361,7 @@ export default {
   data() {
     return {
       Item: {
+        id: 'abcdefg',
         media: '',
         mediaType: '',
         name: '',
@@ -283,9 +369,9 @@ export default {
         description: '',
         collection: this.name,
         // labels
-        Properties: {}, // Properties
-        Levels: {},
-        Stats: {}, // Stats
+        Properties: [], // Properties
+        Levels: [],
+        Stats: [], // Stats
         UnlockableContent: '',
         secret: false,
         // other
@@ -293,10 +379,16 @@ export default {
         blockchain: 'Rinkeby',
         freezemetadata: false
       },
+      // lock
+      lock: false,
       // label-type
       LabelType: '',
-      // lock
-      lock: false
+      // Properties 添加Properties时的临时保存
+      Properties: [],
+      // Levels 同上
+      Levels: [],
+      // Stats 同上
+      Stats: []
     }
   },
   methods: {
@@ -304,11 +396,80 @@ export default {
     showAddDialog(e, type) {
       e.preventDefault()
       this.LabelType = type
+
+      if (type === 'Properties') {
+        if (this.Item.Properties.length !== 0) {
+          this.$set(this, 'Properties', _.cloneDeep(this.Item.Properties))
+        } else {
+          this.$set(this, 'Properties', [{}])
+        }
+      } else if (type === 'Levels') {
+        if (this.Item.Levels.length !== 0) {
+          this.$set(this, 'Levels', _.cloneDeep(this.Item.Levels))
+        } else {
+          this.$set(this, 'Levels', [{}])
+        }
+      } else if (type === 'Stats') {
+        if (this.Item.Stats.length !== 0) {
+          this.$set(this, 'Stats', _.cloneDeep(this.Item.Stats))
+        } else {
+          this.$set(this, 'Stats', [{}])
+        }
+      }
+      
       $('#labelModal').modal('show')
     },
     // addLabels
     addLabels() {
-      $('#labelModal').modal('show')
+      // Properties
+      if (this.LabelType === 'Properties') {
+        this.Item.Properties = []
+        this.Properties.forEach(prop => {
+          if (prop.type && prop.name) {
+            // 有值
+            this.Item.Properties.push(prop)
+          }
+        });
+      } else if (this.LabelType === 'Levels') {
+        this.Item.Levels = []
+        this.Levels.forEach(le => {
+          if (le.name && le.value && le.max) {
+            // 有值
+            this.Item.Levels.push(le)
+          }
+        });
+      } else if (this.LabelType === 'Stats') {
+        this.Item.Stats = []
+        this.Stats.forEach(stat => {
+          if (stat.name && stat.value && stat.max) {
+            // 有值
+            this.Item.Stats.push(stat)
+          }
+        });
+      }
+      $('#labelModal').modal('hide')
+    },
+    // deleteLabels
+    deleteLabels(i) { // 传入索引
+      if (this.LabelType === 'Properties') {
+        this.Properties.splice(i, 1)
+      } else if (this.LabelType === 'Levels') {
+        this.Levels.splice(i, 1)
+      } else if (this.LabelType === 'Stats') {
+        this.Stats.splice(i, 1)
+      }
+    },
+    // addMoreProperties
+    addMoreProperties() {
+      this.Properties.push({})
+    },
+    // addMoreLevels
+    addMoreLevels() {
+      this.Levels.push({})
+    },
+    // addMoreStats
+    addMoreStats() {
+      this.Stats.push({})
     },
     // getItemMedia
     getItemMedia() {
@@ -353,11 +514,11 @@ export default {
     },
     // visitItem
     visitItem() {
-      alert('马上安排')
+      this.$router.history.push(`/assets/${this.Item.id}`)
     },
     // editItem
     editItem() {
-      alert('马上安排')
+      this.$router.history.push(`/collection/${this.name}/assets/${this.Item.id}/edit`)
     }
   },
 }
@@ -581,4 +742,106 @@ export default {
   border-radius: 5px;
   cursor: pointer;
 }
+/* table */
+.properties-table {
+  display: table;
+  width: 90%;
+  border-collapse: separate; border-spacing: 0 15px;
+}
+.properties-table thead th:nth-of-type(1) {
+  width: 60%;
+}
+.properties-table tbody input {
+  width: 100%;
+  height: 40px;
+  padding-left: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+.properties-table tbody input:focus {
+  outline: none;
+  border: none;
+  box-shadow: 0 0 10px #aaa;
+}
+.properties-table tbody input.type-input {
+  padding-left: 50px;
+}
+.properties-table tbody td {
+  position: relative;
+}
+.properties-table tbody td i {
+  position: absolute;
+  top: 1px;
+  left: 3px;
+  width: 40px;
+  height: 38px;
+  line-height: 38px;
+  text-align: center;
+  font-size: 20px;
+  border-right: 1px solid #ccc;
+  background-color: #fff;
+  cursor: pointer;
+}
+.btn.add-more-btn {
+  margin-top: 30px;
+  padding: 10px 20px;
+  color: #039be5;
+  border: 1px solid #039be5;
+}
+.btn.add-more-btn:hover {
+  box-shadow: 0 0 10px #aaa;
+  background-color: #fff;
+}
+.L-S-table {
+  display: table;
+  width: 90%;
+  border-collapse: separate; border-spacing: 0 15px;
+}
+.L-S-table thead th:nth-of-type(1) {
+  width: 60%;
+}
+.L-S-table tbody input {
+  width: 100%;
+  height: 40px;
+  padding-left: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+.L-S-table tbody input:focus {
+  outline: none;
+  border: none;
+  box-shadow: 0 0 10px #aaa;
+}
+.L-S-table tbody input.type-input {
+  padding-left: 50px;
+}
+.L-S-table tbody td {
+  position: relative;
+}
+.L-S-table tbody td i {
+  position: absolute;
+  top: 1px;
+  left: 3px;
+  width: 40px;
+  height: 38px;
+  line-height: 38px;
+  text-align: center;
+  font-size: 20px;
+  border-right: 1px solid #ccc;
+  background-color: #fff;
+  cursor: pointer;
+}
+.of-box {
+  position: relative;
+}
+.of {
+  position: absolute;
+  left: 40%;
+  width: 20%;
+  height: 40px;
+  line-height: 40px;
+  text-align: center;
+  border-left: 1px solid #ccc;
+}
+
 </style>
