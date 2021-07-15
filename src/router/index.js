@@ -21,6 +21,7 @@ import ItemsCollection from '../components/Collection/ItemsCollection.vue'
 import AddItem from '../components/Collection/AddItem.vue'
 import VisitItem from '../components/Collection/VisitItem.vue'
 import EditItem from '../components/Collection/EditItem.vue'
+import Activity from '../components/Collection/Activity.vue' // Activity
 
 Vue.use(VueRouter)
 
@@ -51,6 +52,7 @@ const routes = [
       { path: '/collection/:name/assets/create', component: AddItem, props: true }, // 创建item
       { path: '/assets/:id', component: VisitItem, props: true }, // 查看item
       { path: '/collection/:name/assets/:id/edit', component: EditItem, props: true }, // 编辑item
+      { path: '/activity/:name', component: Activity, props: true }, // activity
       // 重定向
       { path: '/', redirect: '/lend' }
     ]

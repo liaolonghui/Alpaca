@@ -3,6 +3,16 @@
     <header>
       <img :src="collection.img" width="126" height="126">
       <h1>{{collection.name}}</h1>
+      <!-- activity与manage -->
+      <div class="activity-manage-btn">
+        <router-link :to="`/activity/${collection.name}`" tag="div" data-toggle="tooltip" data-placement="top" title="Activity">
+          <i class="iconfont icon-playlist-play"></i>
+        </router-link>
+        <router-link :to="`/collection/${collection.name}/assets/edit`" tag="div" data-toggle="tooltip" data-placement="top" title="Manage">
+          <i class="iconfont icon-edit"></i>
+        </router-link>
+      </div>
+      <!-- info -->
       <span>
         <span class="btn btn-default btn-lg">
           <p>{{collection.item}}</p>
@@ -130,6 +140,33 @@ export default {
   font-size: 16px;
   font-weight: 600;
   border-bottom: 1px solid #aaa;
+}
+.visit-collection {
+  position: relative;
+}
+.activity-manage-btn {
+  position: absolute;
+  top: 50px;
+  right: 50px;
+}
+.activity-manage-btn>div {
+  display: inline-block;
+  width: 45px;
+  height: 45px;
+  margin: 0 10px;
+  line-height: 45px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}
+.activity-manage-btn>div>i {
+  font-size: 20px;
+}
+.activity-manage-btn .tooltip-inner{
+  position: absolute;
+  top: -10px;
+  left: -20px;
+  min-width: 70px !important;/* 修改宽度 */
 }
 @media screen and (max-width: 768px) {
   .recently h3 {
