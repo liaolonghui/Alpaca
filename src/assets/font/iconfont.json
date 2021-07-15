@@ -6,6 +6,90 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "490086",
+      "name": "expand_less",
+      "font_class": "expandless",
+      "unicode": "eb3e",
+      "unicode_decimal": 60222
+    },
+    {
+      "icon_id": "490732",
+      "name": "toc",
+      "font_class": "toc",
+      "unicode": "ed67",
+      "unicode_decimal": 60775
+    },
+    {
+      "icon_id": "737093",
+      "name": "swap-vert",
+      "font_class": "swapvert",
+      "unicode": "e77a",
+      "unicode_decimal": 59258
+    },
+    {
+      "icon_id": "1000816",
+      "name": "share",
+      "font_class": "share",
+      "unicode": "e61e",
+      "unicode_decimal": 58910
+    },
+    {
+      "icon_id": "1410331",
+      "name": "expand-more",
+      "font_class": "expand-more",
+      "unicode": "e667",
+      "unicode_decimal": 58983
+    },
+    {
+      "icon_id": "1567684",
+      "name": "view",
+      "font_class": "view",
+      "unicode": "e6b4",
+      "unicode_decimal": 59060
+    },
+    {
+      "icon_id": "4529759",
+      "name": "刷新/Refresh",
+      "font_class": "Refresh",
+      "unicode": "e60f",
+      "unicode_decimal": 58895
+    },
+    {
+      "icon_id": "6986893",
+      "name": "timeline",
+      "font_class": "timeline",
+      "unicode": "e8ca",
+      "unicode_decimal": 59594
+    },
+    {
+      "icon_id": "6988310",
+      "name": "local-offer",
+      "font_class": "local-offer",
+      "unicode": "ebfe",
+      "unicode_decimal": 60414
+    },
+    {
+      "icon_id": "6988449",
+      "name": "child-friendly",
+      "font_class": "child-friendly",
+      "unicode": "ec43",
+      "unicode_decimal": 60483
+    },
+    {
+      "icon_id": "12344962",
+      "name": "ballot_24px_rounded",
+      "font_class": "ballot_px_rounded",
+      "unicode": "ed5a",
+      "unicode_decimal": 60762
+    },
+    {
+      "icon_id": "19989510",
+      "name": "gift",
+      "font_class": "gift",
+      "unicode": "ea3d",
+      "unicode_decimal": 59965
+    },
+    {
       "icon_id": "6986981",
       "name": "playlist-play",
       "font_class": "playlist-play",

@@ -1,8 +1,8 @@
 @font-face {
   font-family: "iconfont"; /* Project id 2669789 */
-  src: url('iconfont.woff2?t=1626336191143') format('woff2'),
-       url('iconfont.woff?t=1626336191143') format('woff'),
-       url('iconfont.ttf?t=1626336191143') format('truetype');
+  src: url('iconfont.woff2?t=1626340555320') format('woff2'),
+       url('iconfont.woff?t=1626340555320') format('woff'),
+       url('iconfont.ttf?t=1626340555320') format('truetype');
 }
 
 .iconfont {
@@ -11,6 +11,54 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-expandless:before {
+  content: "\eb3e";
+}
+
+.icon-toc:before {
+  content: "\ed67";
+}
+
+.icon-swapvert:before {
+  content: "\e77a";
+}
+
+.icon-share:before {
+  content: "\e61e";
+}
+
+.icon-expand-more:before {
+  content: "\e667";
+}
+
+.icon-view:before {
+  content: "\e6b4";
+}
+
+.icon-Refresh:before {
+  content: "\e60f";
+}
+
+.icon-timeline:before {
+  content: "\e8ca";
+}
+
+.icon-local-offer:before {
+  content: "\ebfe";
+}
+
+.icon-child-friendly:before {
+  content: "\ec43";
+}
+
+.icon-ballot_px_rounded:before {
+  content: "\ed5a";
+}
+
+.icon-gift:before {
+  content: "\ea3d";
 }
 
 .icon-playlist-play:before {
