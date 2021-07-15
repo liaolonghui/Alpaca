@@ -423,4 +423,11 @@ export default {
   margin-top: 50px;
   padding: 10px 30px;
 }
+/* 美化 */
+#createModal .name-input:focus,
+#createModal .CreateCollection-input:focus {
+  border: none;
+  outline: none;
+  box-shadow: 0 0 10px #aaa;
+}
 </style>
