@@ -113,7 +113,7 @@
         </div>
       </nav>
       <!-- content -->
-      <router-view class="app-content" @click="showOrHideLink"></router-view>
+      <router-view :key="$route.path" class="app-content" @click="showOrHideLink"></router-view>
     </article>
     <!-- connect dialog -->
     <div class="modal fade connect-dialog" id="connectModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">

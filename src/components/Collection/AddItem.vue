@@ -346,6 +346,27 @@
             </div><!-- /.modal-content -->
         </div><!-- /.modal -->
     </div>
+    <!-- AddItemModal -->
+    <div class="modal fade" id="AddItemModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title text-center">
+                      {{Item.name}} has been created
+                    </h4>
+                </div>
+                <div class="AddItemModal-body">
+                  <img v-if="Item.mediaType === 'img'" :src="Item.media" alt="">
+                  <video v-else-if="Item.mediaType === 'video'" :src="Item.media" controls></video>
+                </div>
+                <div class="modal-footer AddItemModal-footer" style="text-align: center;">
+                    <button @click="visitItem" type="button" class="btn btn-primary btn-lg">Visit</button>
+                    <button @click="editItem" type="button" class="btn btn-default btn-lg">Edit</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal -->
+    </div>
   </div>
 </template>
 
@@ -514,10 +535,12 @@ export default {
     },
     // visitItem
     visitItem() {
+      $('#AddItemModal').modal('hide')
       this.$router.history.push(`/assets/${this.Item.id}`)
     },
     // editItem
     editItem() {
+      $('#AddItemModal').modal('hide')
       this.$router.history.push(`/collection/${this.name}/assets/${this.Item.id}/edit`)
     }
   },
@@ -526,8 +549,8 @@ export default {
 
 <style>
 .AddItemModal-body {
-  height: 300px;
-  padding-top: 20px;
+  height: 400px;
+  padding: 20px;
   text-align: center;
 }
 .AddItemModal-body video {
@@ -537,9 +560,6 @@ export default {
 .AddItemModal-body img {
   max-width: 100%;
   max-height: 100%;
-}
-.AddItemModal-footer {
-  text-align: center;
 }
 .AddItemModal-footer button {
   margin: 5px;
