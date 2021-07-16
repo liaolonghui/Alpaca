@@ -65,6 +65,21 @@
           </div>
         </div>
       </div>
+      <!-- Links -->
+      <div class="collectionLinks">
+        <label>Links</label>
+        <div class="links-box">
+          <!-- yoursite -->
+          <div class="yoursite">
+            <div class="svg-box">
+              <svg fill="#8A939B" viewBox="0 0 20 16">
+                <path d="M17.569.5H2.43C1.39.5.548 1.344.548 2.375l-.01 11.25A1.89 1.89 0 002.43 15.5H17.57a1.89 1.89 0 001.892-1.875V2.375A1.89 1.89 0 0017.57.5zm-4.73 13.125H2.43v-3.75h10.408v3.75zm0-4.688H2.43v-3.75h10.408v3.75zm4.73 4.688h-3.785V5.187h3.785v8.438z"></path>
+              </svg>
+            </div>
+            <input v-model="collection.url" placeholder="yoursite.io" type="url" name="url" />
+          </div>
+        </div>
+      </div>
       <!-- Royalties -->
       <div class="collectionRoyalties" style="margin-top: 20px;">
         <label>Royalties</label>
@@ -75,7 +90,11 @@
         </div>
         <div style="margin-top: 15px;">
           <p style="color: #777;">Percentage fee</p>
-          <input v-model="collection.fee" type="text" placeholder="e.g.2.5">
+          <input v-model="collection.fee" type="number" placeholder="e.g.2.5" @change="feeChange" min="0" max="10" />
+          <p v-if="dangerText" style="color: red; margin-top: 2px;">
+            <i class="iconfont icon-baseline-close-px" style="color: red;"></i>
+            {{dangerText}}
+          </p>
           <p v-if="collection.fee" style="margin: 5px 0">Your payout wallet address</p>
           <input v-if="collection.fee" v-model="collection.walletaddress" type="text" placeholder="Please enter an address, e.g. 0x1ed3... or destination.eth">
         </div>
@@ -183,6 +202,7 @@ export default {
         img: require('../../assets/images/belt.svg'),
         description: '',
         category: '', // 分类
+        url: '', //Links
         blockchain: 'Rinkeby',
         // Royalties
         fee: '',
@@ -191,7 +211,9 @@ export default {
         tokens: [],
         // Explicit
         explicit: false
-      }
+      },
+      // dangerText
+      dangerText: ''
     }
   },
   methods: {
@@ -236,6 +258,15 @@ export default {
       }
       return url;
     },
+    // feeChange
+    feeChange(e) {
+      console.log(e.currentTarget.value)
+      if (e.currentTarget.value > 10) {
+        this.dangerText = 'Value cannot be more than 10.'
+      } else {
+        this.dangerText = ''
+      }
+    },
     // updateCollection
     updateCollection() {
       alert('提交修改。。。等后端')
@@ -253,6 +284,7 @@ export default {
 .edit-collection-box {
   padding: 10px 15px 100px 15px;
   background-color: #fff;
+  border-radius: 10px;
 }
 .edit-collection .content {
   padding: 30px 20px;
@@ -296,6 +328,7 @@ export default {
   padding-left: 10px;
   line-height: 48px;
   border: 1px solid #aaa;
+  background-color: #fafafa;
   cursor: pointer;
 }
 .edit-collection #Blockchain:hover {
@@ -340,6 +373,42 @@ export default {
   width: 25px;
   height: 25px;
 }
+/* Links */
+.collectionLinks {
+  margin-top: 20px;
+  width: 60%;
+}
+.collectionLinks input {
+  width: 100%;
+  height: 50px;
+  padding-left: 60px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+.collectionLinks input:focus {
+  border: none;
+  outline: none;
+  box-shadow: 0 0 10px #aaa;
+}
+.collectionLinks .links-box>div {
+  position: relative;
+}
+.collectionLinks .links-box>div .svg-box {
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 48px;
+  height: 48px;
+  line-height: 48px;
+  text-align: center;
+  border-right: 1px solid #ccc;
+  background-color: #fafafa;
+}
+.collectionLinks .links-box>div svg {
+  width: 30px;
+  height: 30px;
+  margin-top: 9px;
+}
 /* Royalties */
 #Royalties-detail {
   width: 60%;
@@ -371,7 +440,7 @@ export default {
   display: flex;
   justify-content: space-around;
   align-items: center;
-  width: 150px;
+  width: 120px;
   margin-right: 10px;
   border: 1px solid #ccc;
   border-radius: 5px;

@@ -1,6 +1,6 @@
 <template>
-  <div class="collection">
-    <div class="container">
+  <div id="collection-box">
+    <div class="collection-container">
       <!-- connect -->
       <div v-if="this.$store.state.publicAddress" class="connect">
         <h1 class="CollectionManager-title">My Collections</h1>
@@ -11,28 +11,28 @@
           <button @click="showCreateBox" class="btn btn-primary btn-lg">Create a collection</button>
         </div>
         <!-- collections -->
-        <div class="collections row">
+        <div class="collections">
           <div v-for="item in collections" :key="item.name">
             <router-link :to="`/collection/${item.name}`">
-              <div class="top-grey">
+              <div class="top-grey" :style="{background: 'url('+item.bg+')'}">
                 <div class="other">
                   <i class="iconfont icon-more"></i>
                   <div class="more-operate">
                     <router-link :to="`/collection/${item.name}`">
                       <i class="iconfont icon-visit"></i>
-                      Visit
+                      <span>Visit</span>
                     </router-link>
                     <router-link :to="`/collection/${item.name}/edit`">
                       <i class="iconfont icon-edit"></i>
-                      Edit
+                      <span>Edit</span>
                     </router-link>
                     <router-link :to="`/collection/${item.name}/assets/edit`">
                       <i class="iconfont icon-list"></i>
-                      Items
+                      <span>Items</span>
                     </router-link>
                     <router-link :to="`/collection/${item.name}/payouts`">
                       <i class="iconfont icon-menu"></i>
-                      Royalties
+                      <span>Royalties</span>
                     </router-link>
                   </div>
                 </div>
@@ -49,7 +49,7 @@
       </div>
       <!-- not-connect -->
       <div v-else class="not-connect text-center">
-        <p class="wallet--wrapper-message">Sign in to your wallet.</p>
+        <p class="wallet--wrapper-message" style="padding-top: 20px;">Sign in to your wallet.</p>
         <div>
           <div class="wallet--wallet-logo-container">
             <div style="height: 150px; width: 150px;">
@@ -156,6 +156,7 @@ export default {
       collections: [
         {
           img: require('../assets/images/belt.svg'),
+          bg: require('../assets/images/alpaca.svg'),
           name: 'xxa',
           description: '我是假数据',
           blockchain: 'Rinkeby',
@@ -163,6 +164,7 @@ export default {
         },
         {
           img: require('../assets/images/belt.svg'),
+          bg: require('../assets/images/alpaca.svg'),
           name: 'xxb',
           description: '我是假数据',
           blockchain: 'Rinkeby',
@@ -251,6 +253,11 @@ export default {
 </script>
 
 <style>
+#collection-box {
+  padding: 10px;
+  background-color: #fff;
+  border-radius: 10px;
+}
 .nft .connect {
   padding: 20px;
   background-color: #fff;
@@ -286,20 +293,26 @@ export default {
 }
 #createModal .name-input {
   width: 100%;
+  margin-top: 2px;
   padding-left: 10px;
   height: 48px;
   min-width: 0px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
 }
 #createModal .CreateCollection-input {
   width: 100%;
   padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
 }
 #createModal #Blockchain {
   width: 100%;
   height: 48px;
   padding-left: 10px;
   line-height: 48px;
-  border: 1px solid #aaa;
+  border-radius: 5px;
+  border: 1px solid #ccc;
   cursor: pointer;
 }
 #createModal #Blockchain:hover {
@@ -344,7 +357,7 @@ export default {
 }
 @media screen and (max-width: 768px) {
   .collections {
-    padding: 10px;
+    padding: 10px 0;
   }
   .collections>div {
     width: 100%;
@@ -362,6 +375,9 @@ export default {
 .collections .top-grey {
   height: 200px;
   background-color: #e5e8eb;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  border-bottom: 1px solid #ccc;
 }
 .collections>div .other {
   display: none;
@@ -374,7 +390,7 @@ export default {
   z-index: 66;
   right: 10px;
   top: 10px;
-  padding: 5px;
+  padding: 2px 5px;
   border-radius: 5px;
   border: 2px solid #aaa;
   background-color: #fff;
@@ -387,7 +403,8 @@ export default {
 .more-operate {
   display: none;
   position: absolute;
-  top: 45px;
+  z-index: 99;
+  top: 40px;
   right: 10px;
 }
 .other:hover .more-operate {
@@ -395,10 +412,10 @@ export default {
 }
 .more-operate a {
   display: block;
-  width: 100px;
+  width: 110px;
   height: 40px;
   line-height: 40px;
-  text-align: center;
+  text-align: left;
   border: 1px solid #aaa;
   border-radius: 5px;
   background-color: #fff !important;
@@ -406,7 +423,17 @@ export default {
 .more-operate a:hover {
   box-shadow: 0 0 10px #aaa;
 }
-
+.more-operate i {
+  font-size: 20px;
+  margin-left: 10px;
+}
+.more-operate a:last-of-type>i {
+  font-size: 17px;
+}
+.more-operate span {
+  margin-left: 5px;
+  vertical-align: 2px;
+}
 /* not-connect */
 .not-connect {
   min-height: 550px;

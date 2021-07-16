@@ -5,9 +5,9 @@
       <h1>{{collection.name}}</h1>
       <!-- activity与manage -->
       <div class="activity-manage-btn">
-        <router-link :to="`/activity/${collection.name}`" tag="div" data-toggle="tooltip" data-placement="top" title="Activity">
+        <!-- <router-link :to="`/activity/${collection.name}`" tag="div" data-toggle="tooltip" data-placement="top" title="Activity">
           <i class="iconfont icon-playlist-play"></i>
-        </router-link>
+        </router-link> -->
         <router-link :to="`/collection/${collection.name}/assets/edit`" tag="div" data-toggle="tooltip" data-placement="top" title="Manage">
           <i class="iconfont icon-edit"></i>
         </router-link>
@@ -119,6 +119,7 @@ export default {
 <style>
 .visit-collection {
   background-color: #fff;
+  border-radius: 10px;
 }
 .visit-collection header {
   text-align: center;
@@ -135,11 +136,15 @@ export default {
   padding-left: 15px;
 }
 .recently h3 {
+  padding-left: 10px;
   padding-right: 80px;
   padding-bottom: 5px;
   font-size: 16px;
   font-weight: 600;
   border-bottom: 1px solid #aaa;
+}
+.items-content {
+  padding: 10px;
 }
 .visit-collection {
   position: relative;
@@ -159,6 +164,9 @@ export default {
   border: 1px solid #ccc;
   cursor: pointer;
 }
+.activity-manage-btn>div:hover {
+  box-shadow: 0 0 10px #aaa;
+}
 .activity-manage-btn>div>i {
   font-size: 20px;
 }
@@ -171,6 +179,14 @@ export default {
 @media screen and (max-width: 768px) {
   .recently h3 {
     padding-right: 20px;
+  }
+  .activity-manage-btn {
+    top: 10px;
+    right: 10px;
+  }
+  .recently {
+    padding-left: 5px;
+    padding-right: 5px;
   }
 }
 </style>

@@ -23,6 +23,18 @@
               </div>
             </div>
           </section>
+          <!-- poster -->
+          <section v-if="Item.mediaType === 'video'" class="AssetForm-section">
+            <label>Preview Image</label>
+            <header>
+              Because you’ve included multimedia, you’ll need to provide an image (PNG, JPG, or GIF) for the card display of your item.
+            </header>
+            <div class="poster-box">
+              <img v-if="Item.poster" :src="Item.poster" id="Itemposter" />
+              <i v-else class="iconfont icon-img"></i>
+              <input @change="getItemOpster" accept="image/*" id="image" name="image" type="file">
+            </div>
+          </section>
           <!-- name -->
           <section class="AssetForm-section">
             <label for="name">Name *</label>
@@ -181,7 +193,7 @@
                   <switches v-model="lock" theme="bootstrap" color="success"></switches>
                 </div>
               </div>
-              <textarea v-if="lock" v-model="Item.UnlockableContent" style="width: 100%; padding: 10px;" rows="6" id="description" name="description" placeholder="Enter content (access key, code to redeem, link to a file, etc.)"></textarea>
+              <textarea v-if="lock" v-model="Item.UnlockableContent" class="locked-input" rows="6" id="description" name="description" placeholder="Enter content (access key, code to redeem, link to a file, etc.)"></textarea>
             </div>
             <!-- Explicit & Sensitive Content -->
             <div class="label-item">
@@ -385,6 +397,7 @@ export default {
         id: 'abcdefg',
         media: '',
         mediaType: '',
+        poster: '',
         name: '',
         externalLink: '',
         description: '',
@@ -500,10 +513,10 @@ export default {
       if (fileObj.size > 1024*1024*40) {
         return alert('Max size: 40 MB')
       }
-      const windowURL = window.URL || window.webkitURL;
-      const container = document.getElementById('preview');
+      const windowURL = window.URL || window.webkitURL
+      const container = document.getElementById('preview')
       if(file && fileObj) {
-        const dataURl = windowURL.createObjectURL(fileObj);
+        const dataURl = windowURL.createObjectURL(fileObj)
         // video
         if (fileObj.type.indexOf('video') !== -1) {
           const video = document.createElement('video')
@@ -527,6 +540,13 @@ export default {
         }
         this.Item.media = dataURl
       }
+    },
+    // getItemOpster
+    getItemOpster(e) {
+      const img = $(e.currentTarget)[0].files[0]
+      const windowURL = window.URL || window.webkitURL
+      const url = windowURL.createObjectURL(img)
+      this.$set(this.Item, 'poster', url)
     },
     // addItem
     addItem(e) {
@@ -567,6 +587,7 @@ export default {
 }
 .add-item {
   background-color: #fff;
+  border-radius: 10px;
   padding: 20px 20px 150px 20px;
 }
 .add-item .text-blue {
@@ -601,19 +622,33 @@ export default {
   width: 60%;
   height: 50px;
   padding-left: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
 }
 .add-item .textarea-input {
   width: 60%;
   padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
 }
 .AssetForm-section select {
   width: 60%;
   height: 50px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
 }
 .add-item .supply-input-box input {
   width: 60%;
   height: 50px;
   padding-left: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+.locked-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
 }
 .AssetForm-section {
   margin-top: 20px;
@@ -632,6 +667,7 @@ export default {
   padding-left: 10px;
   line-height: 50px;
   background-color: #f4f4f4;
+  border-radius: 5px;
   border: 1px solid #ccc;
 }
 .AssetForm-section .blockchain-box>span {
@@ -710,13 +746,13 @@ export default {
     padding: 10px 20px 70px 20px;
   }
   .add-item .text-input {
-    width: 90%;
+    width: 100%;
   }
   .add-item .textarea-input {
-    width: 90%;
+    width: 100%;
   }
   .AssetForm-section select {
-    width: 90%;
+    width: 100%;
   }
   .label-section {
     width: 100%;
@@ -726,14 +762,14 @@ export default {
     height: 240px;
   }
   .add-item .supply-input-box input {
-    width: 90%;
+    width: 100%;
   }
   .AssetForm-section .blockchain-box {
-    width: 90%;
+    width: 100%;
   }
   .AssetForm-section .label-box {
     white-space: wrap;
-    width: 90%;
+    width: 100%;
   }
 }
 /* label */
@@ -863,5 +899,31 @@ export default {
   text-align: center;
   border-left: 1px solid #ccc;
 }
-
+/* poster */
+.poster-box {
+  position: relative;
+  width: 200px;
+  height: 160px;
+  border: 3px dashed #ccc;
+  border-radius: 5px;
+  text-align: center;
+  line-height: 160px;
+}
+.poster-box i {
+  font-size: 100px;
+  color: #ccc;
+}
+.poster-box img {
+  max-width: 100%;
+  max-height: 100%;
+}
+.poster-box input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
 </style>

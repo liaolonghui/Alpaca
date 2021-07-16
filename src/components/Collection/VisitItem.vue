@@ -96,6 +96,7 @@ export default {
   position: relative;
   padding: 20px 10px 50px 10px;
   background-color: #fff;
+  border-radius: 10px;
 }
 .item-detail {
   padding: 10px;

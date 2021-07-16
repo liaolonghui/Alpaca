@@ -39,6 +39,7 @@
 .payouts {
   padding: 10px 15px 100px 15px;
   background-color: #fff;
+  border-radius: 10px;
 }
 .payouts .payouts-description {
   width: 70%;

@@ -130,6 +130,11 @@ export default {
 .edit-item:hover {
   box-shadow: 0 0 10px #aaa;
 }
+.items-collection {
+  padding-bottom: 50px;
+  background-color: #fff;
+  border-radius: 10px;
+}
 .items-collection header {
   display: flex;
 }
@@ -156,10 +161,11 @@ export default {
   text-align: center;
   border-radius: 5px;
   border: 1px solid #aaa;
-  background-color: #fafafa;
+  background-color: #fff;
   cursor: pointer;
 }
 #category-actions>div:hover {
+  background-color: #fafafa;
   box-shadow: 0 0 10px #aaa;
 }
 #category-actions>div i {
