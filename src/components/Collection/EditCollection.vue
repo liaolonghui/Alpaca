@@ -138,15 +138,15 @@
         <div id="token-box">
           <div class="SELECT-TOKEN">
             <i class="iconfont icon-ethereum" style="color: pink;"></i>
-            <span>ETHH</span>
+            <span>ETH1</span>
           </div>
           <div class="SELECT-TOKEN">
             <i class="iconfont icon-ethereum" style="color: pink;"></i>
-            <span>ETHH</span>
+            <span>ETH2</span>
           </div>
           <div class="SELECT-TOKEN">
             <i class="iconfont icon-ethereum" style="color: pink;"></i>
-            <span>ETHH</span>
+            <span>ETH3</span>
           </div>
         </div>
       </div>
@@ -462,10 +462,10 @@ export default {
   margin-top: 5px;
 }
 #token-box .SELECT-TOKEN {
-  width: 250px;
-  height: 40px;
+  width: 40%;
+  height: 50px;
   padding-left: 15px;
-  line-height: 40px;
+  line-height: 50px;
   border: 1px solid #ccc;
   border-radius: 5px;
   cursor: pointer;
