@@ -110,13 +110,13 @@
         </div>
         <!-- Own   view -->
         <div class="own-box">
-          <router-link :to="`/space/${Item.own}`">
+          <span>
             <img class="own-img" :src="Item.ownImg" />
-          </router-link>
+          </span>
           Owned by
-          <router-link :to="`/space/${Item.own}`" style="color: #2081e2; font-size: 14px;">
+          <span style="color: #2081e2; font-size: 14px;">
             {{Item.ownName}}
-          </router-link>
+          </span>
           <!-- view -->
           <span class="view-number">
             <i class="iconfont icon-view"></i>
@@ -536,6 +536,7 @@ article.box-body .not-text {
   width: 100%;
   padding: 10px 130px;
   text-align: right;
+  background-color: #fbfdff;
 }
 .itemnav-btn-box>div {
   display: inline-block;
@@ -558,9 +559,10 @@ article.box-body .not-text {
     bottom: 0;
     left: 0;
     padding: 15px 0;
+    border-top: 1px solid #ccc;
   }
-  .itemnav-btn-box>div.btn {
-    width: 105px;
+  .itemnav-btn-box .btn {
+    width: 100px;
     padding: 5px;
     font-size: 13px;
     margin: 0 1px;

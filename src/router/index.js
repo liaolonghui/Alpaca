@@ -22,8 +22,8 @@ import AddItem from '../components/Collection/AddItem.vue'
 import VisitItem from '../components/Collection/VisitItem.vue'
 import EditItem from '../components/Collection/EditItem.vue'
 import SellItem from '../components/Collection/SellItem.vue'
-import Activity from '../components/Collection/Activity.vue' // Activity
-import User from '../components/Collection/User.vue' // User
+import Account from '../components/Collection/Account.vue' // Account
+import SellBundle from '../components/Collection/SellBundle.vue' // SellBundle
 
 Vue.use(VueRouter)
 
@@ -54,9 +54,9 @@ const routes = [
       { path: '/collection/:name/assets/create', component: AddItem, props: true }, // 创建item
       { path: '/assets/:id', component: VisitItem, props: true }, // 查看item
       { path: '/collection/:name/assets/:id/edit', component: EditItem, props: true }, // 编辑item
-      { path: '/assets/:id/sell', component: SellItem, props: true }, // Sell
-      { path: '/activity/:name', component: Activity, props: true }, // activity
-      { path: '/space/:userAddr', component: User, props: true }, // homepage
+      { path: '/assets/:id/sell', component: SellItem, props: true }, // sell
+      { path: '/account', component: Account }, // account
+      { path: '/bundle/sell', component: SellBundle }, // sellBundle
       // 重定向
       { path: '/', redirect: '/lend' }
     ]
