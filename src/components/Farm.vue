@@ -60,27 +60,30 @@
           <div class="col-md-4 col-lg-4 operate-item">
             <h5>I want to deposit</h5>
             <div class="farm-input-box">
-              <input type="number">
+              <input v-model="depositAmount" type="number" placeholder="Amount" />
               <div class="btn btn-success btn-sm">MAX</div>
             </div>
-            <div class="btn btn-success btn-group-justified">Deposit</div>
+            <div @click="deposit" v-if="$store.state.publicAddress" class="btn btn-success btn-group-justified">Deposit</div>
+            <div v-else class="btn btn-default btn-group-justified" disabled>Deposit</div>
           </div>
           <!-- withdraw -->
           <div class="col-md-4 col-lg-4 operate-item">
             <h5>I want to withdraw</h5>
             <div class="farm-input-box">
-              <input type="number">
+              <input v-model="withdrawAmount" type="number" placeholder="Amount" />
               <div class="btn btn-success btn-sm">MAX</div>
             </div>
-            <div class="btn btn-success btn-group-justified">Withdraw</div>
+            <div @click="withdraw" v-if="$store.state.publicAddress" class="btn btn-success btn-group-justified">Withdraw</div>
+            <div v-else class="btn btn-default btn-group-justified" disabled>Withdraw</div>
           </div>
           <!-- claim -->
           <div class="col-md-3 col-lg-3 operate-item text-center">
             <h5>Total Rewards:</h5>
             <div class="rewards">
-              0.00
+              {{ claimableReward }}
             </div>
-            <div class="btn btn-success btn-group-justified" style="margin-top: 5px;">Claim</div>
+            <div @click="claim" v-if="$store.state.publicAddress" class="btn btn-success btn-group-justified">Claim</div>
+            <div v-else class="btn btn-default btn-group-justified" disabled>Claim</div>
           </div>
         </div>
         <!-- mobile-btn -->
@@ -93,23 +96,82 @@
 </template>
 
 <script>
+import BigNumber from 'bignumber.js'
+import getFarmMethods from '../web3Utils/farm.js'
+
 export default {
   data() {
     return {
-      positionType: 'Active'
+      positionType: 'Active',
+      // 合约地址
+      ContractAddress: '0xd668822aF1c66600F5A4deaf2cd5028Af50CD2bA',
+      // deposit/withdraw/claim/claimableReward
+      claimableReward: '0.00',
+      depositAmount: 0,
+      withdrawAmount: 0
     }
   },
   methods: {
+    // showOrHidePoolOperate
     showOrHidePoolOperate(e) {
       $(e.currentTarget).parent().find('.operate-pool').slideToggle()
+    },
+    // deposit
+    deposit() {
+      if (this.depositAmount && this.depositAmount > 0) {
+        let amount = new BigNumber(this.depositAmount)
+        amount = amount.multipliedBy(1e18)
+        console.log(Number(amount))
+        const farmMethods = getFarmMethods(this.ContractAddress)
+        // deposit
+        console.log('0x9e45511656a8C607D6Ea9DEAbe0f715e9B379eF2')
+        console.log(this.$store.state.publicAddress)
+        farmMethods.deposit(amount).send({from: this.$store.state.publicAddress}).then(console.log);
+      }
+    },
+    // withdraw
+    withdraw() {
+      if (this.withdrawAmount && this.withdrawAmount > 0) {
+        let amount = new BigNumber(this.withdrawAmount)
+        amount = amount.multipliedBy(1e18)
+        console.log(Number(amount))
+        const farmMethods = getFarmMethods(this.ContractAddress)
+        // withdraw 
+        farmMethods.withdraw(amount).send({from: this.$store.state.publicAddress}).then(console.log)
+      }
+    },
+    // claim
+    claim() {
+      const farmMethods = getFarmMethods(this.ContractAddress)
+      // claim 
+      farmMethods.claim().call({from: this.$store.state.publicAddress}).then(console.log)
+    },
+    // 获取claimableReward
+    getClaimableReward() {
+      const address = this.$store.state.publicAddress
+      if (!address) return
+      const farmMethods = getFarmMethods(this.ContractAddress)
+      farmMethods.claimableReward(address).call().then((reward) => this.claimableReward=reward)
     }
   },
+  created() {
+    this.getClaimableReward()
+  },
+  watch: {
+    "$store.state.publicAddress": {
+      handler() {
+        this.getClaimableReward()
+      },
+      deep: true,
+      immediate: true,
+    }
+  }
 }
 </script>
 
 <style>
 .farm {
-  padding: 0 20px;
+  padding: 0 20px 50px 20px;
 }
 .farm-header {
   position: relative;
@@ -159,6 +221,7 @@ export default {
 
 /* active-pools */
 .farm .active-pools {
+  min-height: 300px;
   margin-top: 20px;
   padding: 20px;
   background-color: #fff;
@@ -197,6 +260,7 @@ export default {
 
 /* operate-pool */
 .farm-pool .operate-pool {
+  display: none;
   padding-bottom: 30px !important;
   background-color: #fafafa;
 }
@@ -208,8 +272,8 @@ export default {
 }
 .operate-pool input {
   width: 100%;
-  height: 30px;
-  padding-right: 50px;
+  height: 40px;
+  padding-right: 58px;
   padding-left: 10px;
   border: 1px solid #ccc;
   border-radius: 3px;
@@ -222,7 +286,8 @@ export default {
   position: absolute;
   top: 0;
   right: 0;
-  height: 30px;
+  height: 40px;
+  font-size: 16px;
 }
 .operate-pool .btn-group-justified {
   margin-top: 15px;

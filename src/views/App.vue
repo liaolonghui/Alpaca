@@ -142,6 +142,7 @@
 
 <script>
 import Web3 from 'web3'
+import getProvider from '../web3Utils/web3Provider.js'
 
 export default {
   data() {
@@ -166,24 +167,13 @@ export default {
     },
     // 连接钱包
     connectWallet() {
-      let web3Provider;
-      if (window.ethereum) {
-        web3Provider = window.ethereum;
-        try {
-          // 请求用户授权
-          window.ethereum.enable();
-        } catch (error) {
-          // 用户不授权时
-          alert("User denied account access")
-        }
-      }
-      const web3 = new Web3(web3Provider);//web3就是你需要的web3实例
-  
+      const web3Provider = getProvider()
+      const web3 = new Web3(web3Provider)
+      
       const that = this
       web3.eth.getAccounts(async function (error, result) {
         if (!error) {
           //授权成功后result能正常获取到账号了
-          console.log(result)
           that.$store.dispatch('saveAddress', result[0])
           // 获取eth数量
           const balance = await web3.eth.getBalance(result[0])
