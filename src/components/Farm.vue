@@ -1,61 +1,259 @@
 <template>
   <div class="farm">
     <header class="farm-header">
-      <div class="talk">
-        <span>
-          Take your yield to new heights
-        </span>
-        <span class="bg-white">
-          <span class="del-line">3x</span>
-          <span class="big-green">6x</span>
-        </span>
-        <!-- 三角 -->
-        <div class="triangle"></div>
+      <!-- Your Positions -->
+      <h2>Your Positions</h2>
+      <div class="your-position">
+        <div>
+          <div
+            @click="positionType = 'Active'"
+            :class="[positionType==='Active' ? 'btn-active' : 'btn-not-active']"
+            class="btn btn-lg"
+          >
+            Active Positions
+          </div>
+          <div
+            @click="positionType = 'Liquidated'"
+            :class="[positionType==='Liquidated' ? 'btn-active' : 'btn-not-active']"
+            class="btn btn-lg"
+          >
+            Liquidated Positions
+          </div>
+        </div>
+        <!-- earn -->
+        <div class="earn-box">
+          <div>
+            <h4>ALPACA earned:</h4>
+            <p class="earn-number">0.00</p>
+          </div>
+          <div>
+            <div class="btn btn-active btn-md" style="margin-top: 30px;">
+              claim
+            </div>
+          </div>
+        </div>
+        <!-- positions -->
+        <div class="positions-content">
+          {{positionType}}
+        </div>
       </div>
-      <img src="../assets/images/FarmerAlpaca.svg" alt="FarmerAlpaca" class="FarmerAlpaca float-right" style="margin-left: 30px;">
     </header>
+
+    <!-- Active Pools  -->
+    <div class="active-pools">
+      <h2>Active Pools</h2>
+
+      <!-- pool -->
+      <ul class="list-group farm-pool">
+        <li @click="showOrHidePoolOperate" class="list-group-item farm-pool-item">
+          <div class="pair-img">
+            <img src="../assets/images/cake.svg" />
+            <img src="../assets/images/belt.svg" />
+          </div>
+          <div class="pair-name">
+            BNB-WORK Staker
+          </div>
+        </li>
+        <!-- deposit withdraw claimableReward claim -->
+        <div class="operate-pool row" style="margin: 0; padding: 0;">
+          <!-- deposit -->
+          <div class="col-md-4 col-lg-4 operate-item">
+            <h5>I want to deposit</h5>
+            <div class="farm-input-box">
+              <input type="number">
+              <div class="btn btn-success btn-sm">MAX</div>
+            </div>
+            <div class="btn btn-success btn-group-justified">Deposit</div>
+          </div>
+          <!-- withdraw -->
+          <div class="col-md-4 col-lg-4 operate-item">
+            <h5>I want to withdraw</h5>
+            <div class="farm-input-box">
+              <input type="number">
+              <div class="btn btn-success btn-sm">MAX</div>
+            </div>
+            <div class="btn btn-success btn-group-justified">Withdraw</div>
+          </div>
+          <!-- claim -->
+          <div class="col-md-3 col-lg-3 operate-item text-center">
+            <h5>Total Rewards:</h5>
+            <div class="rewards">
+              0.00
+            </div>
+            <div class="btn btn-success btn-group-justified" style="margin-top: 5px;">Claim</div>
+          </div>
+        </div>
+        <!-- mobile-btn -->
+        <div @click="showOrHidePoolOperate" class="showOrHidePoolOperate">
+          <svg viewBox="64 64 896 896" focusable="false" data-icon="down" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M884 256h-75c-5.1 0-9.9 2.5-12.9 6.6L512 654.2 227.9 262.6c-3-4.1-7.8-6.6-12.9-6.6h-75c-6.5 0-10.3 7.4-6.5 12.7l352.6 486.1c12.8 17.6 39 17.6 51.7 0l352.6-486.1c3.9-5.3.1-12.7-6.4-12.7z"></path></svg>
+        </div>
+      </ul>
+    </div>
   </div>
 </template>
 
+<script>
+export default {
+  data() {
+    return {
+      positionType: 'Active'
+    }
+  },
+  methods: {
+    showOrHidePoolOperate(e) {
+      $(e.currentTarget).parent().find('.operate-pool').slideToggle()
+    }
+  },
+}
+</script>
+
 <style>
+.farm {
+  padding: 0 20px;
+}
 .farm-header {
-  display: flex;
-}
-.farm-header .talk {
   position: relative;
-  width: 600px;
-  height: 100px;
-  line-height: 100px;
-  font-size: 24px;
-  color: #fff;
-  text-align: center;
-  border-radius: 10px;
-  background-color: #000;
-}
-.farm-header .talk>.triangle {
-  position: absolute;
-  top: 25px;
-  right: -50px;
-  width: 50px;
-  height: 50px;
-  border: 25px solid;
-  border-left-color: #000;
-  border-top-color: transparent;
-  border-right-color: transparent;
-  border-bottom-color: transparent;
-}
-.bg-white {
-  padding: 5px 10px;
-  border-radius: 5px;
+  padding: 20px 30px;
   background-color: #fff;
+  border-radius: 20px;
+  box-shadow: 0 0 5px #ccc;
+  min-height: 300px;
 }
-.del-line {
-  margin-right: 5px;
-  color: #000;
-  text-decoration: line-through;
-}
-.big-green {
+.farm-header>h2 {
   font-weight: 700;
-  color: #31c77f;
+}
+.your-position .earn-box {
+  display: flex;
+  justify-content: space-between;
+  position: absolute;
+  top: 30px;
+  right: 40px;
+  width: 280px;
+  padding: 10px 20px;
+  border-radius: 10px;
+  background-color: #fafafa;
+  box-shadow: 0 0 5px #aaa;
+}
+.your-position .earn-box .earn-number {
+  font-size: 28px;
+  font-weight: 700;
+  color: #31C77F;
+}
+.your-position .btn-not-active {
+  border: 1px solid #ccc;
+  border-radius: 30px;
+}
+.your-position .btn-active {
+  background-color: #31c77f;
+  font-size: 18px;
+  color: #fff;
+  border-radius: 30px;
+}
+.your-position .btn-active:hover {
+  color: #fff;
+  background-color: #31c78f;
+}
+.your-position .positions-content {
+  margin-top: 30px;
+}
+
+/* active-pools */
+.farm .active-pools {
+  margin-top: 20px;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 20px;
+  box-shadow: 0 0 5px #aaa;
+}
+.farm .active-pools>h2 {
+  font-weight: 700;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #ccc;
+}
+
+/* farm-pool */
+.farm-pool .farm-pool-item {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  margin-top: 10px;
+  padding: 30px 10px;
+  cursor: pointer;
+}
+.farm-pool-item>.pair-img img {
+  width: 40px;
+  height: 40px;
+}
+.farm-pool-item>.pair-img img:nth-of-type(1) {
+  position: relative;
+  z-index: 6;
+  margin-right: -15px;
+}
+.farm-pool-item>.pair-name {
+  font-size: 28px;
+  font-weight: 600;
+  color: #31C77F;
+}
+
+/* operate-pool */
+.farm-pool .operate-pool {
+  padding-bottom: 30px !important;
+  background-color: #fafafa;
+}
+.operate-item {
+  margin-top: 20px;
+}
+.operate-pool h5 {
+  font-weight: 600;
+}
+.operate-pool input {
+  width: 100%;
+  height: 30px;
+  padding-right: 50px;
+  padding-left: 10px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  outline: none;
+}
+.operate-pool .farm-input-box {
+  position: relative;
+}
+.operate-pool .btn-sm {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 30px;
+}
+.operate-pool .btn-group-justified {
+  margin-top: 15px;
+}
+.operate-pool .rewards {
+  font-weight: 600;
+  font-size: 28px;
+  color: #31C77F;
+}
+.farm-pool .showOrHidePoolOperate {
+  position: relative;
+  z-index: 66;
+  width: 40px;
+  height: 40px;
+  margin: -20px auto 0 auto;
+  line-height: 40px;
+  text-align: center;
+  font-size: 18px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+@media screen and (max-width: 768px) {
+  .farm {
+    padding: 10px;
+  }
+  .your-position .earn-box {
+    position: static;
+    margin-top: 10px;
+  }
 }
 </style>

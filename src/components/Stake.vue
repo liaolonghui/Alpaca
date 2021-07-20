@@ -386,7 +386,7 @@ export default {
 /* stake */
 .pc-stake {
   display: none;
-  padding-bottom: 50px;
+  padding-bottom: 20px;
   background-color: #f4f4f4;
 }
 .pc-stake>div {

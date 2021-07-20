@@ -177,7 +177,7 @@
                   <img :src="graze.icon" alt="" width="40" height="40">
                   <span>0.00</span>
                 </p>
-                <div class="btn btn-success btn-group-justified">Claim</div>
+                <div class="btn btn-success" style="width: 90%;">Claim</div>
               </div>
             </div>
           </div>
@@ -626,7 +626,7 @@ export default {
 /* graze-pc-stake */
 .graze-pc-stake {
   display: none;
-  padding-bottom: 50px;
+  padding-bottom: 20px;
   background-color: #f4f4f4;
 }
 .graze-pc-stake>div {
