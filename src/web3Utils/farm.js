@@ -6,7 +6,13 @@ function getFarmMethods(ContractAddress) {
   const web3 = new Web3(getProvider())
   // deposit
   // 智能合约的abi，abi是由编译器生成的
-  const depositABI = [{"inputs": [{"internalType": "uint256","name": "_amount","type": "uint256"}],"name": "deposit","outputs": [],"stateMutability": "nonpayable","type": "function"}]
+  const depositABI = [{
+    "inputs": [{"internalType": "uint256","name": "_amount","type": "uint256"}],
+    "name": "deposit",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }]
   // 根据abi获取合约
   const depositContract = new web3.eth.Contract(depositABI, ContractAddress)
 

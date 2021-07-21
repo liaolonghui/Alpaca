@@ -119,25 +119,25 @@ export default {
     // deposit
     deposit() {
       if (this.depositAmount && this.depositAmount > 0) {
-        let amount = new BigNumber(this.depositAmount)
-        amount = amount.multipliedBy(1e18)
-        console.log(Number(amount))
+        let amount = new BigNumber(this.depositAmount).multipliedBy(1e18)
         const farmMethods = getFarmMethods(this.ContractAddress)
         // deposit
-        console.log('0x9e45511656a8C607D6Ea9DEAbe0f715e9B379eF2')
-        console.log(this.$store.state.publicAddress)
-        farmMethods.deposit(amount).send({from: this.$store.state.publicAddress}).then(console.log);
+        farmMethods.deposit(amount).send({
+          from: this.$store.state.publicAddress,
+          gas: 100000
+        }).then(console.log).catch(console.error)
       }
     },
     // withdraw
     withdraw() {
       if (this.withdrawAmount && this.withdrawAmount > 0) {
-        let amount = new BigNumber(this.withdrawAmount)
-        amount = amount.multipliedBy(1e18)
-        console.log(Number(amount))
+        let amount = new BigNumber(this.withdrawAmount).multipliedBy(1e18)
         const farmMethods = getFarmMethods(this.ContractAddress)
         // withdraw 
-        farmMethods.withdraw(amount).send({from: this.$store.state.publicAddress}).then(console.log)
+        farmMethods.withdraw(amount).send({
+          from: this.$store.state.publicAddress,
+          gas: 100000
+        }).then(console.log).catch(console.error)
       }
     },
     // claim
@@ -151,7 +151,9 @@ export default {
       const address = this.$store.state.publicAddress
       if (!address) return
       const farmMethods = getFarmMethods(this.ContractAddress)
-      farmMethods.claimableReward(address).call().then((reward) => this.claimableReward=reward)
+      farmMethods.claimableReward(address).call().then((reward) => {
+        this.claimableReward = reward
+      })
     }
   },
   created() {

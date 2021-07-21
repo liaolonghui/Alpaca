@@ -9,8 +9,10 @@ function getProvider() {
       } catch (error) {
         // 用户不授权时
         alert("User denied account access")
-      }
-    }
+      }   
+    } else {
+      web3Provider = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:8545"));
+    } 
   }
   getpro()
   return web3Provider
