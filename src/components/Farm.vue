@@ -45,67 +45,106 @@
 
       <!-- pool -->
       <ul class="list-group farm-pool">
-        <li @click="showOrHidePoolOperate" class="list-group-item farm-pool-item">
-          <div class="pair-img">
-            <img src="../assets/images/cake.svg" />
-            <img src="../assets/images/belt.svg" />
-          </div>
-          <div class="pair-name">
-            BNB-WORK Staker
-          </div>
-        </li>
-        <!-- deposit withdraw claimableReward claim -->
-        <div class="operate-pool row" style="margin: 0; padding: 0;">
-          <!-- deposit -->
-          <div class="col-md-4 col-lg-4 operate-item">
-            <h4>I want to deposit</h4>
-            <div class="farm-input-box">
-              <input v-model="depositAmount" type="number" placeholder="Amount" />
-              <div class="btn btn-success btn-sm">MAX</div>
+        <div v-for="(staker, index) in stakers" :key="staker.name">
+          <li @click="showOrHidePoolOperate" class="list-group-item farm-pool-item">
+            <div class="pair-img">
+              <img src="../assets/images/cake.svg" />
+              <img src="../assets/images/belt.svg" />
             </div>
-            <div @click="deposit" v-if="$store.state.publicAddress" class="btn btn-success btn-group-justified">Deposit</div>
-            <div v-else class="btn btn-default btn-group-justified" disabled>Deposit</div>
+            <div class="pair-name">
+              {{ staker.name }}
+            </div>
+          </li>
+          <!-- deposit withdraw claimableReward claim -->
+          <div class="operate-pool row" style="margin: 0; padding: 0;">
+            <!-- deposit -->
+            <div class="col-md-4 col-lg-4 operate-item">
+              <h4>I want to deposit</h4>
+              <div class="farm-input-box">
+                <input v-model="staker.depositAmount" type="number" placeholder="Amount" />
+                <div class="btn btn-success btn-sm">MAX</div>
+              </div>
+              <div @click="deposit(index)" v-if="$store.state.publicAddress" class="btn btn-success btn-group-justified">Deposit</div>
+              <div v-else class="btn btn-default btn-group-justified" disabled>Deposit</div>
+            </div>
+            <!-- withdraw -->
+            <div class="col-md-4 col-lg-4 operate-item">
+              <h4>I want to withdraw</h4>
+              <div class="farm-input-box">
+                <input v-model="staker.withdrawAmount" type="number" placeholder="Amount" />
+                <div class="btn btn-success btn-sm">MAX</div>
+              </div>
+              <div @click="withdraw(index)" v-if="$store.state.publicAddress" class="btn btn-success btn-group-justified">Withdraw</div>
+              <div v-else class="btn btn-default btn-group-justified" disabled>Withdraw</div>
+            </div>
+            <hr class="hidden-md hidden-lg" />
+            <!-- claim -->
+            <div class="col-md-3 col-lg-3 operate-item text-center">
+              <h4>Rewards({{ staker.rewardName }}):</h4>
+              <div class="rewards">
+                {{ staker.claimableReward }}
+              </div>
+              <!-- claim-btn -->
+              <div
+                @click="claim(index)"
+                v-if="$store.state.publicAddress"
+                class="btn btn-success btn-group-justified"
+                style="margin-top: 10px;"
+              >
+                Claim
+              </div>
+              <div
+                v-else
+                class="btn btn-default btn-group-justified"
+                disabled
+                style="margin-top: 10px;"
+              >
+                Claim
+              </div>
+            </div>
           </div>
-          <!-- withdraw -->
-          <div class="col-md-4 col-lg-4 operate-item">
-            <h4>I want to withdraw</h4>
-            <div class="farm-input-box">
-              <input v-model="withdrawAmount" type="number" placeholder="Amount" />
-              <div class="btn btn-success btn-sm">MAX</div>
-            </div>
-            <div @click="withdraw" v-if="$store.state.publicAddress" class="btn btn-success btn-group-justified">Withdraw</div>
-            <div v-else class="btn btn-default btn-group-justified" disabled>Withdraw</div>
+          <!-- mobile-btn -->
+          <div @click="showOrHidePoolOperate" class="showOrHidePoolOperate">
+            <i class="iconfont icon-expand-more moreOrLess"></i>
           </div>
-          <!-- claim -->
-          <div class="col-md-3 col-lg-3 operate-item text-center">
-            <h4>Total Rewards:</h4>
-            <div class="rewards">
-              {{ claimableReward }}
-            </div>
-            <!-- claim-btn -->
-            <div
-              @click="claim"
-              v-if="$store.state.publicAddress"
-              class="btn btn-success btn-group-justified"
-              style="margin-top: 10px;"
-            >
-              Claim
-            </div>
-            <div
-              v-else
-              class="btn btn-default btn-group-justified"
-              disabled
-              style="margin-top: 10px;"
-            >
-              Claim
-            </div>
-          </div>
-        </div>
-        <!-- mobile-btn -->
-        <div @click="showOrHidePoolOperate" class="showOrHidePoolOperate">
-          <svg viewBox="64 64 896 896" focusable="false" data-icon="down" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M884 256h-75c-5.1 0-9.9 2.5-12.9 6.6L512 654.2 227.9 262.6c-3-4.1-7.8-6.6-12.9-6.6h-75c-6.5 0-10.3 7.4-6.5 12.7l352.6 486.1c12.8 17.6 39 17.6 51.7 0l352.6-486.1c3.9-5.3.1-12.7-6.4-12.7z"></path></svg>
         </div>
       </ul>
+    </div>
+
+    <!-- transaction dialog -->
+    <!-- Waiting for confirmation -->
+    <div class="modal fade" id="transactionModal" tabindex="-1" role="dialog" aria-labelledby="transactionModalLabel" aria-hidden="false" data-backdrop="static">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header text-center">
+            <h4 class="modal-title">Confirm {{operation}}</h4>
+          </div>
+          <div class="modal-body text-center" style="min-height: 250px;">
+            <!-- wait -->
+            <div v-if="operationState === 'wait'">
+              <h4>Waiting for confirmation</h4>
+              <img src="../assets/images/blue-loader.svg" class="load-img" />
+              <p>wait for a moment Just a minute,please.</p>
+            </div>
+            <!-- resolve -->
+            <div v-else-if="operationState === 'resolve'">
+              <h4>Transaction completed</h4>
+              <svg xmlns="http://www.w3.org/2000/svg" width="97" height="97" viewBox="0 0 24 24" fill="none" stroke="#1FC7D4" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="16 12 12 8 8 12"></polyline><line x1="12" y1="16" x2="12" y2="8"></line></svg>
+              <div @click="hideTransactionDialog" class="btn btn-info btn-md btn-block">Close</div>
+            </div>
+            <!-- reject -->
+            <div v-else-if="operationState === 'reject'">
+              <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ED4B9E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="stroke-width: 1.5;">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+              <h4>Transaction rejected</h4>
+              <div @click="hideTransactionDialog" class="btn btn-info btn-md btn-block">Dismiss</div>
+            </div>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal -->
     </div>
   </div>
 </template>
@@ -118,100 +157,152 @@ export default {
   data() {
     return {
       positionType: 'Active',
-      // LP地址
-      LPAddress: '0x3Fb6a6DcF90C674E255cBdA0d19a28d01b90D819',
-      contractAddress: '0xd668822aF1c66600F5A4deaf2cd5028Af50CD2bA',
-      // deposit/withdraw/claim/claimableReward
-      claimableReward: '0.00',
-      depositAmount: 0,
-      withdrawAmount: 0
+      stakers: [
+        {
+          name: 'BNB-WORK Staker',
+          // LP地址
+          pairAddress: '0x3Fb6a6DcF90C674E255cBdA0d19a28d01b90D819',
+          contractAddress: '0xd668822aF1c66600F5A4deaf2cd5028Af50CD2bA',
+          // deposit/withdraw/claim/claimableReward
+          claimableReward: '0.00',
+          depositAmount: 0,
+          withdrawAmount: 0,
+          // rewardName
+          rewardName: 'work coin'
+        }
+      ],
+      // operation
+      operation: '',
+      operationState: ''
     }
   },
   methods: {
     // showOrHidePoolOperate
     showOrHidePoolOperate(e) {
+      $(e.currentTarget).parent().find('.moreOrLess').toggleClass('icon-expand-more')
+      $(e.currentTarget).parent().find('.moreOrLess').toggleClass('icon-expandless')
       $(e.currentTarget).parent().find('.operate-pool').slideToggle()
     },
+    // hideTransactionDialog
+    hideTransactionDialog() {
+      $('#transactionModal').modal('hide')
+    },
     // deposit
-    async deposit() {
-      if (this.depositAmount && this.depositAmount > 0) {
-        let amount = new BigNumber(this.depositAmount).multipliedBy(1e18)
+    async deposit(i) {
+      const staker = this.stakers[i]
+      const depositAmount = staker.depositAmount
+      if (depositAmount && depositAmount > 0) {
+        let amount = new BigNumber(depositAmount).multipliedBy(1e18)
         const address = this.$store.state.publicAddress // 用户地址
-        const approveContract = getFarmContract.getapproveContract(this.LPAddress)
-        const depositContract = getFarmContract.getdepositContract(this.contractAddress)
+        const approveContract = getFarmContract.getapproveContract(staker.pairAddress)
+        const depositContract = getFarmContract.getdepositContract(staker.contractAddress)
+
+        // 显示modal
+        this.operationState = 'wait'
+        this.operation = 'Deposit'
+        $('#transactionModal').modal('show')
 
         // approve
-        approveContract.methods.approve(this.contractAddress, amount).send({
+        approveContract.methods.approve(staker.contractAddress, amount).send({
           from: address
         }).then(() => {
           // deposit
           depositContract.methods.deposit(amount).send({
             from: address,
             gas: 10000000
-          }).then(console.log).catch(console.error)
-        }).catch(console.error)
+          }).then(() => {
+            this.getClaimableReward(i) // 获取新reward
+            this.operationState = 'resolve' // 交易成功提交
+          }).catch(() => {
+            this.operationState = 'reject' // 失败
+          })
+        }).catch(() => {
+          this.operationState = 'reject' // 失败
+        }).finally(() => {
+          this.stakers[i].depositAmount = 0
+        })
       }
     },
     // withdraw
-    withdraw() {
-      if (this.withdrawAmount && this.withdrawAmount > 0) {
-        let amount = new BigNumber(this.withdrawAmount).multipliedBy(1e18)
+    withdraw(i) {
+      const staker = this.stakers[i]
+      const withdrawAmount = staker.withdrawAmount
+      if (withdrawAmount && withdrawAmount > 0) {
+        let amount = new BigNumber(withdrawAmount).multipliedBy(1e18)
         const address = this.$store.state.publicAddress // 用户地址
-        const approveContract = getFarmContract.getapproveContract(this.LPAddress)
-        const withdrawContract = getFarmContract.getwithdrawContract(this.contractAddress)
+        const approveContract = getFarmContract.getapproveContract(staker.pairAddress)
+        const withdrawContract = getFarmContract.getwithdrawContract(staker.contractAddress)
+
+        // 显示modal
+        this.operationState = 'wait'
+        this.operation = 'Withdraw'
+        $('#transactionModal').modal('show')
+
         // approve
-        approveContract.methods.approve(this.contractAddress, amount).send({
+        approveContract.methods.approve(staker.contractAddress, amount).send({
           from: address
         }).then(() => {
-
           // withdraw
           withdrawContract.methods.withdraw(amount).send({
             from: address,
             gas: 10000000
           }).then(() => {
-            this.getClaimableReward() // 获取新reward
-          }).catch(console.error)
-
-        }).catch(console.error)
+            this.operationState = 'resolve' // 成功提交
+            this.getClaimableReward(i) // 获取新reward
+          }).catch(() => {
+            this.operationState = 'reject' // 失败
+          })
+        }).catch(() => {
+          this.operationState = 'reject' // 失败
+        }).finally(() => {
+          this.stakers[i].withdrawAmount = 0
+        })
       }
     },
     // claim
-    claim() {
+    claim(i) {
+      const staker = this.stakers[i]
       const address = this.$store.state.publicAddress // 用户地址
-      const claimContract = getFarmContract.getclaimContract(this.contractAddress)
+      const claimContract = getFarmContract.getclaimContract(staker.contractAddress)
 
+      console.log(claimContract.methods.claim)
       // claim
-      claimContract.methods.claim().call({
+      claimContract.methods.claim().send({
         from: address
-      }).then((result) => {
-        console.log(result)
-        this.getClaimableReward() // 获取新reward
+      }).then(() => {
+        // claim成功
+        this.getClaimableReward(i) // 获取新reward
       }).catch(console.error)
 
     },
     // 获取claimableReward
-    getClaimableReward() {
+    getClaimableReward(i) {
       const address = this.$store.state.publicAddress
       if (!address) return
-      const claimableRewardContract = getFarmContract.getclaimableRewardContract(this.contractAddress)
+      const staker = this.stakers[i]
+      const claimableRewardContract = getFarmContract.getclaimableRewardContract(staker.contractAddress)
       claimableRewardContract.methods.claimableReward(address).call().then((reward) => {
         reward = new BigNumber(reward).div(1e18)
-        this.claimableReward = reward
+        this.stakers[i].claimableReward = reward
       }).catch(console.error)
     }
   },
   created() {
-    this.getClaimableReward()
+    this.stakers.map((staker, i) => {
+      this.getClaimableReward(i)
+    })
   },
-  watch: {
-    "$store.state.publicAddress": {
-      handler() {
-        this.getClaimableReward()
-      },
-      deep: true,
-      immediate: true,
-    }
-  }
+  mounted() {
+    this._timer = setInterval(() => {
+      this.stakers.map((staker, i) => {
+        this.getClaimableReward(i)
+      })
+    }, 10000)
+  },
+  unmounted() {
+    clearInterval(this._timer)
+    this._timer = null
+  },
 }
 </script>
 
@@ -248,10 +339,12 @@ export default {
   color: #31C77F;
 }
 .your-position .btn-not-active {
+  margin: 1px;
   border: 1px solid #ccc;
   border-radius: 30px;
 }
 .your-position .btn-active {
+  margin: 1px;
   background-color: #31c77f;
   font-size: 18px;
   color: #fff;
@@ -285,7 +378,7 @@ export default {
   display: flex;
   justify-content: space-around;
   align-items: center;
-  margin-top: 10px;
+  margin-top: 25px;
   padding: 30px 10px;
   cursor: pointer;
 }
@@ -343,7 +436,7 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  width: 200px;
+  width: 170px;
   font-weight: 600;
   font-size: 28px;
   color: #31C77F;
@@ -356,20 +449,56 @@ export default {
   margin: -20px auto 0 auto;
   line-height: 40px;
   text-align: center;
-  font-size: 18px;
   border: 1px solid #ccc;
   background-color: #fff;
   border-radius: 50%;
   cursor: pointer;
+}
+.farm-pool .showOrHidePoolOperate>i {
+  font-size: 30px;
+}
+.farm-pool .showOrHidePoolOperate:hover {
+  border-color: #31C77F;
+  color: #31C77F;
+}
+
+/* transactionModal */
+#transactionModal {
+  margin-top: 50px;
+}
+#transactionModal svg {
+  margin: 25px 0;
+}
+
+@media screen and (min-width: 1050px) {
+  #transactionModal .modal-dialog {
+    width: 400px;
+  }
 }
 
 @media screen and (max-width: 768px) {
   .farm {
     padding: 10px;
   }
+  .farm-header {
+    padding: 10px 15px;
+  }
   .your-position .earn-box {
     position: static;
     margin-top: 10px;
   }
+}
+
+@keyframes load-rotate {
+  50% {
+    transform: rotate(180deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+.load-img {
+  margin: 20px 0;
+  animation: load-rotate 2s linear infinite;
 }
 </style>

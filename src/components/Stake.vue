@@ -133,7 +133,7 @@
         <ul class="list-group hidden-md hidden-lg m-list">
           <div v-for="item in stakeOpportunity" :key="item.name">
             <!-- list -->
-            <li @click="showOrHideMStake" class="list-group-item">
+            <li @click="showOrHideMStake" class="list-group-item list-m-group-item">
               <header>
                 <img :src="item.icon" width="40" height="40" />
                 <h5>{{item.name}}</h5>
@@ -197,7 +197,7 @@
             </div>
             <!-- show/hide -->
             <div @click="showOrHideMStake" class="showOrHideMStake">
-              <svg viewBox="64 64 896 896" focusable="false" data-icon="down" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M884 256h-75c-5.1 0-9.9 2.5-12.9 6.6L512 654.2 227.9 262.6c-3-4.1-7.8-6.6-12.9-6.6h-75c-6.5 0-10.3 7.4-6.5 12.7l352.6 486.1c12.8 17.6 39 17.6 51.7 0l352.6-486.1c3.9-5.3.1-12.7-6.4-12.7z"></path></svg>
+              <i class="iconfont icon-expand-more moreOrLess"></i>
             </div>
           </div>
         </ul>
@@ -233,6 +233,8 @@ export default {
     },
     // showOrHideMStake
     showOrHideMStake(e) {
+      $(e.currentTarget).parent().find('.moreOrLess').toggleClass('icon-expand-more')
+      $(e.currentTarget).parent().find('.moreOrLess').toggleClass('icon-expandless')
       $(e.currentTarget).parent().find('.m-stake').slideToggle()
     }
   },
@@ -361,6 +363,9 @@ export default {
   width: 100%;
   padding-bottom: 5px;
   border-bottom: 1px solid #aaa;
+}
+.m-list .list-m-group-item {
+  cursor: pointer;
 }
 .m-list .list-group-item header h5 {
   display: inline-block;

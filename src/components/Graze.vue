@@ -314,7 +314,7 @@
             </div>
             <!-- show/hide -->
             <div v-if="graze.state == grazeType" @click="showOrHideMStake" class="showOrHideMStake">
-              <svg viewBox="64 64 896 896" focusable="false" data-icon="down" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M884 256h-75c-5.1 0-9.9 2.5-12.9 6.6L512 654.2 227.9 262.6c-3-4.1-7.8-6.6-12.9-6.6h-75c-6.5 0-10.3 7.4-6.5 12.7l352.6 486.1c12.8 17.6 39 17.6 51.7 0l352.6-486.1c3.9-5.3.1-12.7-6.4-12.7z"></path></svg>
+              <i class="iconfont icon-expand-more moreOrLess"></i>
             </div>
           </div>
         </ul>
@@ -396,6 +396,8 @@ export default {
     },
     // showOrHideMStake
     showOrHideMStake(e) {
+      $(e.currentTarget).parent().find('.moreOrLess').toggleClass('icon-expand-more')
+      $(e.currentTarget).parent().find('.moreOrLess').toggleClass('icon-expandless')
       $(e.currentTarget).parent().find('.graze-m-stake').slideToggle()
     },
     // 将时间戳差值转化为: 天，时，分，秒(以后可能有用)
@@ -670,6 +672,7 @@ export default {
 .graze-m-list {
   margin-top: 30px;
   overflow: hidden;
+  cursor: pointer;
 }
 .graze-m-list header {
   height: 48px;
@@ -778,6 +781,14 @@ export default {
   border-radius: 50%;
   border: 1px solid #aaa;
   background-color: #fff;
+  cursor: pointer;
+}
+.showOrHideMStake>i {
+  font-size: 30px;
+}
+.showOrHideMStake:hover {
+  border-color: #31c77f;
+  color: #31c77f;
 }
 
 @media screen and (max-width: 1270px) {
