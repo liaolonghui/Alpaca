@@ -141,6 +141,7 @@
 </template>
 
 <script>
+import BigNumber from 'bignumber.js'
 import Web3 from 'web3'
 import getProvider from '../web3Utils/web3Provider.js'
 
@@ -176,7 +177,8 @@ export default {
           //授权成功后result能正常获取到账号了
           that.$store.dispatch('saveAddress', result[0])
           // 获取eth数量
-          const balance = await web3.eth.getBalance(result[0])
+          let balance = await web3.eth.getBalance(result[0])
+          balance = new BigNumber(balance).div(1e18)
           that.$store.dispatch('savaBalance', balance)
         }
       })

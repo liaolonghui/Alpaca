@@ -1,6 +1,6 @@
 function getProvider() {
   let web3Provider
-  async function getpro(params) {
+  async function getpro() {
     if (window.ethereum) {
       web3Provider = window.ethereum;
       try {

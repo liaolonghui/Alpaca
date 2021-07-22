@@ -58,7 +58,7 @@
         <div class="operate-pool row" style="margin: 0; padding: 0;">
           <!-- deposit -->
           <div class="col-md-4 col-lg-4 operate-item">
-            <h5>I want to deposit</h5>
+            <h4>I want to deposit</h4>
             <div class="farm-input-box">
               <input v-model="depositAmount" type="number" placeholder="Amount" />
               <div class="btn btn-success btn-sm">MAX</div>
@@ -68,7 +68,7 @@
           </div>
           <!-- withdraw -->
           <div class="col-md-4 col-lg-4 operate-item">
-            <h5>I want to withdraw</h5>
+            <h4>I want to withdraw</h4>
             <div class="farm-input-box">
               <input v-model="withdrawAmount" type="number" placeholder="Amount" />
               <div class="btn btn-success btn-sm">MAX</div>
@@ -78,12 +78,27 @@
           </div>
           <!-- claim -->
           <div class="col-md-3 col-lg-3 operate-item text-center">
-            <h5>Total Rewards:</h5>
+            <h4>Total Rewards:</h4>
             <div class="rewards">
               {{ claimableReward }}
             </div>
-            <div @click="claim" v-if="$store.state.publicAddress" class="btn btn-success btn-group-justified">Claim</div>
-            <div v-else class="btn btn-default btn-group-justified" disabled>Claim</div>
+            <!-- claim-btn -->
+            <div
+              @click="claim"
+              v-if="$store.state.publicAddress"
+              class="btn btn-success btn-group-justified"
+              style="margin-top: 10px;"
+            >
+              Claim
+            </div>
+            <div
+              v-else
+              class="btn btn-default btn-group-justified"
+              disabled
+              style="margin-top: 10px;"
+            >
+              Claim
+            </div>
           </div>
         </div>
         <!-- mobile-btn -->
@@ -97,14 +112,15 @@
 
 <script>
 import BigNumber from 'bignumber.js'
-import getFarmMethods from '../web3Utils/farm.js'
+import getFarmContract from '../web3Utils/farm.js'
 
 export default {
   data() {
     return {
       positionType: 'Active',
-      // 合约地址
-      ContractAddress: '0xd668822aF1c66600F5A4deaf2cd5028Af50CD2bA',
+      // LP地址
+      LPAddress: '0x3Fb6a6DcF90C674E255cBdA0d19a28d01b90D819',
+      contractAddress: '0xd668822aF1c66600F5A4deaf2cd5028Af50CD2bA',
       // deposit/withdraw/claim/claimableReward
       claimableReward: '0.00',
       depositAmount: 0,
@@ -117,43 +133,71 @@ export default {
       $(e.currentTarget).parent().find('.operate-pool').slideToggle()
     },
     // deposit
-    deposit() {
+    async deposit() {
       if (this.depositAmount && this.depositAmount > 0) {
         let amount = new BigNumber(this.depositAmount).multipliedBy(1e18)
-        const farmMethods = getFarmMethods(this.ContractAddress)
-        // deposit
-        farmMethods.deposit(amount).send({
-          from: this.$store.state.publicAddress,
-          gas: 100000
-        }).then(console.log).catch(console.error)
+        const address = this.$store.state.publicAddress // 用户地址
+        const approveContract = getFarmContract.getapproveContract(this.LPAddress)
+        const depositContract = getFarmContract.getdepositContract(this.contractAddress)
+
+        // approve
+        approveContract.methods.approve(this.contractAddress, amount).send({
+          from: address
+        }).then(() => {
+          // deposit
+          depositContract.methods.deposit(amount).send({
+            from: address,
+            gas: 10000000
+          }).then(console.log).catch(console.error)
+        }).catch(console.error)
       }
     },
     // withdraw
     withdraw() {
       if (this.withdrawAmount && this.withdrawAmount > 0) {
         let amount = new BigNumber(this.withdrawAmount).multipliedBy(1e18)
-        const farmMethods = getFarmMethods(this.ContractAddress)
-        // withdraw 
-        farmMethods.withdraw(amount).send({
-          from: this.$store.state.publicAddress,
-          gas: 100000
-        }).then(console.log).catch(console.error)
+        const address = this.$store.state.publicAddress // 用户地址
+        const approveContract = getFarmContract.getapproveContract(this.LPAddress)
+        const withdrawContract = getFarmContract.getwithdrawContract(this.contractAddress)
+        // approve
+        approveContract.methods.approve(this.contractAddress, amount).send({
+          from: address
+        }).then(() => {
+
+          // withdraw
+          withdrawContract.methods.withdraw(amount).send({
+            from: address,
+            gas: 10000000
+          }).then(() => {
+            this.getClaimableReward() // 获取新reward
+          }).catch(console.error)
+
+        }).catch(console.error)
       }
     },
     // claim
     claim() {
-      const farmMethods = getFarmMethods(this.ContractAddress)
-      // claim 
-      farmMethods.claim().call({from: this.$store.state.publicAddress}).then(console.log)
+      const address = this.$store.state.publicAddress // 用户地址
+      const claimContract = getFarmContract.getclaimContract(this.contractAddress)
+
+      // claim
+      claimContract.methods.claim().call({
+        from: address
+      }).then((result) => {
+        console.log(result)
+        this.getClaimableReward() // 获取新reward
+      }).catch(console.error)
+
     },
     // 获取claimableReward
     getClaimableReward() {
       const address = this.$store.state.publicAddress
       if (!address) return
-      const farmMethods = getFarmMethods(this.ContractAddress)
-      farmMethods.claimableReward(address).call().then((reward) => {
+      const claimableRewardContract = getFarmContract.getclaimableRewardContract(this.contractAddress)
+      claimableRewardContract.methods.claimableReward(address).call().then((reward) => {
+        reward = new BigNumber(reward).div(1e18)
         this.claimableReward = reward
-      })
+      }).catch(console.error)
     }
   },
   created() {
@@ -269,7 +313,7 @@ export default {
 .operate-item {
   margin-top: 20px;
 }
-.operate-pool h5 {
+.operate-pool h4 {
   font-weight: 600;
 }
 .operate-pool input {
@@ -295,6 +339,11 @@ export default {
   margin-top: 15px;
 }
 .operate-pool .rewards {
+  display: inline-block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 200px;
   font-weight: 600;
   font-size: 28px;
   color: #31C77F;
