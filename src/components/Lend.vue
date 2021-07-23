@@ -145,7 +145,7 @@ export default {
       availableLendingPools: [
         {
           name: 'Alpaca',
-          icon: 'https://alpaca-app-asset.s3-ap-southeast-1.amazonaws.com/icons/coins/alpaca.svg',
+          icon: require('../assets/images/alpaca.svg'),
           ratio: '1.0026',
           LendingAPR: '1.05%',
           StakingAPR: '18.02%',
@@ -158,7 +158,7 @@ export default {
         },
         {
           name: 'BNB',
-          icon: 'https://alpaca-app-asset.s3-ap-southeast-1.amazonaws.com/icons/coins/bnb.svg',
+          icon: require('../assets/images/cake.svg'),
           ratio: '1.0361',
           LendingAPR: '11.38%',
           StakingAPR: '3.4%',
@@ -170,7 +170,7 @@ export default {
         },
         {
           name: 'BNBBB',
-          icon: 'https://alpaca-app-asset.s3-ap-southeast-1.amazonaws.com/icons/coins/bnb.svg',
+          icon: require('../assets/images/alpaca.svg'),
           ratio: '1.0361',
           LendingAPR: '11.38%',
           StakingAPR: '3.4%',

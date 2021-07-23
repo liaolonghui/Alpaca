@@ -23,11 +23,16 @@
         <!-- earn -->
         <div class="earn-box">
           <div>
-            <h4>ALPACA earned:</h4>
-            <p class="earn-number">0.00</p>
+            <h4>Total earned:</h4>
+            <p class="earn-number" :class="[Totalearn==0 ? 'default-grey-mask' : '']">
+              {{ Totalearn }}
+            </p>
           </div>
           <div>
-            <div class="btn btn-active btn-md" style="margin-top: 30px;">
+            <div @click="showclaimModal" v-if="Totalearn && Totalearn>0" class="btn btn-active btn-md" style="margin-top: 30px;">
+              claim
+            </div>
+            <div v-else class="btn btn-default btn-md" disabled style="margin-top: 30px;">
               claim
             </div>
           </div>
@@ -82,7 +87,7 @@
             <div class="col-md-3 col-lg-3 operate-item text-center">
               <h4>Rewards({{ staker.rewardName }}):</h4>
               <div class="rewards">
-                {{ staker.claimableReward }}
+                {{ staker.claimableReward || '0.00' }}
               </div>
               <!-- claim-btn -->
               <div
@@ -109,6 +114,34 @@
           </div>
         </div>
       </ul>
+    </div>
+
+    <!-- select claim -->
+    <div class="modal fade" id="claimModal" tabindex="-1" role="dialog" aria-labelledby="claimModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header text-center">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title" id="myModalLabel">Choose the item you want to claim</h4>
+          </div>
+          <div class="modal-body">
+            <ul class="list-group">
+              <li
+                v-for="(item, index) in stakers"
+                :key="item.name"
+                class="list-group-item claim-item"
+                @click="claim(index)"
+              >
+                <img src="../assets/images/cake.svg" width="30" height="30" />
+                <h5>{{ item.name }}</h5>
+              </li>
+            </ul>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal -->
     </div>
 
     <!-- transaction dialog -->
@@ -164,7 +197,7 @@ export default {
           pairAddress: '0x3Fb6a6DcF90C674E255cBdA0d19a28d01b90D819',
           contractAddress: '0xd668822aF1c66600F5A4deaf2cd5028Af50CD2bA',
           // deposit/withdraw/claim/claimableReward
-          claimableReward: '0.00',
+          claimableReward: 0,
           depositAmount: 0,
           withdrawAmount: 0,
           // rewardName
@@ -177,6 +210,10 @@ export default {
     }
   },
   methods: {
+    // showclaimModal
+    showclaimModal() {
+      $('#claimModal').modal('show')
+    },
     // showOrHidePoolOperate
     showOrHidePoolOperate(e) {
       $(e.currentTarget).parent().find('.moreOrLess').toggleClass('icon-expand-more')
@@ -273,6 +310,9 @@ export default {
         this.getClaimableReward(i) // 获取新reward
       }).catch(console.error)
 
+      // 若通过模态框claim，要把模态框隐藏起来
+      $('#claimModal').modal('hide')
+
     },
     // 获取claimableReward
     async getClaimableReward(i) {
@@ -284,6 +324,14 @@ export default {
         reward = new BigNumber(reward).div(1e18)
         this.stakers[i].claimableReward = reward
       }).catch(console.error)
+    }
+  },
+  computed: {
+    // Totalearn总收入
+    Totalearn() {
+      return this.stakers.reduce((total, staker) => {
+        return new BigNumber(staker.claimableReward).plus(total)
+      }, 0)
     }
   },
   created() {
@@ -332,7 +380,17 @@ export default {
   background-color: #fafafa;
   box-shadow: 0 0 5px #aaa;
 }
+.your-position .earn-box .btn-default[disabled] {
+  color: #000;
+  font-size: 18px;
+  border-radius: 30px;
+  background-color: #fff !important;
+}
 .your-position .earn-box .earn-number {
+  width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: 28px;
   font-weight: 700;
   color: #31C77F;
@@ -504,5 +562,22 @@ export default {
 .load-img {
   margin: 20px 0;
   animation: load-rotate 2s linear infinite;
+}
+
+/* claim modal */
+#claimModal .claim-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 15px;
+  cursor: pointer;
+}
+#claimModal .claim-item:hover {
+  border-color: #31C77F;
+}
+@media screen and (min-width: 500px) {
+  #claimModal .modal-dialog {
+    width: 400px;
+  }
 }
 </style>

@@ -68,8 +68,8 @@
                   <svg style="color: 31c77f; font-size: 18px;" viewBox="64 64 896 896" focusable="false" data-icon="wallet" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M880 112H144c-17.7 0-32 14.3-32 32v736c0 17.7 14.3 32 32 32h736c17.7 0 32-14.3 32-32V144c0-17.7-14.3-32-32-32zm-40 464H528V448h312v128zm0 264H184V184h656v200H496c-17.7 0-32 14.3-32 32v192c0 17.7 14.3 32 32 32h344v200zM580 512a40 40 0 1080 0 40 40 0 10-80 0z"></path></svg>
                 </div>
                 <div>Balance:</div>
-                <div class="myBalance">
-                  {{this.$store.state.balance ? this.$store.state.balance : '0.00'}}
+                <div class="myBalance" :class="this.$store.state.balance ? '' : 'default-grey-mask'">
+                  {{ this.$store.state.balance }}
                 </div>
               </div>
             </div>
@@ -177,7 +177,8 @@ export default {
           //授权成功后result能正常获取到账号了
           that.$store.dispatch('saveAddress', result[0])
           // 获取eth数量
-          web3.eth.getBalance(result[0], function(balance) {
+          web3.eth.getBalance(result[0], function(error, balance) {
+            if (error) return
             balance = new BigNumber(balance).div(1e18)
             that.$store.dispatch('savaBalance', balance)
           })

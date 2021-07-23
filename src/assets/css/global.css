@@ -32,3 +32,11 @@ img {
   visibility: hidden;
   height: 0;
 }
+
+
+/* default-grey-mask */
+.default-grey-mask {
+  color: #ddd !important;
+  border-radius: 5px;
+  background-color: #ddd !important;
+}
