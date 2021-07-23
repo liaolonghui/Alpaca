@@ -194,8 +194,8 @@ export default {
       if (depositAmount && depositAmount > 0) {
         let amount = new BigNumber(depositAmount).multipliedBy(1e18)
         const address = this.$store.state.publicAddress // 用户地址
-        const approveContract = getFarmContract.getapproveContract(staker.pairAddress)
-        const depositContract = getFarmContract.getdepositContract(staker.contractAddress)
+        const approveContract = await getFarmContract.getapproveContract(staker.pairAddress)
+        const depositContract = await getFarmContract.getdepositContract(staker.contractAddress)
 
         // 显示modal
         this.operationState = 'wait'
@@ -224,14 +224,14 @@ export default {
       }
     },
     // withdraw
-    withdraw(i) {
+    async withdraw(i) {
       const staker = this.stakers[i]
       const withdrawAmount = staker.withdrawAmount
       if (withdrawAmount && withdrawAmount > 0) {
         let amount = new BigNumber(withdrawAmount).multipliedBy(1e18)
         const address = this.$store.state.publicAddress // 用户地址
-        const approveContract = getFarmContract.getapproveContract(staker.pairAddress)
-        const withdrawContract = getFarmContract.getwithdrawContract(staker.contractAddress)
+        const approveContract = await getFarmContract.getapproveContract(staker.pairAddress)
+        const withdrawContract = await getFarmContract.getwithdrawContract(staker.contractAddress)
 
         // 显示modal
         this.operationState = 'wait'
@@ -260,10 +260,10 @@ export default {
       }
     },
     // claim
-    claim(i) {
+    async claim(i) {
       const staker = this.stakers[i]
       const address = this.$store.state.publicAddress // 用户地址
-      const claimContract = getFarmContract.getclaimContract(staker.contractAddress)
+      const claimContract = await getFarmContract.getclaimContract(staker.contractAddress)
 
       // claim
       claimContract.methods.claim().send({
@@ -275,11 +275,11 @@ export default {
 
     },
     // 获取claimableReward
-    getClaimableReward(i) {
+    async getClaimableReward(i) {
       const address = this.$store.state.publicAddress
       if (!address) return
       const staker = this.stakers[i]
-      const claimableRewardContract = getFarmContract.getclaimableRewardContract(staker.contractAddress)
+      const claimableRewardContract = await getFarmContract.getclaimableRewardContract(staker.contractAddress)
       claimableRewardContract.methods.claimableReward(address).call().then((reward) => {
         reward = new BigNumber(reward).div(1e18)
         this.stakers[i].claimableReward = reward

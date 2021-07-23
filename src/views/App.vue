@@ -167,19 +167,20 @@ export default {
       $('#connectModal').modal('show')
     },
     // 连接钱包
-    connectWallet() {
-      const web3Provider = getProvider()
+    async connectWallet() {
+      const web3Provider = await getProvider()
       const web3 = new Web3(web3Provider)
       
       const that = this
-      web3.eth.getAccounts(async function (error, result) {
+      web3.eth.getAccounts(function (error, result) {
         if (!error) {
           //授权成功后result能正常获取到账号了
           that.$store.dispatch('saveAddress', result[0])
           // 获取eth数量
-          let balance = await web3.eth.getBalance(result[0])
-          balance = new BigNumber(balance).div(1e18)
-          that.$store.dispatch('savaBalance', balance)
+          web3.eth.getBalance(result[0], function(balance) {
+            balance = new BigNumber(balance).div(1e18)
+            that.$store.dispatch('savaBalance', balance)
+          })
         }
       })
       $('#connectModal').modal('hide')

@@ -1,8 +1,8 @@
 import Web3 from 'web3'
 import getProvider from './web3Provider'
 
-function getdepositContract(ContractAddress) {
-  const web3 = new Web3(getProvider())
+async function getdepositContract(ContractAddress) {
+  const web3 = new Web3(await getProvider())
   // deposit
   // 智能合约的abi，abi是由编译器生成的
   const depositABI = [{
@@ -17,8 +17,8 @@ function getdepositContract(ContractAddress) {
   return depositContract
 }
 
-function getapproveContract(ContractAddress) {
-  const web3 = new Web3(getProvider())
+async function getapproveContract(ContractAddress) {
+  const web3 = new Web3(await getProvider())
   const approveABI = [{
     "stateMutability": "nonpayable", 
     "type": "function", 
@@ -31,8 +31,8 @@ function getapproveContract(ContractAddress) {
   return approveContract
 }
 
-function getwithdrawContract(ContractAddress) {
-  const web3 = new Web3(getProvider())
+async function getwithdrawContract(ContractAddress) {
+  const web3 = new Web3(await getProvider())
   // withdraw
   const withdrawABI = [
     {
@@ -53,8 +53,8 @@ function getwithdrawContract(ContractAddress) {
   return withdrawContract
 }
 
-function getclaimableRewardContract(ContractAddress) {
-  const web3 = new Web3(getProvider())
+async function getclaimableRewardContract(ContractAddress) {
+  const web3 = new Web3(await getProvider())
   // claimableReward
   const claimableRewardABI = [
     {
@@ -81,8 +81,8 @@ function getclaimableRewardContract(ContractAddress) {
   return claimableRewardContract
 }
 
-function getclaimContract(ContractAddress) {
-  const web3 = new Web3(getProvider())
+async function getclaimContract(ContractAddress) {
+  const web3 = new Web3(await getProvider())
   // claim
   const claimABI = [
     {
