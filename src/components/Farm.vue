@@ -265,7 +265,6 @@ export default {
       const address = this.$store.state.publicAddress // 用户地址
       const claimContract = getFarmContract.getclaimContract(staker.contractAddress)
 
-      console.log(claimContract.methods.claim)
       // claim
       claimContract.methods.claim().send({
         from: address
@@ -381,6 +380,11 @@ export default {
   margin-top: 25px;
   padding: 30px 10px;
   cursor: pointer;
+}
+@media screen and (max-width: 768px) {
+  .farm-pool .farm-pool-item {
+    flex-direction: column;
+  }
 }
 .farm-pool-item>.pair-img img {
   width: 40px;
