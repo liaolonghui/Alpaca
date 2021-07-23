@@ -320,7 +320,7 @@ export default {
 /* home-landing */
 #home-landing {
   padding-top: 100px;
-  padding-bottom: 170px;
+  padding-bottom: 180px;
   background: url(../assets/images/bgnew.svg);
   background-size: 100%;
   background-position: bottom center;
