@@ -97,10 +97,84 @@ async function getclaimContract(ContractAddress) {
   return claimContract
 }
 
+async function getTotalstakedContract(ContractAddress) {
+  const web3 = new Web3(await getProvider())
+  // total_staked
+  const totalstakedABI = [
+    {
+      "inputs": [],
+      "name": "total_staked_",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ]
+  const totalstakedContract = new web3.eth.Contract(totalstakedABI, ContractAddress)
+  return totalstakedContract
+}
+
+async function getUserstakedContract(ContractAddress) {
+  const web3 = new Web3(await getProvider())
+  // total_staked
+  const userstakedABI = [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_user",
+          "type": "address"
+        }
+      ],
+      "name": "user_staked",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ]
+  const userstakedContract = new web3.eth.Contract(userstakedABI, ContractAddress)
+  return userstakedContract
+}
+
+// allowance
+async function getAllowanceContract(ContractAddress) {
+  const web3 = new Web3(await getProvider())
+  // total_staked
+  const allowanceABI = [
+    {
+      "stateMutability": "view",
+      "type": "function",
+      "name": "allowance",
+      "inputs": [
+        {"name": "arg0", "type": "address"},
+        {"name": "arg1", "type": "address"}
+      ],
+      "outputs": [{"name": "", "type": "uint256"}],
+      "gas": 1878
+    }
+  ]
+  const allowanceContract = new web3.eth.Contract(allowanceABI, ContractAddress)
+  return allowanceContract
+}
+
 export default {
   getapproveContract,
   getdepositContract,
   getwithdrawContract,
   getclaimableRewardContract,
-  getclaimContract
+  getclaimContract,
+  getTotalstakedContract, // total-staked
+  getUserstakedContract,  // user-staked
+  getAllowanceContract, // Allowance
 }

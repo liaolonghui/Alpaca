@@ -182,13 +182,13 @@ export default {
   },
   methods: {
     // 连接钱包
-    connectWallet() {
+    async connectWallet() {
       let web3Provider;
       if (window.ethereum) {
         web3Provider = window.ethereum;
         try {
           // 请求用户授权
-          window.ethereum.enable();
+          await window.ethereum.enable();
         } catch (error) {
           // 用户不授权时
           alert("User denied account access")
@@ -200,8 +200,8 @@ export default {
       web3.eth.getAccounts(async function (error, result) {
         if (!error) {
           //授权成功后result能正常获取到账号了
-          console.log(result)
           that.$store.dispatch('saveAddress', result[0])
+          localStorage.setItem('addr', result[0])
           // 获取eth数量
           const balance = await web3.eth.getBalance(result[0])
           that.$store.dispatch('savaBalance', balance)

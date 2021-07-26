@@ -176,6 +176,7 @@ export default {
         if (!error) {
           //授权成功后result能正常获取到账号了
           that.$store.dispatch('saveAddress', result[0])
+          localStorage.setItem('addr', result[0])
           // 获取eth数量
           web3.eth.getBalance(result[0], function(error, balance) {
             if (error) return

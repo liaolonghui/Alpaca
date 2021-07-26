@@ -54,10 +54,69 @@
           <li @click="showOrHidePoolOperate" class="list-group-item farm-pool-item">
             <div class="pair-img">
               <img src="../assets/images/cake.svg" />
-              <img src="../assets/images/belt.svg" />
             </div>
             <div class="pair-name">
               {{ staker.name }}
+            </div>
+            <div class="stake-APY">
+              <p>APY</p>
+              <p class="stake-APY-info" :class="[(staker.totalStaked&&staker.userStaked)?'':'default-grey-mask']">
+                <!-- 计算APY -->
+                {{ computedAPY(index) }}
+              </p>
+            </div>
+            <div class="total-staked">
+              <p>Total staked</p>
+              <p class="total-staked-num" :class="[staker.totalStaked?'':'default-grey-mask']">
+                <span>{{staker.totalStaked}}</span>
+                CAKE
+              </p>
+            </div>
+            <hr class="hidden-md hidden-lg" style="width: 100%;">
+            <div>
+              <P>token info</P>
+              <p class="view-contract">
+                <a target="_blank" :href="`https://bscscan.com/address/${staker.contractAddress}`">
+                  View Contract
+                  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18 19H6C5.45 19 5 18.55 5 18V6C5 5.45 5.45 5 6 5H11C11.55 5 12 4.55 12 4C12 3.45 11.55 3 11 3H5C3.89 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V13C21 12.45 20.55 12 20 12C19.45 12 19 12.45 19 13V18C19 18.55 18.55 19 18 19ZM14 4C14 4.55 14.45 5 15 5H17.59L8.46 14.13C8.07 14.52 8.07 15.15 8.46 15.54C8.85 15.93 9.48 15.93 9.87 15.54L19 6.41V9C19 9.55 19.45 10 20 10C20.55 10 21 9.55 21 9V4C21 3.45 20.55 3 20 3H15C14.45 3 14 3.45 14 4Z"></path></svg>
+                </a>
+              </p>
+              <div @click="(e) => addToMetamask(e, staker.pairAddress)" class="add-to-metamask">
+                <div>Add to Metamask</div>
+                <svg viewBox="0 0 35 33" color="text" width="20px" xmlns="http://www.w3.org/2000/svg">
+                  <path d="m32.9582 1-13.1341 9.7183 2.4424-5.72731z" fill="#e17726" stroke="#e17726"></path>
+                  <g fill="#e27625" stroke="#e27625">
+                  <path d="m2.66296 1 13.01714 9.809-2.3254-5.81802z"></path>
+                  <path d="m28.2295 23.5335-3.4947 5.3386 7.4829 2.0603 2.1436-7.2823z"></path>
+                  <path d="m1.27281 23.6501 2.13055 7.2823 7.46994-2.0603-3.48166-5.3386z"></path>
+                  <path d="m10.4706 14.5149-2.0786 3.1358 7.405.3369-.2469-7.969z"></path>
+                  <path d="m25.1505 14.5149-5.1575-4.58704-.1688 8.05974 7.4049-.3369z"></path>
+                  <path d="m10.8733 28.8721 4.4819-2.1639-3.8583-3.0062z"></path>
+                  <path d="m20.2659 26.7082 4.4689 2.1639-.6105-5.1701z"></path>
+                  </g>
+                  <path d="m24.7348 28.8721-4.469-2.1639.3638 2.9025-.039 1.231z" fill="#d5bfb2" stroke="#d5bfb2"></path>
+                  <path d="m10.8732 28.8721 4.1572 1.9696-.026-1.231.3508-2.9025z" fill="#d5bfb2" stroke="#d5bfb2"></path>
+                  <path d="m15.1084 21.7842-3.7155-1.0884 2.6243-1.2051z" fill="#233447" stroke="#233447"></path>
+                  <path d="m20.5126 21.7842 1.0913-2.2935 2.6372 1.2051z" fill="#233447" stroke="#233447"></path>
+                  <path d="m10.8733 28.8721.6495-5.3386-4.13117.1167z" fill="#cc6228" stroke="#cc6228"></path>
+                  <path d="m24.0982 23.5335.6366 5.3386 3.4946-5.2219z" fill="#cc6228" stroke="#cc6228"></path>
+                  <path d="m27.2291 17.6507-7.405.3369.6885 3.7966 1.0913-2.2935 2.6372 1.2051z" fill="#cc6228" stroke="#cc6228"></path>
+                  <path d="m11.3929 20.6958 2.6242-1.2051 1.0913 2.2935.6885-3.7966-7.40495-.3369z" fill="#cc6228" stroke="#cc6228"></path>
+                  <path d="m8.392 17.6507 3.1049 6.0513-.1039-3.0062z" fill="#e27525" stroke="#e27525"></path>
+                  <path d="m24.2412 20.6958-.1169 3.0062 3.1049-6.0513z" fill="#e27525" stroke="#e27525"></path>
+                  <path d="m15.797 17.9876-.6886 3.7967.8704 4.4833.1949-5.9087z" fill="#e27525" stroke="#e27525"></path>
+                  <path d="m19.8242 17.9876-.3638 2.3584.1819 5.9216.8704-4.4833z" fill="#e27525" stroke="#e27525"></path>
+                  <path d="m20.5127 21.7842-.8704 4.4834.6236.4406 3.8584-3.0062.1169-3.0062z" fill="#f5841f" stroke="#f5841f"></path>
+                  <path d="m11.3929 20.6958.104 3.0062 3.8583 3.0062.6236-.4406-.8704-4.4834z" fill="#f5841f" stroke="#f5841f"></path>
+                  <path d="m20.5906 30.8417.039-1.231-.3378-.2851h-4.9626l-.3248.2851.026 1.231-4.1572-1.9696 1.4551 1.1921 2.9489 2.0344h5.0536l2.962-2.0344 1.442-1.1921z" fill="#c0ac9d" stroke="#c0ac9d"></path>
+                  <path d="m20.2659 26.7082-.6236-.4406h-3.6635l-.6236.4406-.3508 2.9025.3248-.2851h4.9626l.3378.2851z" fill="#161616" stroke="#161616"></path>
+                  <path d="m33.5168 11.3532 1.1043-5.36447-1.6629-4.98873-12.6923 9.3944 4.8846 4.1205 6.8983 2.0085 1.52-1.7752-.6626-.4795 1.0523-.9588-.8054-.622 1.0523-.8034z" fill="#763e1a" stroke="#763e1a"></path>
+                  <path d="m1 5.98873 1.11724 5.36447-.71451.5313 1.06527.8034-.80545.622 1.05228.9588-.66255.4795 1.51997 1.7752 6.89835-2.0085 4.8846-4.1205-12.69233-9.3944z" fill="#763e1a" stroke="#763e1a"></path>
+                  <path d="m32.0489 16.5234-6.8983-2.0085 2.0786 3.1358-3.1049 6.0513 4.1052-.0519h6.1318z" fill="#f5841f" stroke="#f5841f"></path>
+                  <path d="m10.4705 14.5149-6.89828 2.0085-2.29944 7.1267h6.11883l4.10519.0519-3.10487-6.0513z" fill="#f5841f" stroke="#f5841f"></path>
+                  <path d="m19.8241 17.9876.4417-7.5932 2.0007-5.4034h-8.9119l2.0006 5.4034.4417 7.5932.1689 2.3842.013 5.8958h3.6635l.013-5.8958z" fill="#f5841f" stroke="#f5841f"></path>
+                </svg>
+              </div>
             </div>
           </li>
           <!-- deposit withdraw claimableReward claim -->
@@ -65,29 +124,31 @@
             <!-- deposit -->
             <div class="col-md-4 col-lg-4 operate-item">
               <h4>I want to deposit</h4>
+              <p>You have {{1}} that can deposit</p>
               <div class="farm-input-box">
-                <input v-model="staker.depositAmount" type="number" placeholder="Amount" />
-                <div class="btn btn-success btn-sm">MAX</div>
+                <input v-model="staker.depositAmount" type="number" placeholder="Amount" min="0" />
+                <div @click="depositmax(index)" class="btn btn-success btn-sm">MAX</div>
               </div>
-              <div @click="deposit(index)" v-if="$store.state.publicAddress" class="btn btn-success btn-group-justified">Deposit</div>
+              <div @click="transaction(index, 'deposit')" v-if="$store.state.publicAddress" class="btn btn-success btn-group-justified">Deposit</div>
               <div v-else class="btn btn-default btn-group-justified" disabled>Deposit</div>
             </div>
             <!-- withdraw -->
             <div class="col-md-4 col-lg-4 operate-item">
               <h4>I want to withdraw</h4>
+              <p>You have {{staker.userStaked}} that can withdraw</p>
               <div class="farm-input-box">
-                <input v-model="staker.withdrawAmount" type="number" placeholder="Amount" />
-                <div class="btn btn-success btn-sm">MAX</div>
+                <input v-model="staker.withdrawAmount" type="number" placeholder="Amount" min="0" :max="staker.userStaked" />
+                <div @click="withdrawmax(index)" class="btn btn-success btn-sm">MAX</div>
               </div>
-              <div @click="withdraw(index)" v-if="$store.state.publicAddress" class="btn btn-success btn-group-justified">Withdraw</div>
+              <div @click="transaction(index, 'withdraw')" v-if="$store.state.publicAddress" class="btn btn-success btn-group-justified">Withdraw</div>
               <div v-else class="btn btn-default btn-group-justified" disabled>Withdraw</div>
             </div>
             <hr class="hidden-md hidden-lg" />
             <!-- claim -->
             <div class="col-md-3 col-lg-3 operate-item text-center">
               <h4>Rewards({{ staker.rewardName }}):</h4>
-              <div class="rewards">
-                {{ staker.claimableReward || '0.00' }}
+              <div class="rewards" :class="[staker.claimableReward ? '' : 'default-grey-mask']">
+                {{ staker.claimableReward }}
               </div>
               <!-- claim-btn -->
               <div
@@ -150,6 +211,7 @@
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header text-center">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
             <h4 class="modal-title">Confirm {{operation}}</h4>
           </div>
           <div class="modal-body text-center" style="min-height: 250px;">
@@ -175,6 +237,23 @@
               <h4>Transaction rejected</h4>
               <div @click="hideTransactionDialog" class="btn btn-info btn-md btn-block">Dismiss</div>
             </div>
+            <!-- default -->
+            <div v-else>
+              <div v-if="needApprove">
+                <!-- 需要approve -->
+                <br />
+                <h4>You need to approve</h4>
+                <br />
+                <div @click="approve" class="btn btn-success btn-lg">Approve</div>
+              </div>
+              <div v-else>
+                <!-- 不需要approve -->
+                <br />
+                <h4>You need to confirm</h4>
+                <br />
+                <div @click="confirmTransaction" class="btn btn-success btn-lg">Confirm Transiaction</div>
+              </div>
+            </div>
           </div>
         </div><!-- /.modal-content -->
       </div><!-- /.modal -->
@@ -192,24 +271,55 @@ export default {
       positionType: 'Active',
       stakers: [
         {
-          name: 'BNB-WORK Staker',
+          name: 'BNB-Work-Stake',
           // LP地址
           pairAddress: '0x3Fb6a6DcF90C674E255cBdA0d19a28d01b90D819',
-          contractAddress: '0xd668822aF1c66600F5A4deaf2cd5028Af50CD2bA',
+          contractAddress: '0x7d3341D090250399F45C6B43996A88c42E5B47Fe',
           // deposit/withdraw/claim/claimableReward
           claimableReward: 0,
           depositAmount: 0,
           withdrawAmount: 0,
+          // totalStaked
+          totalStaked: 0,
+          // userStaked
+          userStaked: 0,
           // rewardName
           rewardName: 'work coin'
+        },
+        {
+          name: 'Stable-Stake',
+          pairAddress: '0x5126C1B8b4368c6F07292932451230Ba53a6eB7A',
+          contractAddress: '0x7a199FD711A1723e941Ac49d8C9fF6AB80c70Df8',
+          claimableReward: 0,
+          depositAmount: 0,
+          withdrawAmount: 0,
+          totalStaked: 0,
+          userStaked: 0,
+          rewardName: 'work coin',
+          totalcoin: 10000
         }
       ],
       // operation
-      operation: '',
-      operationState: ''
+      stakeIndex: null,   // 对应stake索引
+      operation: '',      // 交易类型（操作）
+      operationState: '', // 状态
+      needApprove: false,  // 是否需要approve
     }
   },
   methods: {
+    // addToMetamask
+    addToMetamask(e, address) {
+      e.stopPropagation()
+      alert(address)
+    },
+    // deposit
+    depositmax(i) {
+      this.stakers[i].depositAmount = 1
+    },
+    // withdrawmax
+    withdrawmax(i) {
+      this.stakers[i].withdrawAmount = this.stakers[i].userStaked
+    },
     // showclaimModal
     showclaimModal() {
       $('#claimModal').modal('show')
@@ -224,77 +334,129 @@ export default {
     hideTransactionDialog() {
       $('#transactionModal').modal('hide')
     },
-    // deposit
-    async deposit(i) {
-      const staker = this.stakers[i]
-      const depositAmount = staker.depositAmount
-      if (depositAmount && depositAmount > 0) {
-        let amount = new BigNumber(depositAmount).multipliedBy(1e18)
-        const address = this.$store.state.publicAddress // 用户地址
-        const approveContract = await getFarmContract.getapproveContract(staker.pairAddress)
-        const depositContract = await getFarmContract.getdepositContract(staker.contractAddress)
+    // transaction
+    async transaction(index, transactionType) {
+      const stake = this.stakers[index]
+      let amount
+      if (transactionType === 'deposit') {
+        amount = stake.depositAmount
+      } else if (transactionType === 'withdraw') {
+        amount = stake.withdrawAmount
+      }
 
+      // 输入值大于0才继续
+      if (amount && amount > 0) {
         // 显示modal
-        this.operationState = 'wait'
-        this.operation = 'Deposit'
+        this.operationState = '' // 状态置为空
         $('#transactionModal').modal('show')
 
-        // approve
-        approveContract.methods.approve(staker.contractAddress, amount).send({
-          from: address
-        }).then(() => {
-          // deposit
-          depositContract.methods.deposit(amount).send({
-            from: address,
-            gas: 10000000
-          }).then(() => {
-            this.getClaimableReward(i) // 获取新reward
-            this.operationState = 'resolve' // 交易成功提交
-          }).catch(() => {
-            this.operationState = 'reject' // 失败
-          })
-        }).catch(() => {
-          this.operationState = 'reject' // 失败
-        }).finally(() => {
-          this.stakers[i].depositAmount = 0
-        })
+        this.operation = transactionType // 把交易类型保存一下
+        this.stakeIndex = index          // 把交易的stake的index保存一下
+        this.needApprove = await this.allowance() // 是否需要approve
+        
+      } else {
+        alert('Please enter a value greater than 0')
+      }
+
+    },
+    // allowance
+    async allowance() {
+      const stake = this.stakers[this.stakeIndex]
+      const address = this.$store.state.publicAddress // 用户地址
+      let amount
+      if (this.operation === 'deposit') {
+        amount = stake.depositAmount*1e18
+      } else if (this.operation === 'withdraw') {
+        amount = stake.withdrawAmount*1e18
+      }
+      // Allowance
+      const allowanceContract = await getFarmContract.getAllowanceContract(stake.pairAddress)
+      let allowance = await allowanceContract.methods.allowance(address, stake.contractAddress).call()
+
+      console.log(allowance, amount)
+      if (allowance >= amount) {
+        return false // 不需要approve
+      } else {
+        return true // 需要approve
       }
     },
-    // withdraw
-    async withdraw(i) {
-      const staker = this.stakers[i]
-      const withdrawAmount = staker.withdrawAmount
-      if (withdrawAmount && withdrawAmount > 0) {
-        let amount = new BigNumber(withdrawAmount).multipliedBy(1e18)
-        const address = this.$store.state.publicAddress // 用户地址
-        const approveContract = await getFarmContract.getapproveContract(staker.pairAddress)
-        const withdrawContract = await getFarmContract.getwithdrawContract(staker.contractAddress)
-
-        // 显示modal
-        this.operationState = 'wait'
-        this.operation = 'Withdraw'
-        $('#transactionModal').modal('show')
-
-        // approve
-        approveContract.methods.approve(staker.contractAddress, amount).send({
-          from: address
-        }).then(() => {
-          // withdraw
-          withdrawContract.methods.withdraw(amount).send({
-            from: address,
-            gas: 10000000
-          }).then(() => {
-            this.operationState = 'resolve' // 成功提交
-            this.getClaimableReward(i) // 获取新reward
-          }).catch(() => {
-            this.operationState = 'reject' // 失败
-          })
-        }).catch(() => {
-          this.operationState = 'reject' // 失败
-        }).finally(() => {
-          this.stakers[i].withdrawAmount = 0
-        })
+    // approve
+    async approve() {
+      const stake = this.stakers[this.stakeIndex] // stake
+      const address = this.$store.state.publicAddress // 用户地址
+      let amount
+      if (this.operation === 'deposit') {
+        amount = new BigNumber(stake.depositAmount+10000).multipliedBy(1e18)
+      } else if (this.operation === 'withdraw') {
+        amount = new BigNumber(stake.withdrawAmount+10000).multipliedBy(1e18)
       }
+      const approveContract = await getFarmContract.getapproveContract(stake.pairAddress)
+      approveContract.methods.approve(stake.contractAddress, amount).send({
+        from: address
+      }).then((result) => {
+        this.needApprove = false // approve成功，将needApprove置为false
+      }).catch((err) => {
+        this.needApprove = true
+      })
+    },
+    // confirmTransaction
+    confirmTransaction() {
+      this.operationState = 'wait' // 置为等待状态
+      // 根据交易类型执行对应方法
+      if (this.operation === 'deposit') {
+        this.deposit()
+      } else if (this.operation === 'withdraw') {
+        this.withdraw()
+      }
+    },
+    // deposit
+    async deposit() {
+      const i = this.stakeIndex
+      const stake = this.stakers[i]
+      const amount = new BigNumber(stake.depositAmount).multipliedBy(1e18)
+      const address = this.$store.state.publicAddress // 用户地址
+      const depositContract = await getFarmContract.getdepositContract(stake.contractAddress)
+        
+      // deposit
+      depositContract.methods.deposit(amount).send({
+        from: address,
+        gas: 10000000
+      }).then(() => {
+        this.operationState = 'resolve' // 交易成功提交
+        this.getClaimableReward(i) // 获取新reward
+        this.getTotalStaked(i)
+        this.getUserStaked(i)
+      }).catch(() => {
+        this.operationState = 'reject' // 失败
+      })
+      // 清空depositAmount
+      setTimeout(() => {
+        this.stakers[i].depositAmount = 0
+      },0)
+    },
+    // withdraw
+    async withdraw() {
+      const i = this.stakeIndex
+      const stake = this.stakers[i]
+      const amount = new BigNumber(stake.withdrawAmount).multipliedBy(1e18)
+      const address = this.$store.state.publicAddress // 用户地址
+      const withdrawContract = await getFarmContract.getwithdrawContract(stake.contractAddress)
+
+      withdrawContract.methods.withdraw(amount).send({
+        from: address,
+        gas: 10000000
+      }).then(() => {
+        this.operationState = 'resolve' // 成功提交
+        this.getClaimableReward(i) // 获取新reward
+        this.getTotalStaked(i)
+        this.getUserStaked(i)
+      }).catch(() => {
+        this.operationState = 'reject' // 失败
+      })
+      // 清空withdrawAmount
+      setTimeout(() => {
+        this.stakers[i].withdrawAmount = 0
+      }, 0)
     },
     // claim
     async claim(i) {
@@ -308,6 +470,8 @@ export default {
       }).then(() => {
         // claim成功
         this.getClaimableReward(i) // 获取新reward
+        this.getTotalStaked(i)
+        this.getUserStaked(i)
       }).catch(console.error)
 
       // 若通过模态框claim，要把模态框隐藏起来
@@ -324,6 +488,34 @@ export default {
         reward = new BigNumber(reward).div(1e18)
         this.stakers[i].claimableReward = reward
       }).catch(console.error)
+    },
+    // 获取total-staked
+    async getTotalStaked(i) {
+      const address = this.$store.state.publicAddress
+      if (!address) return
+      const contractAddress = this.stakers[i].contractAddress
+      const totalstakedContract = await getFarmContract.getTotalstakedContract(contractAddress)
+      totalstakedContract.methods.total_staked_().call().then((totalStaked) => {
+        this.stakers[i].totalStaked = new BigNumber(totalStaked).div(1e18)
+      }).catch(console.error)
+    },
+    // 获取user-staked
+    async getUserStaked(i) {
+      const address = this.$store.state.publicAddress
+      if (!address) return
+      const contractAddress = this.stakers[i].contractAddress
+      const userstakedContract = await getFarmContract.getUserstakedContract(contractAddress)
+      userstakedContract.methods.user_staked(address).call().then((userStaked) => {
+        this.stakers[i].userStaked = new BigNumber(userStaked).div(1e18)
+      }).catch(console.error)
+    },
+    // 计算APY
+    computedAPY(i) {
+      const totalStaked = this.stakers[i].totalStaked
+      const userStaked = this.stakers[i].userStaked
+      const APY = (userStaked/totalStaked * 100).toFixed(2)
+
+      return APY+'%'
     }
   },
   computed: {
@@ -332,17 +524,39 @@ export default {
       return this.stakers.reduce((total, staker) => {
         return new BigNumber(staker.claimableReward).plus(total)
       }, 0)
+    },
+  },
+  watch: {
+    "$store.state.publicAddress"() {
+      this.stakers.map((staker, i) => {
+        // claimableReward
+        this.getClaimableReward(i)
+        // TotalStaked
+        this.getTotalStaked(i)
+        // getUserStaked
+        this.getUserStaked(i)
+      })
     }
   },
   created() {
     this.stakers.map((staker, i) => {
+      // claimableReward
       this.getClaimableReward(i)
+      // TotalStaked
+      this.getTotalStaked(i)
+      // getUserStaked
+      this.getUserStaked(i)
     })
   },
   mounted() {
     this._timer = setInterval(() => {
       this.stakers.map((staker, i) => {
+        // claimableReward
         this.getClaimableReward(i)
+        // TotalStaked
+        this.getTotalStaked(i)
+        // getUserStaked
+        this.getUserStaked(i)
       })
     }, 10000)
   },
@@ -433,10 +647,10 @@ export default {
 /* farm-pool */
 .farm-pool .farm-pool-item {
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
   align-items: center;
-  margin-top: 25px;
-  padding: 30px 10px;
+  margin-top: 10px;
+  padding: 30px;
   cursor: pointer;
 }
 @media screen and (max-width: 768px) {
@@ -448,15 +662,67 @@ export default {
   width: 40px;
   height: 40px;
 }
-.farm-pool-item>.pair-img img:nth-of-type(1) {
-  position: relative;
-  z-index: 6;
-  margin-right: -15px;
-}
 .farm-pool-item>.pair-name {
-  font-size: 28px;
+  width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 25px;
+  font-weight: 600;
+  text-align: center;
+  color: #31C77F;
+}
+.farm-pool-item .total-staked-num {
+  font-size: 20px;
   font-weight: 600;
   color: #31C77F;
+}
+.farm-pool-item .total-staked-num>span {
+  display: inline-block;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: -7px;
+}
+.farm-pool-item .stake-APY-info {
+  font-size: 20px;
+  font-weight: 600;
+  color: #31C77F;
+}
+.farm-pool-item .stake-APY>p,
+.farm-pool-item .total-stated>p {
+  margin-bottom: 5px;
+  height: 20px;
+  line-height: 20px;
+}
+.farm-pool-item .view-contract>a {
+  color: #31C77F !important;
+  font-size: 16px;
+}
+.farm-pool-item .view-contract>a:hover {
+  text-decoration: underline !important;
+}
+.farm-pool-item .view-contract svg {
+  fill: #31C77F;
+  width: 16px;
+  height: 16px;
+  vertical-align: -2px;
+}
+.farm-pool-item .add-to-metamask {
+  display: flex;
+  justify-content: space-between;
+  color: #31C77F;
+  font-size: 16px;
+  padding: 5px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+.farm-pool-item .add-to-metamask:hover {
+  background-color: #fafafa;
+}
+.farm-pool-item .add-to-metamask svg {
+  margin-left: 5px;
 }
 
 /* operate-pool */
@@ -499,6 +765,7 @@ export default {
   text-overflow: ellipsis;
   white-space: nowrap;
   width: 170px;
+  margin: 15px 0;
   font-weight: 600;
   font-size: 28px;
   color: #31C77F;
@@ -548,6 +815,26 @@ export default {
   .your-position .earn-box {
     position: static;
     margin-top: 10px;
+  }
+  .farm-pool .farm-pool-item {
+    padding: 15px 15px 30px 15px;
+  }
+  .farm-pool-item .stake-APY,
+  .farm-pool-item .total-staked {
+    width: 100%;
+    margin: 5px 0;
+    display: flex;
+    justify-content: space-between;
+  }
+  .farm-pool-item .total-staked-num>span {
+    max-width: 100px;
+  }
+  .farm-pool-item .stake-APY>p,
+  .farm-pool-item .total-staked>p {
+    margin: 0 10px;
+  }
+  .farm-pool-item .total-staked>p:nth-of-type(1) {
+    padding-top: 4px;
   }
 }
 

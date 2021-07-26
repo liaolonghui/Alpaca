@@ -6,7 +6,7 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     // 保存钱包地址
-    publicAddress: '',
+    publicAddress: localStorage.getItem('addr') || '',
     // balance
     balance: 0
   },
