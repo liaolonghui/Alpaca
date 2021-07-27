@@ -7,7 +7,7 @@ async function getProvider() {
       await window.ethereum.enable();
     } catch (error) {
       // 用户不授权时
-      alert("User denied account access")
+      console.wran("User denied account access")
     }
   } else if (window.web3) {   // 老版 MetaMask Legacy dapp browsers...
     web3Provider = window.web3.currentProvider;

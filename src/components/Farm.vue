@@ -303,7 +303,7 @@ export default {
       stakeIndex: null,   // 对应stake索引
       operation: '',      // 交易类型（操作）
       operationState: '', // 状态
-      needApprove: false,  // 是否需要approve
+      needApprove: true,  // 是否需要approve
     }
   },
   methods: {
@@ -353,7 +353,7 @@ export default {
         this.operation = transactionType // 把交易类型保存一下
         this.stakeIndex = index          // 把交易的stake的index保存一下
         this.needApprove = await this.allowance() // 是否需要approve
-        
+
       } else {
         alert('Please enter a value greater than 0')
       }
@@ -715,8 +715,8 @@ export default {
   color: #31C77F;
   font-size: 16px;
   padding: 5px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
+  border-radius: 10px;
+  border: 1px solid #31C77F;
 }
 .farm-pool-item .add-to-metamask:hover {
   background-color: #fafafa;
@@ -817,7 +817,7 @@ export default {
     margin-top: 10px;
   }
   .farm-pool .farm-pool-item {
-    padding: 15px 15px 30px 15px;
+    padding: 15px 25px 30px 25px;
   }
   .farm-pool-item .stake-APY,
   .farm-pool-item .total-staked {
@@ -833,8 +833,15 @@ export default {
   .farm-pool-item .total-staked>p {
     margin: 0 10px;
   }
+  .farm-pool-item .stake-APY>p:nth-of-type(1) {
+    padding-top: 1px;
+    font-weight: 550;
+    font-size: 15px;
+  }
   .farm-pool-item .total-staked>p:nth-of-type(1) {
-    padding-top: 4px;
+    padding-top: 5px;
+    font-weight: 550;
+    font-size: 15px;
   }
 }
 

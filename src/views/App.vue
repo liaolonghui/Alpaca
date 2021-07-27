@@ -177,7 +177,7 @@ export default {
           //授权成功后result能正常获取到账号了
           that.$store.dispatch('saveAddress', result[0])
           localStorage.setItem('addr', result[0])
-          // 获取eth数量
+          // 获取钱包余额
           web3.eth.getBalance(result[0], function(error, balance) {
             if (error) return
             balance = new BigNumber(balance).div(1e18)
@@ -191,8 +191,38 @@ export default {
     showSetDialog() {
       window.alert('还没完成')
       // setDialogVisibly
+    },
+    // 获取钱包余额
+    async getBalance(address) {
+      const web3Provider = await getProvider()
+      const web3 = new Web3(web3Provider)
+      // 获取钱包余额
+      const that = this
+      web3.eth.getBalance(address, function(error, balance) {
+        if (error) return
+        balance = new BigNumber(balance).div(1e18)
+        that.$store.dispatch('savaBalance', balance)
+      })
     }
-  }
+  }, 
+  created() {
+    const address = this.$store.state.publicAddress
+    if (address) {
+      this.getBalance(address)
+    }
+  },
+  mounted() {
+    this._timer = setInterval(async () => {
+      const address = this.$store.state.publicAddress
+      if (address) {
+        this.getBalance(address)
+      }
+    }, 10000)
+  },
+  unmounted() {
+    clearInterval(this.timer)
+    this.timer = null
+  },
 }
 </script>
 
