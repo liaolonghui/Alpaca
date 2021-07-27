@@ -187,11 +187,6 @@ export default {
       })
       $('#connectModal').modal('hide')
     },
-    // 显示setDialog
-    showSetDialog() {
-      window.alert('还没完成')
-      // setDialogVisibly
-    },
     // 获取钱包余额
     async getBalance(address) {
       const web3Provider = await getProvider()
@@ -203,6 +198,11 @@ export default {
         balance = new BigNumber(balance).div(1e18)
         that.$store.dispatch('savaBalance', balance)
       })
+    },
+    // 显示setDialog
+    showSetDialog() {
+      window.alert('还没完成')
+      // setDialogVisibly
     }
   }, 
   created() {

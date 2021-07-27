@@ -7,12 +7,12 @@ async function getProvider() {
       await window.ethereum.enable();
     } catch (error) {
       // 用户不授权时
-      console.wran("User denied account access")
+      console.warn("User denied account access")
     }
   } else if (window.web3) {   // 老版 MetaMask Legacy dapp browsers...
     web3Provider = window.web3.currentProvider;
   } else {
-    web3Provider = new Web3.providers.HttpProvider("http://127.0.0.1:8545")
+    web3Provider = new Web3.providers.HttpProvider("https://data-seed-prebsc-1-s1.binance.org:8545")
   }
   return web3Provider
 }
