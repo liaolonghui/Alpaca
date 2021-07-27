@@ -735,7 +735,6 @@ export default {
   display: inline-block;
   max-width: 150px;
   overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
   vertical-align: -7px;
 }
@@ -881,7 +880,7 @@ export default {
     justify-content: space-between;
   }
   .farm-pool-item .total-staked-num>span {
-    max-width: 100px;
+    max-width: 71px;
   }
   .farm-pool-item .stake-APY>p,
   .farm-pool-item .total-staked>p {
