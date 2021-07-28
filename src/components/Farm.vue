@@ -486,7 +486,9 @@ export default {
         this.getClaimableReward(i) // 获取新reward
         this.getTotalStaked(i)
         this.getUserStaked(i)
-        this.getLPBalance(i)
+        setTimeout(() => {
+          this.getLPBalance(i)
+        },1000)
       }).catch(() => {
         this.operationState = 'reject' // 失败
       })
@@ -511,7 +513,9 @@ export default {
         this.getClaimableReward(i) // 获取新reward
         this.getTotalStaked(i)
         this.getUserStaked(i)
-        this.getLPBalance(i)
+        setTimeout(() => {
+          this.getLPBalance(i)
+        },1000)
       }).catch(() => {
         this.operationState = 'reject' // 失败
       })
@@ -534,7 +538,6 @@ export default {
         this.getClaimableReward(i) // 获取新reward
         this.getTotalStaked(i)
         this.getUserStaked(i)
-        this.getLPBalance(i)
       }).catch(console.error)
 
       // 若通过模态框claim，要把模态框隐藏起来
@@ -600,22 +603,25 @@ export default {
       let lpVal // lp的价值
       if (i === 0) {
         dayNum = 5000 / 20
-        lpVal = 2.25 / 1865
+        lpVal = ((1/1)*1 + (1/1566480)*1962100) / 1399.66
       } else if (i === 1) {
         dayNum = 10000 / 20
-        lpVal = 2 / 360
+        lpVal = ((1/363.531)*1 + (1/354.071)*0.971055) / 0.985394
       }
       const userNum = (userStaked / totalStaked) * dayNum
 
       // 每天挖到的数量 = (我投入的/所有人投入的)*每天能挖到的
       // APY就是：(每天挖到的数量*其价格 / 我投入的代币数量*其价格) * 365
-      const workVal = 1 / 2607280
+      const workVal = 1 / 1566480
 
       let APY = (userNum * workVal) / (userStaked * lpVal) * 365
-
       APY = (APY * 100).toFixed(2)
 
-      return APY + '%'
+      if (!isNaN(APY)) {
+        return APY + '%'
+      } else {
+        return ''
+      }
     }
   },
   computed: {
@@ -659,10 +665,6 @@ export default {
         this.getClaimableReward(i)
         // TotalStaked
         this.getTotalStaked(i)
-        // getUserStaked
-        this.getUserStaked(i)
-        // LP
-        // this.getLPBalance(i)
       })
     }, 10000)
   },
@@ -864,6 +866,7 @@ export default {
   top: 0;
   right: 0;
   height: 40px;
+  line-height: 28px;
   font-size: 16px;
 }
 .operate-pool .btn-group-justified {

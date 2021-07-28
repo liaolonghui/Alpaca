@@ -196,6 +196,10 @@ export default {
     async getBalance(address) {
       const web3Provider = await getProvider()
       const web3 = new Web3(web3Provider)
+
+      // changeNetwork
+      this.changeNetwork(web3) // 切换网络
+      
       // 获取钱包余额
       const that = this
       web3.eth.getBalance(address, function(error, balance) {
@@ -203,8 +207,6 @@ export default {
         balance = new BigNumber(balance).div(1e18)
         that.$store.dispatch('savaBalance', balance)
       })
-      // changeNetwork
-      this.changeNetwork(web3) // 切换网络
     },
     // 显示setDialog
     showSetDialog() {
