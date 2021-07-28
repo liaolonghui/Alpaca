@@ -187,7 +187,7 @@ export default {
             that.$store.dispatch('savaBalance', balance)
           })
           // changeNetwork
-          that.changeNetwork()
+          that.changeNetwork(web3)
         }
       })
       $('#connectModal').modal('hide')
@@ -204,7 +204,7 @@ export default {
         that.$store.dispatch('savaBalance', balance)
       })
       // changeNetwork
-      this.changeNetwork() // 切换网络
+      this.changeNetwork(web3) // 切换网络
     },
     // 显示setDialog
     showSetDialog() {
@@ -212,7 +212,10 @@ export default {
       // setDialogVisibly
     },
     // changeNetwork
-    changeNetwork() {
+    async changeNetwork(web3) {
+      // 是正确的网络则不用切换
+      if (await web3.eth.getChainId() === 97) return
+
       window.ethereum &&
       window.ethereum
         .request({
