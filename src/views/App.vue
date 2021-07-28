@@ -165,6 +165,7 @@ export default {
         // 如果存在就清空
         localStorage.removeItem('addr')
         this.$store.dispatch('saveAddress', '')
+        return window.location.reload() // 刷新
       }
       $('#connectModal').modal('show')
     },

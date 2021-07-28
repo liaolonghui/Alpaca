@@ -50,38 +50,38 @@
 
       <!-- pool -->
       <ul class="list-group farm-pool">
-        <div v-for="(staker, index) in stakers" :key="staker.name">
+        <div v-for="(stake, index) in stakes" :key="stake.name">
           <li @click="showOrHidePoolOperate" class="list-group-item farm-pool-item">
             <div class="pair-img">
               <img src="../assets/images/cake.svg" />
             </div>
             <div class="pair-name">
-              {{ staker.name }}
+              {{ stake.name }}
             </div>
             <div class="stake-APY">
               <p>APY</p>
-              <p class="stake-APY-info" :class="[(staker.totalStaked&&staker.userStaked)?'':'default-grey-mask']">
+              <p class="stake-APY-info" :class="[(stake.totalStaked&&stake.userStaked)?'':'default-grey-mask']">
                 <!-- 计算APY -->
                 {{ computedAPY(index) }}
               </p>
             </div>
             <div class="total-staked">
               <p>Total staked</p>
-              <p class="total-staked-num" :class="[staker.totalStaked?'':'default-grey-mask']">
-                <span>{{staker.totalStaked}}</span>
+              <p class="total-staked-num" :class="[stake.totalStaked?'':'default-grey-mask']">
+                <span>{{stake.totalStaked}}</span>
                 CAKE
               </p>
             </div>
             <hr class="hidden-sm hidden-md hidden-lg" style="width: 100%;">
             <div class="token-detail">
               <P class="see-token-info">
-                <a  @click="(e) => e.stopPropagation()" target="_blank" :href="`https://pancakeswap.info/token/${staker.pairAddress}`">
+                <a  @click="(e) => e.stopPropagation()" target="_blank" :href="`https://pancakeswap.info/token/${stake.pairAddress}`">
                   See Token Info
                   <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18 19H6C5.45 19 5 18.55 5 18V6C5 5.45 5.45 5 6 5H11C11.55 5 12 4.55 12 4C12 3.45 11.55 3 11 3H5C3.89 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V13C21 12.45 20.55 12 20 12C19.45 12 19 12.45 19 13V18C19 18.55 18.55 19 18 19ZM14 4C14 4.55 14.45 5 15 5H17.59L8.46 14.13C8.07 14.52 8.07 15.15 8.46 15.54C8.85 15.93 9.48 15.93 9.87 15.54L19 6.41V9C19 9.55 19.45 10 20 10C20.55 10 21 9.55 21 9V4C21 3.45 20.55 3 20 3H15C14.45 3 14 3.45 14 4Z"></path></svg>
                 </a>
               </P>
               <p class="view-contract">
-                <a @click="(e) => e.stopPropagation()" target="_blank" :href="`https://bscscan.com/address/${staker.contractAddress}`">
+                <a @click="(e) => e.stopPropagation()" target="_blank" :href="`https://bscscan.com/address/${stake.contractAddress}`">
                   View Contract
                   <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18 19H6C5.45 19 5 18.55 5 18V6C5 5.45 5.45 5 6 5H11C11.55 5 12 4.55 12 4C12 3.45 11.55 3 11 3H5C3.89 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V13C21 12.45 20.55 12 20 12C19.45 12 19 12.45 19 13V18C19 18.55 18.55 19 18 19ZM14 4C14 4.55 14.45 5 15 5H17.59L8.46 14.13C8.07 14.52 8.07 15.15 8.46 15.54C8.85 15.93 9.48 15.93 9.87 15.54L19 6.41V9C19 9.55 19.45 10 20 10C20.55 10 21 9.55 21 9V4C21 3.45 20.55 3 20 3H15C14.45 3 14 3.45 14 4Z"></path></svg>
                 </a>
@@ -131,11 +131,17 @@
               <h4>I want to deposit</h4>
               <p class="token-info">
                 You have
-                <span class="transaction-balance">{{staker.LPBalance}}</span>
+                <span class="transaction-balance">{{stake.LPBalance}}</span>
                 that can deposit
               </p>
               <div class="farm-input-box">
-                <input v-model="staker.depositAmount" type="number" placeholder="Amount" min="0" :max="staker.LPBalance" />
+                <input
+                  v-model="stake.depositAmount"
+                  type="number"
+                  placeholder="Amount"
+                  min="0"
+                  :max="stake.LPBalance"
+                />
                 <div @click="depositmax(index)" class="btn btn-success btn-sm">MAX</div>
               </div>
               <div @click="transaction(index, 'deposit')" v-if="$store.state.publicAddress" class="btn btn-success btn-group-justified">Deposit</div>
@@ -146,11 +152,17 @@
               <h4>I want to withdraw</h4>
               <p class="token-info">
                 You have
-                <span class="transaction-balance">{{staker.userStaked}}</span>
+                <span class="transaction-balance">{{stake.userStaked}}</span>
                 that can withdraw
               </p>
               <div class="farm-input-box">
-                <input v-model="staker.withdrawAmount" type="number" placeholder="Amount" min="0" :max="staker.userStaked" />
+                <input
+                  v-model="stake.withdrawAmount"
+                  type="number"
+                  placeholder="Amount"
+                  min="0"
+                  :max="stake.userStaked"
+                />
                 <div @click="withdrawmax(index)" class="btn btn-success btn-sm">MAX</div>
               </div>
               <div @click="transaction(index, 'withdraw')" v-if="$store.state.publicAddress" class="btn btn-success btn-group-justified">Withdraw</div>
@@ -159,16 +171,16 @@
             <hr class="hidden-md hidden-lg" />
             <!-- claim -->
             <div class="col-md-3 col-lg-3 operate-item text-center">
-              <h4>Rewards({{ staker.rewardName }}):</h4>
-              <div class="rewards" :class="[staker.claimableReward ? '' : 'default-grey-mask']">
-                {{ staker.claimableReward }}
+              <h4>Rewards({{ stake.rewardName }}):</h4>
+              <div class="rewards" :class="[stake.claimableReward ? '' : 'default-grey-mask']">
+                {{ stake.claimableReward }}
               </div>
               <!-- claim-btn -->
               <div
                 @click="claim(index)"
                 v-if="$store.state.publicAddress"
                 class="btn btn-success btn-group-justified"
-                style="margin-top: 10px;"
+                style="margin-top: 8px;"
               >
                 Claim
               </div>
@@ -176,7 +188,7 @@
                 v-else
                 class="btn btn-default btn-group-justified"
                 disabled
-                style="margin-top: 10px;"
+                style="margin-top: 8px;"
               >
                 Claim
               </div>
@@ -201,7 +213,7 @@
           <div class="modal-body">
             <ul class="list-group">
               <li
-                v-for="(item, index) in stakers"
+                v-for="(item, index) in stakes"
                 :key="item.name"
                 class="list-group-item claim-item"
                 @click="claim(index)"
@@ -282,7 +294,7 @@ export default {
   data () {
     return {
       positionType: 'Active',
-      stakers: [
+      stakes: [
         {
           name: 'BNB-Work-Stake',
           // LP地址
@@ -328,8 +340,8 @@ export default {
     async addToMetamask (event, index) {
       event.stopPropagation()
 
-      const tokenAddress = this.stakers[index].pairAddress
-      const tokenSymbol = this.stakers[index].lpName
+      const tokenAddress = this.stakes[index].pairAddress
+      const tokenSymbol = this.stakes[index].lpName
       const tokenDecimals = 18
       const tokenImage = 'http://placekitten.com/200/300'
 
@@ -360,11 +372,11 @@ export default {
     },
     // deposit
     depositmax (i) {
-      this.stakers[i].depositAmount = this.stakers[i].LPBalance
+      this.stakes[i].depositAmount = this.stakes[i].LPBalance
     },
     // withdrawmax
     withdrawmax (i) {
-      this.stakers[i].withdrawAmount = this.stakers[i].userStaked
+      this.stakes[i].withdrawAmount = this.stakes[i].userStaked
     },
     // showclaimModal
     showclaimModal () {
@@ -382,7 +394,7 @@ export default {
     },
     // transaction
     async transaction (index, transactionType) {
-      const stake = this.stakers[index]
+      const stake = this.stakes[index]
       let amount
       if (transactionType === 'deposit') {
         amount = stake.depositAmount
@@ -398,7 +410,10 @@ export default {
 
         this.operation = transactionType // 把交易类型保存一下
         this.stakeIndex = index // 把交易的stake的index保存一下
+
+        this.operationState = 'wait' // 等待allowance
         this.needApprove = await this.allowance() // 是否需要approve
+        this.operationState = ''
 
       } else {
         alert('Please enter a value greater than 0')
@@ -407,7 +422,7 @@ export default {
     },
     // allowance
     async allowance () {
-      const stake = this.stakers[this.stakeIndex]
+      const stake = this.stakes[this.stakeIndex]
       const address = this.$store.state.publicAddress // 用户地址
       let amount
       if (this.operation === 'deposit') {
@@ -427,7 +442,7 @@ export default {
     },
     // approve
     async approve () {
-      const stake = this.stakers[this.stakeIndex] // stake
+      const stake = this.stakes[this.stakeIndex] // stake
       const address = this.$store.state.publicAddress // 用户地址
       let amount
       if (this.operation === 'deposit') {
@@ -457,7 +472,7 @@ export default {
     // deposit
     async deposit () {
       const i = this.stakeIndex
-      const stake = this.stakers[i]
+      const stake = this.stakes[i]
       const amount = new BigNumber(stake.depositAmount).multipliedBy(1e18)
       const address = this.$store.state.publicAddress // 用户地址
       const depositContract = await getFarmContract.getdepositContract(stake.contractAddress)
@@ -477,13 +492,13 @@ export default {
       })
       // 清空depositAmount
       setTimeout(() => {
-        this.stakers[i].depositAmount = 0
+        this.stakes[i].depositAmount = 0
       },0)
     },
     // withdraw
     async withdraw () {
       const i = this.stakeIndex
-      const stake = this.stakers[i]
+      const stake = this.stakes[i]
       const amount = new BigNumber(stake.withdrawAmount).multipliedBy(1e18)
       const address = this.$store.state.publicAddress // 用户地址
       const withdrawContract = await getFarmContract.getwithdrawContract(stake.contractAddress)
@@ -502,14 +517,14 @@ export default {
       })
       // 清空withdrawAmount
       setTimeout(() => {
-        this.stakers[i].withdrawAmount = 0
+        this.stakes[i].withdrawAmount = 0
       }, 0)
     },
     // claim
     async claim (i) {
-      const staker = this.stakers[i]
+      const stake = this.stakes[i]
       const address = this.$store.state.publicAddress // 用户地址
-      const claimContract = await getFarmContract.getclaimContract(staker.contractAddress)
+      const claimContract = await getFarmContract.getclaimContract(stake.contractAddress)
 
       // claim
       claimContract.methods.claim().send({
@@ -529,36 +544,36 @@ export default {
     async getClaimableReward (i) {
       const address = this.$store.state.publicAddress
       if (!address) return
-      const staker = this.stakers[i]
-      const claimableRewardContract = await getFarmContract.getclaimableRewardContract(staker.contractAddress)
+      const stake = this.stakes[i]
+      const claimableRewardContract = await getFarmContract.getclaimableRewardContract(stake.contractAddress)
       claimableRewardContract.methods.claimableReward(address).call().then((reward) => {
         reward = new BigNumber(reward).div(1e18)
-        this.stakers[i].claimableReward = reward
+        this.stakes[i].claimableReward = reward
       }).catch(console.error)
     },
     // 获取total-staked
     async getTotalStaked (i) {
       const address = this.$store.state.publicAddress
       if (!address) return
-      const contractAddress = this.stakers[i].contractAddress
+      const contractAddress = this.stakes[i].contractAddress
       const totalstakedContract = await getFarmContract.getTotalstakedContract(contractAddress)
       totalstakedContract.methods.total_staked_().call().then((totalStaked) => {
-        this.stakers[i].totalStaked = new BigNumber(totalStaked).div(1e18)
+        this.stakes[i].totalStaked = new BigNumber(totalStaked).div(1e18)
       }).catch(console.error)
     },
     // 获取user-staked
     async getUserStaked (i) {
       const address = this.$store.state.publicAddress
       if (!address) return
-      const contractAddress = this.stakers[i].contractAddress
+      const contractAddress = this.stakes[i].contractAddress
       const userstakedContract = await getFarmContract.getUserstakedContract(contractAddress)
       userstakedContract.methods.user_staked(address).call().then((userStaked) => {
-        this.stakers[i].userStaked = new BigNumber(userStaked).div(1e18)
+        this.stakes[i].userStaked = new BigNumber(userStaked).div(1e18)
       }).catch(console.error)
     },
     // 获取用户钱包LP的余额
     async getLPBalance (i) {
-      const pairAddr = this.stakers[i].pairAddress
+      const pairAddr = this.stakes[i].pairAddress
       const address = this.$store.state.publicAddress
       if (!address) return
       const result = await $.ajax({
@@ -573,13 +588,13 @@ export default {
         }
       })
       if (result.message === 'OK') {
-        this.stakers[i].LPBalance = new BigNumber(result.result).div(1e18)
+        this.stakes[i].LPBalance = new BigNumber(result.result).div(1e18)
       }
     },
     // 计算APY
     computedAPY (i) {
-      const totalStaked = this.stakers[i].totalStaked
-      const userStaked = this.stakers[i].userStaked
+      const totalStaked = this.stakes[i].totalStaked
+      const userStaked = this.stakes[i].userStaked
 
       let dayNum
       if (i === 0) {
@@ -604,14 +619,14 @@ export default {
   computed: {
     // Totalearn总收入
     Totalearn () {
-      return this.stakers.reduce((total, staker) => {
-        return new BigNumber(staker.claimableReward).plus(total)
+      return this.stakes.reduce((total, stake) => {
+        return new BigNumber(stake.claimableReward).plus(total)
       }, 0)
     }
   },
   watch: {
     '$store.state.publicAddress' () {
-      this.stakers.map((staker, i) => {
+      this.stakes.map((stake, i) => {
         // claimableReward
         this.getClaimableReward(i)
         // TotalStaked
@@ -624,7 +639,7 @@ export default {
     }
   },
   created () {
-    this.stakers.map((staker, i) => {
+    this.stakes.map((stake, i) => {
       // claimableReward
       this.getClaimableReward(i)
       // TotalStaked
@@ -637,7 +652,7 @@ export default {
   },
   mounted () {
     this._timer = setInterval(() => {
-      this.stakers.map((staker, i) => {
+      this.stakes.map((stake, i) => {
         // claimableReward
         this.getClaimableReward(i)
         // TotalStaked
@@ -645,7 +660,7 @@ export default {
         // getUserStaked
         this.getUserStaked(i)
         // LP
-        this.getLPBalance(i)
+        // this.getLPBalance(i)
       })
     }, 10000)
   },
