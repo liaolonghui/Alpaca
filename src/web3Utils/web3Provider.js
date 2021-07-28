@@ -4,7 +4,7 @@ async function getProvider() {
     web3Provider = window.ethereum;
     try {
       // 请求用户授权
-      await window.ethereum.enable();
+      await window.ethereum.request({ method: 'eth_requestAccounts' }) // window.ethereum.enable();
     } catch (error) {
       // 用户不授权时
       console.warn("User denied account access")

@@ -597,17 +597,19 @@ export default {
       const userStaked = this.stakes[i].userStaked
 
       let dayNum
+      let lpVal // lp的价值
       if (i === 0) {
         dayNum = 5000 / 20
+        lpVal = 2.25 / 1865
       } else if (i === 1) {
         dayNum = 10000 / 20
+        lpVal = 2 / 360
       }
       const userNum = (userStaked / totalStaked) * dayNum
 
       // 每天挖到的数量 = (我投入的/所有人投入的)*每天能挖到的
       // APY就是：(每天挖到的数量*其价格 / 我投入的代币数量*其价格) * 365
       const workVal = 1 / 2607280
-      const lpVal = 2 / 360
 
       let APY = (userNum * workVal) / (userStaked * lpVal) * 365
 

@@ -186,6 +186,8 @@ export default {
             balance = new BigNumber(balance).div(1e18)
             that.$store.dispatch('savaBalance', balance)
           })
+          // changeNetwork
+          that.changeNetwork()
         }
       })
       $('#connectModal').modal('hide')
@@ -201,11 +203,37 @@ export default {
         balance = new BigNumber(balance).div(1e18)
         that.$store.dispatch('savaBalance', balance)
       })
+      // changeNetwork
+      this.changeNetwork() // 切换网络
     },
     // 显示setDialog
     showSetDialog() {
       window.alert('还没完成')
       // setDialogVisibly
+    },
+    // changeNetwork
+    changeNetwork() {
+      window.ethereum &&
+      window.ethereum
+        .request({
+          method: 'wallet_addEthereumChain',
+          params: [
+            {
+              chainId: '0x61',
+              chainName: 'BSC测试网',
+              nativeCurrency: {
+                name: 'BNB',
+                symbol: 'BNB',
+                decimals: 18,
+              },
+              rpcUrls: ['https://data-seed-prebsc-1-s1.binance.org:8545/'],
+              blockExplorerUrls: ['https://testnet.bscscan.com/'],
+            },
+          ],
+      })
+      .then(() => {
+        console.log('网络切换成功')
+      }).catch(console.error)
     }
   }, 
   created() {
