@@ -72,7 +72,7 @@
                 CAKE
               </p>
             </div>
-            <hr class="hidden-md hidden-lg" style="width: 100%;">
+            <hr class="hidden-sm hidden-md hidden-lg" style="width: 100%;">
             <div class="token-detail">
               <P>token info</P>
               <p class="view-contract">
@@ -272,6 +272,8 @@
 <script>
 import BigNumber from 'bignumber.js'
 import getFarmContract from '../web3Utils/farm.js'
+import Web3 from 'web3'
+import getProvider from '../web3Utils/web3Provider'
 
 export default {
   data () {
@@ -321,6 +323,9 @@ export default {
     async addToMetamask (event, address) {
       event.stopPropagation()
       alert(address)
+      const Provider = await getProvider()
+      const web3 = new Web3(Provider)
+      console.log(web3)
     },
     // deposit
     depositmax (i) {
@@ -375,9 +380,9 @@ export default {
       const address = this.$store.state.publicAddress // 用户地址
       let amount
       if (this.operation === 'deposit') {
-        amount = stake.depositAmount*1e18
+        amount = stake.depositAmount * 1e18
       } else if (this.operation === 'withdraw') {
-        amount = stake.withdrawAmount*1e18
+        amount = stake.withdrawAmount * 1e18
       }
       // Allowance
       const allowanceContract = await getFarmContract.getAllowanceContract(stake.pairAddress)
@@ -556,7 +561,7 @@ export default {
       // 每天挖到的数量 = (我投入的/所有人投入的)*每天能挖到的
       // APY就是：(每天挖到的数量*其价格 / 我投入的代币数量*其价格) * 365
       const workVal = 1 / 2607280
-      const lpVal = 1 / 720
+      const lpVal = 2 / 360
 
       let APY = (userNum * workVal) / (userStaked * lpVal) * 365
 
@@ -658,7 +663,7 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 28px;
+  font-size: 25px;
   font-weight: 700;
   color: #31C77F;
 }
@@ -726,18 +731,20 @@ export default {
   color: #31C77F;
 }
 .farm-pool-item .total-staked-num {
+  width: 170px;
   font-size: 20px;
   font-weight: 600;
   color: #31C77F;
 }
 .farm-pool-item .total-staked-num>span {
   display: inline-block;
-  max-width: 150px;
+  max-width: 105px;
   overflow: hidden;
   white-space: nowrap;
   vertical-align: -7px;
 }
 .farm-pool-item .stake-APY-info {
+  width: 80px;
   font-size: 20px;
   font-weight: 600;
   color: #31C77F;
@@ -889,6 +896,12 @@ export default {
     padding-top: 1px;
     font-weight: 550;
     font-size: 15px;
+  }
+  .farm-pool-item .stake-APY-info {
+    width: auto;
+  }
+  .farm-pool-item .total-staked-num {
+    width: auto;
   }
   .farm-pool-item .total-staked>p:nth-of-type(1) {
     padding-top: 5px;
