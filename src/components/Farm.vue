@@ -274,7 +274,7 @@ import BigNumber from 'bignumber.js'
 import getFarmContract from '../web3Utils/farm.js'
 
 export default {
-  data() {
+  data () {
     return {
       positionType: 'Active',
       stakers: [
@@ -310,42 +310,42 @@ export default {
         }
       ],
       // operation
-      stakeIndex: null,   // 对应stake索引
-      operation: '',      // 交易类型（操作）
+      stakeIndex: null, // 对应stake索引
+      operation: '', // 交易类型（操作）
       operationState: '', // 状态
-      needApprove: true,  // 是否需要approve
+      needApprove: true // 是否需要approve
     }
   },
   methods: {
     // addToMetamask
-    async addToMetamask(event, address) {
+    async addToMetamask (event, address) {
       event.stopPropagation()
       alert(address)
     },
     // deposit
-    depositmax(i) {
+    depositmax (i) {
       this.stakers[i].depositAmount = this.stakers[i].LPBalance
     },
     // withdrawmax
-    withdrawmax(i) {
+    withdrawmax (i) {
       this.stakers[i].withdrawAmount = this.stakers[i].userStaked
     },
     // showclaimModal
-    showclaimModal() {
+    showclaimModal () {
       $('#claimModal').modal('show')
     },
     // showOrHidePoolOperate
-    showOrHidePoolOperate(e) {
+    showOrHidePoolOperate (e) {
       $(e.currentTarget).parent().find('.moreOrLess').toggleClass('icon-expand-more')
       $(e.currentTarget).parent().find('.moreOrLess').toggleClass('icon-expandless')
       $(e.currentTarget).parent().find('.operate-pool').slideToggle()
     },
     // hideTransactionDialog
-    hideTransactionDialog() {
+    hideTransactionDialog () {
       $('#transactionModal').modal('hide')
     },
     // transaction
-    async transaction(index, transactionType) {
+    async transaction (index, transactionType) {
       const stake = this.stakers[index]
       let amount
       if (transactionType === 'deposit') {
@@ -361,7 +361,7 @@ export default {
         $('#transactionModal').modal('show')
 
         this.operation = transactionType // 把交易类型保存一下
-        this.stakeIndex = index          // 把交易的stake的index保存一下
+        this.stakeIndex = index // 把交易的stake的index保存一下
         this.needApprove = await this.allowance() // 是否需要approve
 
       } else {
@@ -370,7 +370,7 @@ export default {
 
     },
     // allowance
-    async allowance() {
+    async allowance () {
       const stake = this.stakers[this.stakeIndex]
       const address = this.$store.state.publicAddress // 用户地址
       let amount
@@ -381,7 +381,7 @@ export default {
       }
       // Allowance
       const allowanceContract = await getFarmContract.getAllowanceContract(stake.pairAddress)
-      let allowance = await allowanceContract.methods.allowance(address, stake.contractAddress).call()
+      const allowance = await allowanceContract.methods.allowance(address, stake.contractAddress).call()
 
       if (allowance >= amount) {
         return false // 不需要approve
@@ -390,26 +390,26 @@ export default {
       }
     },
     // approve
-    async approve() {
+    async approve () {
       const stake = this.stakers[this.stakeIndex] // stake
       const address = this.$store.state.publicAddress // 用户地址
       let amount
       if (this.operation === 'deposit') {
-        amount = new BigNumber(stake.depositAmount+10000).multipliedBy(1e18)
+        amount = new BigNumber(stake.depositAmount + 10000).multipliedBy(1e18)
       } else if (this.operation === 'withdraw') {
-        amount = new BigNumber(stake.withdrawAmount+10000).multipliedBy(1e18)
+        amount = new BigNumber(stake.withdrawAmount + 10000).multipliedBy(1e18)
       }
       const approveContract = await getFarmContract.getapproveContract(stake.pairAddress)
       approveContract.methods.approve(stake.contractAddress, amount).send({
         from: address
       }).then((result) => {
         this.needApprove = false // approve成功，将needApprove置为false
-      }).catch((err) => {
+      }).catch(() => {
         this.needApprove = true
       })
     },
     // confirmTransaction
-    confirmTransaction() {
+    confirmTransaction () {
       this.operationState = 'wait' // 置为等待状态
       // 根据交易类型执行对应方法
       if (this.operation === 'deposit') {
@@ -419,13 +419,13 @@ export default {
       }
     },
     // deposit
-    async deposit() {
+    async deposit () {
       const i = this.stakeIndex
       const stake = this.stakers[i]
       const amount = new BigNumber(stake.depositAmount).multipliedBy(1e18)
       const address = this.$store.state.publicAddress // 用户地址
       const depositContract = await getFarmContract.getdepositContract(stake.contractAddress)
-        
+
       // deposit
       depositContract.methods.deposit(amount).send({
         from: address,
@@ -445,7 +445,7 @@ export default {
       },0)
     },
     // withdraw
-    async withdraw() {
+    async withdraw () {
       const i = this.stakeIndex
       const stake = this.stakers[i]
       const amount = new BigNumber(stake.withdrawAmount).multipliedBy(1e18)
@@ -470,7 +470,7 @@ export default {
       }, 0)
     },
     // claim
-    async claim(i) {
+    async claim (i) {
       const staker = this.stakers[i]
       const address = this.$store.state.publicAddress // 用户地址
       const claimContract = await getFarmContract.getclaimContract(staker.contractAddress)
@@ -488,10 +488,9 @@ export default {
 
       // 若通过模态框claim，要把模态框隐藏起来
       $('#claimModal').modal('hide')
-
     },
     // 获取claimableReward
-    async getClaimableReward(i) {
+    async getClaimableReward (i) {
       const address = this.$store.state.publicAddress
       if (!address) return
       const staker = this.stakers[i]
@@ -502,7 +501,7 @@ export default {
       }).catch(console.error)
     },
     // 获取total-staked
-    async getTotalStaked(i) {
+    async getTotalStaked (i) {
       const address = this.$store.state.publicAddress
       if (!address) return
       const contractAddress = this.stakers[i].contractAddress
@@ -512,7 +511,7 @@ export default {
       }).catch(console.error)
     },
     // 获取user-staked
-    async getUserStaked(i) {
+    async getUserStaked (i) {
       const address = this.$store.state.publicAddress
       if (!address) return
       const contractAddress = this.stakers[i].contractAddress
@@ -522,7 +521,7 @@ export default {
       }).catch(console.error)
     },
     // 获取用户钱包LP的余额
-    async getLPBalance(i) {
+    async getLPBalance (i) {
       const pairAddr = this.stakers[i].pairAddress
       const address = this.$store.state.publicAddress
       if (!address) return
@@ -537,45 +536,45 @@ export default {
           apikey: '44MDXAAGI9M1INP37QDYBZBYBUDQBXAPCD'
         }
       })
-      if (result.message === "OK") {
-        this.stakers[i].LPBalance = web3.fromWei(result.result)
+      if (result.message === 'OK') {
+        this.stakers[i].LPBalance = new BigNumber(result.result).div(1e18)
       }
     },
     // 计算APY
-    computedAPY(i) {
+    computedAPY (i) {
       const totalStaked = this.stakers[i].totalStaked
       const userStaked = this.stakers[i].userStaked
 
       let dayNum
       if (i === 0) {
-        dayNum = 5000/20
+        dayNum = 5000 / 20
       } else if (i === 1) {
-        dayNum = 10000/20
+        dayNum = 10000 / 20
       }
-      const userNum = (userStaked/totalStaked) * dayNum
+      const userNum = (userStaked / totalStaked) * dayNum
 
       // 每天挖到的数量 = (我投入的/所有人投入的)*每天能挖到的
       // APY就是：(每天挖到的数量*其价格 / 我投入的代币数量*其价格) * 365
-      const workVal = 1/2607280
-      const lpVal = 1/720
+      const workVal = 1 / 2607280
+      const lpVal = 1 / 720
 
-      let APY = (userNum*workVal) / (userStaked*lpVal) * 365
+      let APY = (userNum * workVal) / (userStaked * lpVal) * 365
 
       APY = (APY * 100).toFixed(2)
 
-      return APY+'%'
+      return APY + '%'
     }
   },
   computed: {
     // Totalearn总收入
-    Totalearn() {
+    Totalearn () {
       return this.stakers.reduce((total, staker) => {
         return new BigNumber(staker.claimableReward).plus(total)
       }, 0)
-    },
+    }
   },
   watch: {
-    "$store.state.publicAddress"() {
+    '$store.state.publicAddress' () {
       this.stakers.map((staker, i) => {
         // claimableReward
         this.getClaimableReward(i)
@@ -588,7 +587,7 @@ export default {
       })
     }
   },
-  created() {
+  created () {
     this.stakers.map((staker, i) => {
       // claimableReward
       this.getClaimableReward(i)
@@ -600,7 +599,7 @@ export default {
       this.getLPBalance(i)
     })
   },
-  mounted() {
+  mounted () {
     this._timer = setInterval(() => {
       this.stakers.map((staker, i) => {
         // claimableReward
@@ -614,10 +613,10 @@ export default {
       })
     }, 10000)
   },
-  unmounted() {
+  unmounted () {
     clearInterval(this._timer)
     this._timer = null
-  },
+  }
 }
 </script>
 

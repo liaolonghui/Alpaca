@@ -10,12 +10,12 @@ import $ from 'jquery'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap/dist/js/bootstrap.min.js'
 
-$(function () { $("[data-toggle='tooltip']").tooltip(); })
-
 // iconfont
 import './assets/font/iconfont.css'
 
 import store from './store'
+
+$(function () { $("[data-toggle='tooltip']").tooltip() })
 
 Vue.config.productionTip = false
 
