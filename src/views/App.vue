@@ -161,7 +161,9 @@ export default {
     },
     // 用于控制Set模态框的显示隐藏
     showConnectDialog() {
-      if (this.publicAddress) {
+      if (this.$store.state.publicAddress) {
+        // 如果存在就清空
+        localStorage.removeItem('addr')
         this.$store.dispatch('saveAddress', '')
       }
       $('#connectModal').modal('show')

@@ -74,7 +74,12 @@
             </div>
             <hr class="hidden-sm hidden-md hidden-lg" style="width: 100%;">
             <div class="token-detail">
-              <P>token info</P>
+              <P class="see-token-info">
+                <a  @click="(e) => e.stopPropagation()" target="_blank" :href="`https://pancakeswap.info/token/${staker.pairAddress}`">
+                  See Token Info
+                  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18 19H6C5.45 19 5 18.55 5 18V6C5 5.45 5.45 5 6 5H11C11.55 5 12 4.55 12 4C12 3.45 11.55 3 11 3H5C3.89 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V13C21 12.45 20.55 12 20 12C19.45 12 19 12.45 19 13V18C19 18.55 18.55 19 18 19ZM14 4C14 4.55 14.45 5 15 5H17.59L8.46 14.13C8.07 14.52 8.07 15.15 8.46 15.54C8.85 15.93 9.48 15.93 9.87 15.54L19 6.41V9C19 9.55 19.45 10 20 10C20.55 10 21 9.55 21 9V4C21 3.45 20.55 3 20 3H15C14.45 3 14 3.45 14 4Z"></path></svg>
+                </a>
+              </P>
               <p class="view-contract">
                 <a @click="(e) => e.stopPropagation()" target="_blank" :href="`https://bscscan.com/address/${staker.contractAddress}`">
                   View Contract
@@ -281,7 +286,7 @@ export default {
         {
           name: 'BNB-Work-Stake',
           // LP地址
-          plName: 'BNB/work',
+          lpName: 'BNB/work',
           pairAddress: '0x3Fb6a6DcF90C674E255cBdA0d19a28d01b90D819',
           LPBalance: 0,
           contractAddress: '0x7d3341D090250399F45C6B43996A88c42E5B47Fe',
@@ -298,7 +303,7 @@ export default {
         },
         {
           name: 'Stable-Stake',
-          plName: 'BUSD/USDT',
+          lpName: 'BUSD/USDT',
           pairAddress: '0x5126C1B8b4368c6F07292932451230Ba53a6eB7A',
           LPBalance: 0,
           contractAddress: '0x7a199FD711A1723e941Ac49d8C9fF6AB80c70Df8',
@@ -324,7 +329,7 @@ export default {
       event.stopPropagation()
 
       const tokenAddress = this.stakers[index].pairAddress
-      const tokenSymbol = this.stakers[index].plName
+      const tokenSymbol = this.stakers[index].lpName
       const tokenDecimals = 18
       const tokenImage = 'http://placekitten.com/200/300'
 
@@ -781,13 +786,16 @@ export default {
   height: 20px;
   line-height: 20px;
 }
+.farm-pool-item .see-token-info>a,
 .farm-pool-item .view-contract>a {
   color: #31C77F !important;
   font-size: 16px;
 }
+.farm-pool-item .see-token-info>a:hover,
 .farm-pool-item .view-contract>a:hover {
   text-decoration: underline !important;
 }
+.farm-pool-item .see-token-info svg,
 .farm-pool-item .view-contract svg {
   fill: #31C77F;
   width: 16px;

@@ -25,6 +25,7 @@ import SellItem from '../components/Collection/SellItem.vue'
 import Account from '../components/Collection/Account.vue' // Account
 import SellBundle from '../components/Collection/SellBundle.vue' // SellBundle
 
+
 Vue.use(VueRouter)
 
 const routes = [
