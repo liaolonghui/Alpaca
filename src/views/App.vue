@@ -237,7 +237,8 @@ export default {
           ],
       })
       .then(() => {
-        console.log('网络切换成功')
+        // 网络切换成功
+        window.location.reload()
       }).catch(console.error)
     }
   }, 
