@@ -411,6 +411,12 @@ export default {
         this.operation = transactionType // 把交易类型保存一下
         this.stakeIndex = index // 把交易的stake的index保存一下
 
+        if (transactionType === 'withdraw') {
+          // 如果是withdraw交易则不需要approve
+          return this.needApprove = false
+        }
+
+        // deposit交易才需要判断是否需要approve
         this.operationState = 'wait' // 等待allowance
         this.needApprove = await this.allowance() // 是否需要approve
         this.operationState = ''
