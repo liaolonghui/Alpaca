@@ -600,7 +600,7 @@ export default {
         this.stakes[i].LPBalance = new BigNumber(result.result).div(1e18)
       }
     },
-    // 计算APY
+    // 计算APY    用的是固定写死的比例，待修正。
     computedAPY (i) {
       const totalStaked = this.stakes[i].totalStaked
       const userStaked = this.stakes[i].userStaked
