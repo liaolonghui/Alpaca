@@ -241,14 +241,14 @@ export default {
         window.location.reload()
       }).catch(console.error)
     }
-  }, 
-  created() {
+  },
+  mounted() {
+    // 一开始就先查询一次
     const address = this.$store.state.publicAddress
     if (address) {
       this.getBalance(address)
     }
-  },
-  mounted() {
+    // 定时器查询
     this._timer = setInterval(async () => {
       const address = this.$store.state.publicAddress
       if (address) {
