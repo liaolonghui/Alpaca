@@ -62,7 +62,7 @@
               <p>APY</p>
               <p class="stake-APY-info" :class="[(stake.totalStaked&&stake.userStaked)?'':'default-grey-mask']">
                 <!-- 计算APY -->
-                {{ computedAPY(index) }}
+                {{ stake.APY }}
               </p>
             </div>
             <div class="total-staked">
@@ -289,6 +289,7 @@
 <script>
 import BigNumber from 'bignumber.js'
 import getFarmContract from '../web3Utils/farm.js'
+import getPairContract from '../web3Utils/pair.js'
 
 export default {
   data () {
@@ -310,8 +311,12 @@ export default {
           totalStaked: 0,
           // userStaked
           userStaked: 0,
+          // apy
+          APY: '',
           // rewardName
-          rewardName: 'work coin'
+          rewardName: 'work coin',
+          // dayNum 平均一天产生
+          dayNum: 250
         },
         {
           name: 'Stable-Stake',
@@ -324,8 +329,9 @@ export default {
           withdrawAmount: 0,
           totalStaked: 0,
           userStaked: 0,
+          APY: '',
           rewardName: 'work coin',
-          totalcoin: 10000
+          dayNum: 500
         }
       ],
       // operation
@@ -600,33 +606,32 @@ export default {
         this.stakes[i].LPBalance = new BigNumber(result.result).div(1e18)
       }
     },
-    // 计算APY    用的是固定写死的比例，待修正。
-    computedAPY (i) {
-      const totalStaked = this.stakes[i].totalStaked
-      const userStaked = this.stakes[i].userStaked
+    // 计算APY
+    async computedAPY (stake) {
+      const getReservesContract = await getPairContract(stake.pairAddress)
+      const result = await getReservesContract.methods.getReserves().call()
 
-      let dayNum
-      let lpVal // lp的价值
-      if (i === 0) {
-        dayNum = 5000 / 20
-        lpVal = ((1/1)*1 + (1/1566480)*1962100) / 1399.66
-      } else if (i === 1) {
-        dayNum = 10000 / 20
-        lpVal = ((1/363.531)*1 + (1/354.071)*0.971055) / 0.985394
-      }
+      // dayNum是平均一天的产出
+      const { totalStaked, userStaked, dayNum } = stake
+
+      let lpVal = result[1] / result[0]
+
+      const workgetReservesContract = await getPairContract('0x3Fb6a6DcF90C674E255cBdA0d19a28d01b90D819')
+      const workResult = await workgetReservesContract.methods.getReserves().call()
+      const workVal = workResult[1] / workResult[0] / 1e5
+
       const userNum = (userStaked / totalStaked) * dayNum
 
       // 每天挖到的数量 = (我投入的/所有人投入的)*每天能挖到的
       // APY就是：(每天挖到的数量*其价格 / 我投入的代币数量*其价格) * 365
-      const workVal = 1 / 1566480
 
       let APY = (userNum * workVal) / (userStaked * lpVal) * 365
       APY = (APY * 100).toFixed(2)
 
       if (!isNaN(APY)) {
-        return APY + '%'
+        stake.APY = APY + '%'
       } else {
-        return ''
+        stake.APY = ''
       }
     }
   },
@@ -649,6 +654,8 @@ export default {
         this.getUserStaked(i)
         // LP
         this.getLPBalance(i)
+        // 计算APY
+        this.computedAPY(stake)
       })
     }
   },
@@ -663,6 +670,8 @@ export default {
       this.getUserStaked(i)
       // LP
       this.getLPBalance(i)
+      // 计算APY
+      this.computedAPY(stake)
     })
     // 定时器查询10s
     this._timer = setInterval(() => {
@@ -671,6 +680,8 @@ export default {
         this.getClaimableReward(i)
         // TotalStaked
         this.getTotalStaked(i)
+        // 计算APY
+        this.computedAPY(stake)
       })
     }, 10000)
   },
