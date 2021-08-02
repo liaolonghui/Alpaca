@@ -645,6 +645,8 @@ export default {
   },
   watch: {
     '$store.state.publicAddress' () {
+      const address = this.$store.state.publicAddress
+      if (!address) return
       this.stakes.map((stake, i) => {
         // claimableReward
         this.getClaimableReward(i)
@@ -662,6 +664,8 @@ export default {
   mounted () {
     // 一开始先查询一次
     this.stakes.map((stake, i) => {
+      const address = this.$store.state.publicAddress
+      if (!address) return
       // claimableReward
       this.getClaimableReward(i)
       // TotalStaked
@@ -676,6 +680,8 @@ export default {
     // 定时器查询10s
     this._timer = setInterval(() => {
       this.stakes.map((stake, i) => {
+        const address = this.$store.state.publicAddress
+        if (!address) return
         // claimableReward
         this.getClaimableReward(i)
         // TotalStaked
