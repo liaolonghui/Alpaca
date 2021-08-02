@@ -35,7 +35,7 @@
         <router-link to="/lend" tag="li" class="active">Lend</router-link>
         <router-link to="/grazing-range" tag="li">Graze</router-link>
         <router-link to="/farm" tag="li">Farm</router-link>
-        <router-link to="/stake" tag="li">Stake</router-link>
+        <router-link to="/trade" tag="li">Trade</router-link>
         <router-link to="/collection" tag="li">Collection</router-link>
       </ul>
     </header>
@@ -47,7 +47,7 @@
           <router-link to="/lend" tag="li" class="active">Lend</router-link>
           <router-link to="/grazing-range" tag="li">Graze</router-link>
           <router-link to="/farm" tag="li">Farm</router-link>
-          <router-link to="/stake" tag="li">Stake</router-link>
+          <router-link to="/trade" tag="li">Trade</router-link>
           <router-link to="/collection" tag="li">Collection</router-link>
         </ul>
         <div class="other-nav">

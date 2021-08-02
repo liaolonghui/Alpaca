@@ -7,7 +7,7 @@ import Documentation from '../views/Documentation.vue'
 import Lend from '../components/Lend.vue'
 import Graze from '../components/Graze.vue'
 import Farm from '../components/Farm.vue'
-import Stake from '../components/Stake.vue'
+import Trade from '../components/Trade.vue'
 import Collection from '../components/Collection.vue'
 // deposit和withdraw（lend的子功能）
 import Deposit from '../components/Lend/Deposit.vue'
@@ -42,7 +42,7 @@ const routes = [
       { path: '/lend', component: Lend },
       { path: '/grazing-range', component: Graze },
       { path: '/farm', component: Farm },
-      { path: '/stake', component: Stake },
+      { path: '/trade', component: Trade },
       { path: '/collection', component: Collection },
       // deposit和withdraw（lend的子功能）
       { path: '/deposit', component: Deposit},

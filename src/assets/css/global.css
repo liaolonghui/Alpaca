@@ -8,6 +8,7 @@ ul,
 ol,
 li {
   list-style-type: none;
+  user-select: none;
 }
 
 #app a {
