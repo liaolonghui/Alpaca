@@ -26,6 +26,16 @@ img {
   border-style: none;
 }
 
+/* 去除number类型input的上下箭头 */
+input[type=number] {  
+  -moz-appearance:textfield;  
+}  
+input[type=number]::-webkit-inner-spin-button,  
+input[type=number]::-webkit-outer-spin-button {  
+  -webkit-appearance: none;  
+  margin: 0;  
+} 
+
 .clearfix::after {
   display: block;
   content: '';

@@ -106,7 +106,23 @@
           </div>
           <div class="liquidity-content">
             <h4>Your Liquidity</h4>
-            <p>xxxxx</p>
+            <!-- liquidity -->
+            <div class="your-liquidity">
+              <div v-for="item in liquidity" :key="item.name" class="liquidity-item">
+                <div class="liquidity-info">
+                  <div class="liquidity-img">
+                    <img :src="item.icon1" />
+                    <img :src="item.icon2" />
+                  </div>
+                  <div class="liquidity-name">
+                    {{ item.name }}
+                  </div>
+                </div>
+                <div class="liquidity-i">
+                  <i class="iconfont icon-expand-more"></i>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         <!-- add liquidty -->
@@ -121,64 +137,65 @@
           </div>
           <div class="add-liquidity-content">
             <!-- input1 -->
+            <!-- 类名就不改了，和swap共用一部分样式 -->
             <div class="swap-from">
               <div class="from-header">
-                <div>From</div>
-                <div>Balance: {{ from.balance || '-' }}</div>
+                <div>Input</div>
+                <div>Balance: {{ input1.balance || '-' }}</div>
               </div>
               <div class="from-input">
                 <input
-                  v-model="from.amount"
+                  v-model="input1.amount"
                   type="number"
                   placeholder="0.0"
                   min="0"
-                  :max="from.balance"
+                  :max="input1.balance"
                 />
                 <span
-                  @click="getMax('from')"
-                  v-show="from.amount !== from.balance"
+                  @click="getMax('input1')"
+                  v-show="input1.amount !== input1.balance"
                   class="from-max"
                 >Max</span>
                 <!-- token -->
-                <span @click="showSelectTokenModal('from')" class="token-info">
-                  <img class="token-icon" v-if="from.icon" :src="from.icon" alt="token icon" width="24" height="24">
-                  {{ from.name || 'Select a currency' }}
+                <span @click="showSelectTokenModal('input1')" class="token-info">
+                  <img class="token-icon" v-if="input1.icon" :src="input1.icon" alt="token icon" width="24" height="24">
+                  {{ input1.name || 'Select a currency' }}
                   <i class="iconfont icon-expand-more"></i>
                 </span>
               </div>
             </div>
             <div class="icon-box">
-              <i class="iconfont icon-bottom"></i>
+              <i class="iconfont icon-add"></i>
             </div>
             <!-- input2 -->
             <div class="swap-to">
               <div class="to-header">
-                <div>To</div>
-                <div>Balance: {{ to.balance || '-' }}</div>
+                <div>Input</div>
+                <div>Balance: {{ input2.balance || '-' }}</div>
               </div>
               <div class="to-input">
                 <input
-                  v-model="to.amount"
+                  v-model="input2.amount"
                   type="number"
                   placeholder="0.0"
                   min="0"
-                  :max="to.balance"
+                  :max="input2.balance"
                 />
                 <span
-                  @click="getMax('to')"
-                  v-show="to.amount !== to.balance"
+                  @click="getMax('input2')"
+                  v-show="input2.amount !== input2.balance"
                   class="to-max"
                 >Max</span>
                 <!-- token -->
-                <span @click="showSelectTokenModal('to')" class="token-info">
-                  <img class="token-icon" v-if="to.icon" :src="to.icon" alt="token icon" width="24" height="24">
-                  {{ to.name || 'Select a currency' }}
+                <span @click="showSelectTokenModal('input2')" class="token-info">
+                  <img class="token-icon" v-if="input2.icon" :src="input2.icon" alt="token icon" width="24" height="24">
+                  {{ input2.name || 'Select a currency' }}
                   <i class="iconfont icon-expand-more"></i>
                 </span>
               </div>
             </div>
             <!-- pair-button -->
-            <div v-if="from.amount>0 && to.amount>0" class="swap-button btn btn-success btn-block">
+            <div v-if="input1.amount>0 && input2.amount>0" class="swap-button btn btn-success btn-block">
               Supply
             </div>
             <div v-else class="swap-button btn btn-default btn-blockbtn-default btn-block" disabled>
@@ -192,7 +209,7 @@
     <div class="modal fade" id="tokenModal" tabindex="-1" role="dialog" aria-labelledby="tokenModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header">
+                <div class="modal-header text-center">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                     <h4 class="modal-title" id="myModalLabel">Select a token</h4>
                 </div>
@@ -225,37 +242,50 @@
 <script>
 export default {
   data() {
-    return {
-      tradeType: 'swap',
-      tokens: [
-        {
-          name: 'BNB',
-          icon: require('../assets/images/bnb.png'),
-          balance: 1
-        },
-        {
-          name: 'work',
-          icon: require('../assets/images/cake.svg'),
-          balance: 233
-        },
-        {
-          name: 'cake',
-          icon: require('../assets/images/cake.svg'),
-          balance: 120000
-        },
-        {
-          name: 'not-cake',
-          icon: require('../assets/images/cake.svg'),
-          balance: 233333
-        }
-      ],
-      from: {
+    const tokens = [
+      {
         name: 'BNB',
         icon: require('../assets/images/bnb.png'),
         balance: 1
       },
+      {
+        name: 'work',
+        icon: require('../assets/images/cake.svg'),
+        balance: 233
+      },
+      {
+        name: 'cake',
+        icon: require('../assets/images/cake.svg'),
+        balance: 120000
+      },
+      {
+        name: 'not-cake',
+        icon: require('../assets/images/cake.svg'),
+        balance: 233333
+      }
+    ]
+
+    return {
+      tradeType: 'swap',
+      tokens: tokens,
+      from: {...tokens[0]}, // from默认是BNB
       to: {},
-      tokenTo: ''
+      tokenTo: '', // 选中的token赋值给谁
+      input1: {...tokens[0]}, // input1默认也是BNB
+      input2: {},
+      // liquidity
+      liquidity: [
+        {
+          name: 'BNB/work',
+          icon1: require('../assets/images/bnb.png'),
+          icon2: require('../assets/images/cake.svg')
+        },
+        {
+          name: 'BUSD/USDT',
+          icon1: require('../assets/images/cake.svg'),
+          icon2: require('../assets/images/cake.svg')
+        }
+      ]
     }
   },
   methods: {
@@ -270,12 +300,16 @@ export default {
     },
     // selectToken
     selectToken (index) {
-      const token = this.tokens[index]
+      const token = {...this.tokens[index]}
       // 将选中的token赋值给对应的对象
       // 如果要赋值的对象 对应的另一个对象 已经选中一样的则不能选
       if (this.tokenTo === 'to' && this.from.name === token.name) {
         return $('#tokenModal').modal('hide')
       } else if (this.tokenTo === 'from' && this.to.name === token.name) {
+        return $('#tokenModal').modal('hide')
+      } else if (this.tokenTo === 'input1' && this.input2.name === token.name) {
+        return $('#tokenModal').modal('hide')
+      } else if (this.tokenTo === 'input2' && this.input1.name === token.name) {
         return $('#tokenModal').modal('hide')
       }
       this[this.tokenTo] = token
@@ -450,13 +484,51 @@ export default {
 }
 .liquidity .add-liquidity-btn {
   padding: 10px 15px;
-  margin-bottom: 15px;
+  margin: 10px 0 20px 0;
   font-size: 16px;
   font-weight: 600;
   border-radius: 15px;
 }
 .liquidity-content {
+  padding-top: 20px;
+}
+.liquidity-content h4 {
+  margin: 5px 0;
+  font-weight: 600;
+  color: #452a7a;
+}
+.your-liquidity {
   padding-top: 10px;
+}
+.your-liquidity .liquidity-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 15px;
+  margin-top: 10px;
+  border: 1px solid transparent;
+  border-radius: 15px;
+  cursor: pointer;
+}
+.your-liquidity .liquidity-item:hover {
+  border-color: #ccc;
+}
+.your-liquidity .liquidity-img>img {
+  width: 24px;
+  height: 24px;
+}
+.liquidity-item .liquidity-name {
+  display: inline-block;
+  margin-left: 15px;
+}
+.liquidity-item .liquidity-info {
+  line-height: 35px;
+}
+.liquidity-item .liquidity-i>i {
+  font-size: 25px;
+}
+
+.liquidity-item .liquidity-img {
+  display: inline-block;
 }
 
 /* add-liquidity */
@@ -474,7 +546,7 @@ export default {
   float: left;
   padding: 5px;
   font-weight: 700;
-  color: #31c77f;
+  color: #8f80ba;
   border-radius: 50%;
   background-color: #f4f4f4;
   cursor: pointer;
@@ -509,6 +581,7 @@ export default {
   margin: 10px auto;
   line-height: 30px;
   text-align: center;
+  font-weight: 600;
   background-color: #f4f4f4;
   border-radius: 50%;
 }
@@ -527,16 +600,17 @@ export default {
   padding: 5px 15px;
   font-size: 16px;
   font-weight: 550;
-  color: #31c77f;
+  color: #8f80ba;
 }
 #tokenModal .token-item {
   display: flex;
   justify-content: space-between;
-  margin-top: 10px;
+  margin-top: 8px;
   cursor: pointer;
 }
 #tokenModal .token-item:hover {
-  border-color: #31c77f;
+  color: #8f80ba;
+  border-color: #8f80ba;
 }
 #tokenModal .token-item img {
   width: 24px;
@@ -551,6 +625,24 @@ export default {
   }
   .swap-content input {
     width: 40%;
+  }
+  .from-max, .to-max {
+    margin-left: 0px;
+  }
+}
+/* 补充，防止在特小机型上出bug */
+@media screen and (max-width: 350px){
+  .trade div.swap, .trade div.liquidity, .trade div.add-liquidity {
+    width: 320px;
+  }
+  .from-header, .to-header {
+    padding: 8px 15px;
+  }
+  .from-input, .to-input {
+    padding: 15px;
+  }
+  .swap-content input {
+    width: 38%;
   }
 }
 </style>
