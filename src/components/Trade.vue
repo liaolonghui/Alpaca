@@ -644,5 +644,8 @@ export default {
   .swap-content input {
     width: 38%;
   }
+  .add-liquidity-content .token-info {
+    padding: 3px 5px;
+  }
 }
 </style>

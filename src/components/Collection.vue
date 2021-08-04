@@ -255,8 +255,12 @@ export default {
 <style>
 #collection-box {
   padding: 10px;
-  background-color: #fff;
   border-radius: 10px;
+}
+#collection-box .collection-container {
+  background-color: #fff;
+  padding: 10px;
+  border-radius: 20px;
 }
 .nft .connect {
   padding: 20px;
