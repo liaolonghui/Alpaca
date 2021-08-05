@@ -207,34 +207,38 @@
     </div>
     <!-- select token -->
     <div class="modal fade" id="tokenModal" tabindex="-1" role="dialog" aria-labelledby="tokenModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header text-center">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    <h4 class="modal-title" id="myModalLabel">Select a token</h4>
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header text-center">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title" id="myModalLabel">Select a token</h4>
+          </div>
+          <div class="modal-body">
+            <!-- search token -->
+            <input v-model="searchToken" type="text" id="search-token" placeholder="Search name or paste address" />
+            <!-- tokens -->
+            <div class="tokens-title">
+              <div>name</div>
+              <div>balance</div>
+            </div>
+            <!-- searchTokenResult -->
+            <ul class="list-group">
+              <li @click="selectToken(i)" v-for="(token, i) in searchTokenResult" :key="token.name" class="list-group-item token-item">
+                <div class="token-info">
+                  <img :src="token.icon" alt="">
+                  <span>{{ token.name }}</span>
                 </div>
-                <div class="modal-body">
-                  <div class="tokens-title">
-                    <div>name</div>
-                    <div>balance</div>
-                  </div>
-                  <ul class="list-group">
-                      <li @click="selectToken(i)" v-for="(token, i) in tokens" :key="token.name" class="list-group-item token-item">
-                        <div class="token-info">
-                          <img :src="token.icon" alt="">
-                          <span>{{ token.name }}</span>
-                        </div>
-                        <div>
-                          {{ token.balance }}
-                        </div>
-                      </li>
-                  </ul>
+                <div>
+                  {{ token.balance }}
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                </div>
-            </div><!-- /.modal-content -->
-        </div><!-- /.modal -->
+              </li>
+            </ul>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal -->
     </div>
   </div>
 </template>
@@ -246,20 +250,24 @@ export default {
       {
         name: 'BNB',
         icon: require('../assets/images/bnb.png'),
+        addr: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',
         balance: 1
       },
       {
-        name: 'work',
-        icon: require('../assets/images/cake.svg'),
+        name: 'USDT',
+        addr: '0x7ef95a0FEE0Dd31b22626fA2e10Ee6A223F8a684',
+        icon: require('../assets/images/USDT.png'),
         balance: 233
       },
       {
-        name: 'cake',
-        icon: require('../assets/images/cake.svg'),
+        name: 'BUSD',
+        addr: '0x78867BbEeF44f2326bF8DDd1941a4439382EF2A7',
+        icon: require('../assets/images/BUSD.png'),
         balance: 120000
       },
       {
-        name: 'not-cake',
+        name: 'CAKE',
+        addr: '0xF9f93cF501BFaDB6494589Cb4b4C15dE49E85D0e',
         icon: require('../assets/images/cake.svg'),
         balance: 233333
       }
@@ -268,6 +276,8 @@ export default {
     return {
       tradeType: 'swap',
       tokens: tokens,
+      searchToken: '', // 用于搜索token
+      searchTokenResult: tokens, // 搜索token的结果, 初始化和tokens相同
       from: {...tokens[0]}, // from默认是BNB
       to: {},
       tokenTo: '', // 选中的token赋值给谁
@@ -285,6 +295,15 @@ export default {
           icon1: require('../assets/images/cake.svg'),
           icon2: require('../assets/images/cake.svg')
         }
+      ],
+      // otherTokens 其他token(可供用户自己添加)
+      otherTokens: [
+        {
+          name: 'work',
+          addr: '0xDE259d3beCAdc21C1D8d33442aa68f43AB7327f5',
+          icon: require('../assets/images/defaultTokenIcon.svg'),
+          balance: 0
+        }
       ]
     }
   },
@@ -300,7 +319,8 @@ export default {
     },
     // selectToken
     selectToken (index) {
-      const token = {...this.tokens[index]}
+      // 根据index从searchTokenResult获取到选中的token
+      const token = {...this.searchTokenResult[index]}
       // 将选中的token赋值给对应的对象
       // 如果要赋值的对象 对应的另一个对象 已经选中一样的则不能选
       if (this.tokenTo === 'to' && this.from.name === token.name) {
@@ -316,6 +336,28 @@ export default {
       $('#tokenModal').modal('hide')
     }
   },
+  watch: {
+    searchToken(newVal, oldVal) {
+      if (newVal !== oldVal) {
+        if (newVal.startsWith('0x')) {
+          // 若是以0x开头则是地址
+          // 如果是填地址，则要把otherTokens里的也遍历一遍
+          const tokenResult = this.tokens.filter(token => {
+            return token.addr.toLowerCase() == newVal.trim().toLowerCase()
+          })
+          const otherT = this.otherTokens.filter(token => {
+            return token.addr.toLowerCase() == newVal.trim().toLowerCase()
+          })
+          this.searchTokenResult = tokenResult.concat(otherT)
+        } else {
+          // 不以0x开头则认为是name
+          this.searchTokenResult = this.tokens.filter(token => {
+            return (token.name.indexOf(newVal.trim()) !== -1)
+          })
+        }
+      }
+    }
+  }
 }
 </script>
 
@@ -602,15 +644,19 @@ export default {
   font-weight: 550;
   color: #8f80ba;
 }
+#tokenModal .list-group {
+  height: 220px;
+  overflow: auto;
+}
 #tokenModal .token-item {
   display: flex;
   justify-content: space-between;
-  margin-top: 8px;
+  margin-top: 10px;
+  border: none;
   cursor: pointer;
 }
 #tokenModal .token-item:hover {
   color: #8f80ba;
-  border-color: #8f80ba;
 }
 #tokenModal .token-item img {
   width: 24px;
@@ -619,6 +665,20 @@ export default {
 #tokenModal .token-info>span {
   margin-left: 8px;
 }
+/* search-token */
+#search-token {
+  width: 100%;
+  margin: 15px 0;
+  padding: 15px 10px;
+  font-size: 18px;
+  outline: none;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+}
+#search-token:focus {
+  border-color: #31c77f;
+}
+
 @media screen and (max-width: 768px) {
   #tokenModal .modal-dialog {
     width: 90%;
