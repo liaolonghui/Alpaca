@@ -34,7 +34,12 @@
             <div class="swap-from">
               <div class="from-header">
                 <div>From</div>
-                <div>Balance: {{ from.balance || '-' }}</div>
+                <div>
+                  Balance:
+                  <span class="trade-token-balance">
+                    {{ from.balance >= 0 ? from.balance : '-' }}
+                  </span>
+                </div>
               </div>
               <div class="from-input">
                 <input
@@ -64,7 +69,12 @@
             <div class="swap-to">
               <div class="to-header">
                 <div>To</div>
-                <div>Balance: {{ to.balance || '-' }}</div>
+                <div>
+                  Balance:
+                  <span class="trade-token-balance">
+                    {{ to.balance >= 0 ? to.balance : '-' }}
+                  </span>
+                </div>
               </div>
               <div class="to-input">
                 <input
@@ -83,7 +93,7 @@
               </div>
             </div>
             <!-- swap-button -->
-            <div v-if="from.amount>0 && to.amount>0" class="swap-button btn btn-success btn-block">
+            <div @click="swap" v-if="from.amount>0 && to.amount>0" class="swap-button btn btn-success btn-block">
               Swap
             </div>
             <div v-else class="swap-button btn btn-default btn-blockbtn-default btn-block" disabled>
@@ -141,7 +151,12 @@
             <div class="swap-from">
               <div class="from-header">
                 <div>Input</div>
-                <div>Balance: {{ input1.balance || '-' }}</div>
+                <div>
+                  Balance:
+                  <span class="trade-token-balance">
+                    {{ input1.balance >= 0 ? input1.balance : '-' }}
+                  </span>
+                </div>
               </div>
               <div class="from-input">
                 <input
@@ -171,7 +186,12 @@
             <div class="swap-to">
               <div class="to-header">
                 <div>Input</div>
-                <div>Balance: {{ input2.balance || '-' }}</div>
+                <div>
+                  Balance:
+                  <span class="trade-token-balance">
+                    {{ input2.balance >= 0 ? input2.balance : '-' }}
+                  </span>
+                </div>
               </div>
               <div class="to-input">
                 <input
@@ -228,14 +248,11 @@
                   <img :src="token.icon" alt="">
                   <span>{{ token.name }}</span>
                 </div>
-                <div>
-                  {{ token.balance }}
+                <div class="trade-token-balance">
+                  {{ token.balance>=0 ? token.balance : '-' }}
                 </div>
               </li>
             </ul>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
           </div>
         </div><!-- /.modal-content -->
       </div><!-- /.modal -->
@@ -244,32 +261,46 @@
 </template>
 
 <script>
+import BigNumber from 'bignumber.js'
+import { getRouterContract } from '../web3Utils/trade.js'
+
 export default {
   data() {
     const tokens = [
       {
         name: 'BNB',
         icon: require('../assets/images/bnb.png'),
-        addr: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',
-        balance: 1
+        addr: ''
       },
       {
         name: 'USDT',
         addr: '0x7ef95a0FEE0Dd31b22626fA2e10Ee6A223F8a684',
-        icon: require('../assets/images/USDT.png'),
-        balance: 233
+        icon: require('../assets/images/USDT.png')
       },
       {
         name: 'BUSD',
         addr: '0x78867BbEeF44f2326bF8DDd1941a4439382EF2A7',
-        icon: require('../assets/images/BUSD.png'),
-        balance: 120000
+        icon: require('../assets/images/BUSD.png')
+      },
+      {
+        name: 'ETH',
+        addr: '0x8BaBbB98678facC7342735486C851ABD7A0d17Ca',
+        icon: require('../assets/images/eth.png')
       },
       {
         name: 'CAKE',
         addr: '0xF9f93cF501BFaDB6494589Cb4b4C15dE49E85D0e',
-        icon: require('../assets/images/cake.svg'),
-        balance: 233333
+        icon: require('../assets/images/cake.svg')
+      },
+      {
+        name: 'DAI',
+        addr: '0x8a9424745056Eb399FD19a0EC26A14316684e274',
+        icon: require('../assets/images/DAI.png')
+      },
+      {
+        name: 'WBNB',
+        addr: '0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd',
+        icon: require('../assets/images/bnb.png')
       }
     ]
 
@@ -301,13 +332,16 @@ export default {
         {
           name: 'work',
           addr: '0xDE259d3beCAdc21C1D8d33442aa68f43AB7327f5',
-          icon: require('../assets/images/defaultTokenIcon.svg'),
-          balance: 0
+          icon: require('../assets/images/defaultTokenIcon.svg')
         }
       ]
     }
   },
   methods: {
+    // swap
+    swap() {
+      console.log(this.routerContract.methods)
+    },
     // getMax
     getMax (type) {
       this.$set(this[type], 'amount', this[type].balance)
@@ -315,7 +349,8 @@ export default {
     // showSelectTokenModal
     showSelectTokenModal (type) {
       this.tokenTo = type
-      $('#tokenModal').modal('show') 
+      this.searchToken = '' // 每次打开时将用于搜索的字符串置为空串
+      $('#tokenModal').modal('show')
     },
     // selectToken
     selectToken (index) {
@@ -334,9 +369,81 @@ export default {
       }
       this[this.tokenTo] = token
       $('#tokenModal').modal('hide')
+    },
+    // getRouterContract
+    async getMyRouterContract () {
+      this.routerContract = await getRouterContract()
+    },
+    // 获取用户钱包某个币的余额
+    async getTokenBalance (target, i) {
+      const tokenAddr = target[i].addr
+      const address = this.$store.state.publicAddress
+      if (!address) return
+      try {
+        const result = await $.ajax({
+          url: 'https://api-testnet.bscscan.com/api',
+          data: {
+            module: 'account',
+            action: tokenAddr ? 'tokenbalance' : 'balance',
+            contractaddress: tokenAddr,
+            address: address,
+            tag: 'latest',
+            apikey: '44MDXAAGI9M1INP37QDYBZBYBUDQBXAPCD'
+          }
+        })
+        if (result.message === 'OK') {
+          const balance = result.result / 1e18
+          this.$set(target[i], 'balance', balance)
+          // i为0时 获取到数据后给from和input1也赋值上
+          if (i === 0 && target === this.tokens) {
+            this.from.balance = balance
+            this.input1.balance = balance
+          }
+        } else {
+          this.getTokenBalance(target, i)
+        }
+      } catch (error) {
+        this.getTokenBalance(target, i)
+      }
     }
   },
+  created() {
+    this.getMyRouterContract()
+  },
+  mounted() {
+    this.tokens.map((token, i) => {
+      this.getTokenBalance(this.tokens, i)
+    })
+    this.otherTokens.map((token, i) => {
+      this.getTokenBalance(this.otherTokens, i)
+    })
+  },
   watch: {
+    // swap的 from和to 的amount
+    "from.amount" (newVal, oldVal) {
+      if (newVal !== oldVal) {
+        console.log(this.routerContract.methods)
+      }
+    },
+    "to.amount" (newVal, oldVal) {
+      if (newVal !== oldVal) {
+        
+      }
+    },
+    // address
+    "$store.state.publicAddress"(newAddr, oldAddr) {
+      if (!newAddr) return 
+      if (newAddr !== oldAddr) {
+        this.getMyRouterContract()
+        this.tokens.map((token, i) => {
+          this.getTokenBalance(this.tokens, i)
+        })
+        this.otherTokens.map((token, i) => {
+          this.getTokenBalance(this.otherTokens, i)
+        })
+      }
+    },
+    // searchToken
     searchToken(newVal, oldVal) {
       if (newVal !== oldVal) {
         if (newVal.startsWith('0x')) {
@@ -459,7 +566,8 @@ export default {
 }
 .swap-content input {
   width: 50%;
-  font-size: 18px;
+  font-size: 15px;
+  font-weight: 540;
   border: none;
   outline: none;
   background-color: rgb(238, 234, 244);
@@ -481,6 +589,7 @@ export default {
 .swap-content img.token-icon {
   width: 24px;
   height: 24px;
+  vertical-align: -7px;
 }
 .swap-content .icon-box {
   width: 30px;
@@ -496,6 +605,7 @@ export default {
 }
 .swap-from,
 .swap-to {
+  padding: 10PX 0;
   background-color: rgb(238, 234, 244);
   border-radius: 15px;
 }
@@ -642,10 +752,10 @@ export default {
   padding: 5px 15px;
   font-size: 16px;
   font-weight: 550;
-  color: #8f80ba;
+  color: #31c77f;
 }
 #tokenModal .list-group {
-  height: 220px;
+  height: 45vh;
   overflow: auto;
 }
 #tokenModal .token-item {
@@ -656,14 +766,24 @@ export default {
   cursor: pointer;
 }
 #tokenModal .token-item:hover {
-  color: #8f80ba;
+  color: #31c77f;
 }
 #tokenModal .token-item img {
   width: 24px;
   height: 24px;
+  vertical-align: -7px;
 }
 #tokenModal .token-info>span {
   margin-left: 8px;
+}
+.trade-token-balance {
+  display: inline-block;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: right;
+  vertical-align: -5px;
 }
 /* search-token */
 #search-token {
@@ -681,7 +801,7 @@ export default {
 
 @media screen and (max-width: 768px) {
   #tokenModal .modal-dialog {
-    width: 90%;
+    width: 95%;
   }
   .swap-content input {
     width: 40%;
