@@ -62,7 +62,7 @@
                 </span>
               </div>
             </div>
-            <div class="icon-box">
+            <div @click="exchangeFromAndTo" class="icon-box">
               <i class="iconfont icon-bottom"></i>
             </div>
             <!-- to -->
@@ -214,8 +214,15 @@
                 </span>
               </div>
             </div>
+            <!-- approve input1与input2 -->
+            <div class="swap-button btn btn-success btn-block">
+              Approve {{input1.name}}
+            </div>
+            <div class="swap-button btn btn-success btn-block">
+              Approve {{input2.name}}
+            </div>
             <!-- pair-button -->
-            <div v-if="input1.amount>0 && input2.amount>0" class="swap-button btn btn-success btn-block">
+            <div @click="addLiquidity" v-if="input1.amount>0 && input2.amount>0" class="swap-button btn btn-success btn-block">
               Supply
             </div>
             <div v-else class="swap-button btn btn-default btn-blockbtn-default btn-block" disabled>
@@ -262,7 +269,8 @@
 
 <script>
 import BigNumber from 'bignumber.js'
-import { getRouterContract } from '../web3Utils/trade.js'
+import { getRouterContract, getFactoryContract } from '../web3Utils/trade.js'
+import getPairContract from '../web3Utils/pair.js'
 
 export default {
   data() {
@@ -338,6 +346,24 @@ export default {
     }
   },
   methods: {
+    // addliquidity
+    addLiquidity() {
+      const address = this.$store.state.publicAddress
+      const addr1 = this.input1.addr
+      const addr2 = this.input2.addr
+      const amount1 = new BigNumber(this.input1.amount || 0).multipliedBy(1e18)
+      const amount2 = new BigNumber(this.input2.amount || 0).multipliedBy(1e18)
+      const deadline = Math.floor((new Date).getTime()/1000) + 100
+      // 都有地址
+      if (addr1 && addr2) {
+        this.routerContract.methods.addLiquidity(addr1, addr2, amount1, amount2, amount1.multipliedBy(0.992), amount2.multipliedBy(0.992), address, deadline).send({
+          from: address,
+          gas: 100000
+        }).then(result => {
+          console.log(result)
+        })
+      }
+    },
     // swap
     swap() {
       console.log(this.routerContract.methods)
@@ -345,6 +371,12 @@ export default {
     // getMax
     getMax (type) {
       this.$set(this[type], 'amount', this[type].balance)
+    },
+    // 交换 交易的代币 from和to
+    exchangeFromAndTo() {
+      const token = this.from
+      this.from = this.to
+      this.to = token
     },
     // showSelectTokenModal
     showSelectTokenModal (type) {
@@ -355,17 +387,21 @@ export default {
     // selectToken
     selectToken (index) {
       // 根据index从searchTokenResult获取到选中的token
-      const token = {...this.searchTokenResult[index]}
+      let token = {...this.searchTokenResult[index]}
       // 将选中的token赋值给对应的对象
-      // 如果要赋值的对象 对应的另一个对象 已经选中一样的则不能选
+      // 如果要赋值的对象 对应的另一个对象 已经选中一样的则 互相交换
       if (this.tokenTo === 'to' && this.from.name === token.name) {
-        return $('#tokenModal').modal('hide')
+        token = this.from // 让token等于from，以此实现交换
+        this.from = this[this.tokenTo]
       } else if (this.tokenTo === 'from' && this.to.name === token.name) {
-        return $('#tokenModal').modal('hide')
+        token = this.to
+        this.to = this[this.tokenTo]
       } else if (this.tokenTo === 'input1' && this.input2.name === token.name) {
-        return $('#tokenModal').modal('hide')
+        token = this.input2
+        this.input2 = this[this.tokenTo]
       } else if (this.tokenTo === 'input2' && this.input1.name === token.name) {
-        return $('#tokenModal').modal('hide')
+        token = this.input1
+        this.input1 = this[this.tokenTo]
       }
       this[this.tokenTo] = token
       $('#tokenModal').modal('hide')
@@ -373,6 +409,7 @@ export default {
     // getRouterContract
     async getMyRouterContract () {
       this.routerContract = await getRouterContract()
+      this.factoryContract = await getFactoryContract()
     },
     // 获取用户钱包某个币的余额
     async getTokenBalance (target, i) {
@@ -419,10 +456,31 @@ export default {
     })
   },
   watch: {
-    // swap的 from和to 的amount
-    "from.amount" (newVal, oldVal) {
+    // addliquidity  input1和input2
+    "input1.amount" (newVal, oldVal) {
+      const address = this.$store.state.publicAddress
+      if (newVal !== oldVal && this.input1.addr && this.input2.addr && address) {
+        const input1 = this.input1
+        const input2 = this.input2
+        // 交易的币不含bnb时
+        console.log(input1, input2)
+      }
+    },
+    "input2.amount" (newVal, oldVal) {
       if (newVal !== oldVal) {
-        console.log(this.routerContract.methods)
+        
+      }
+    },
+    // swap的 from和to 的amount       from/in  to/out
+    "from.amount" (newVal, oldVal) {
+      if (newVal !== oldVal && this.from.name && this.to.name) {
+        this.factoryContract.methods.getPair(this.from.addr, this.to.addr).call().then(pairAddr => {
+          getPairContract(pairAddr).then((pairContract) => {
+            pairContract.methods.getReserves().call().then(result => {
+              console.log(result)
+            })
+          })
+        })
       }
     },
     "to.amount" (newVal, oldVal) {
@@ -599,6 +657,11 @@ export default {
   text-align: center;
   background-color: #f4f4f4;
   border-radius: 50%;
+  color: #31c77f;
+  cursor: pointer;
+}
+.swap-content .icon-box:hover {
+  opacity: 0.5;
 }
 .swap-content .icon-box>i.iconfont {
   font-size: 20px;
@@ -611,7 +674,7 @@ export default {
 }
 .from-max,
 .to-max {
-  margin-left: 20px;
+  margin-left: 4px;
   color: #31c77f;
   cursor: pointer;
 }
@@ -827,5 +890,8 @@ export default {
   .add-liquidity-content .token-info {
     padding: 3px 5px;
   }
+}
+.btn-block+.btn-block {
+  margin-top: 10px !important;
 }
 </style>
