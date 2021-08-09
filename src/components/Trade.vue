@@ -215,17 +215,33 @@
               </div>
             </div>
             <!-- approve input1与input2 -->
-            <div class="swap-button btn btn-success btn-block">
+            <div
+              @click="approve('input1')"
+              v-if="input1Approve && input1.name && input1.amount"
+              class="swap-button btn btn-success btn-block"
+            >
               Approve {{input1.name}}
             </div>
-            <div class="swap-button btn btn-success btn-block">
+            <div
+              @click="approve('input2')"
+              v-if="input2Approve && input2.name && input2.amount"
+              class="swap-button btn btn-success btn-block"
+            >
               Approve {{input2.name}}
             </div>
             <!-- pair-button -->
-            <div @click="addLiquidity" v-if="input1.amount>0 && input2.amount>0" class="swap-button btn btn-success btn-block">
+            <div
+              @click="addLiquidity"
+              v-if="!input1Approve && !input2Approve"
+              class="swap-button btn btn-success btn-block"
+            >
               Supply
             </div>
-            <div v-else class="swap-button btn btn-default btn-blockbtn-default btn-block" disabled>
+            <div
+              v-else
+              class="swap-button btn btn-default btn-blockbtn-default btn-block"
+              disabled
+            >
               Invalid pair
             </div>
           </div>
@@ -271,6 +287,7 @@
 import BigNumber from 'bignumber.js'
 import { getRouterContract, getFactoryContract } from '../web3Utils/trade.js'
 import getPairContract from '../web3Utils/pair.js'
+import getFarmContract from '../web3Utils/farm.js'
 
 export default {
   data() {
@@ -342,7 +359,14 @@ export default {
           addr: '0xDE259d3beCAdc21C1D8d33442aa68f43AB7327f5',
           icon: require('../assets/images/defaultTokenIcon.svg')
         }
-      ]
+      ],
+      // routerAddr
+      routerAddr: '0xeaBa760F2f0F68981C9D9816741616277c7AbC3f',
+      // 标识是否需要approve
+      fromApprove: true,
+      toApprove: true,
+      input1Approve: true,
+      input2Approve: true
     }
   },
   methods: {
@@ -353,7 +377,7 @@ export default {
       const addr2 = this.input2.addr
       const amount1 = new BigNumber(this.input1.amount || 0).multipliedBy(1e18)
       const amount2 = new BigNumber(this.input2.amount || 0).multipliedBy(1e18)
-      const deadline = Math.floor((new Date).getTime()/1000) + 100
+      const deadline = Math.floor((new Date).getTime()/1000) + 1200
       // 都有地址
       if (addr1 && addr2) {
         this.routerContract.methods.addLiquidity(addr1, addr2, amount1, amount2, amount1.multipliedBy(0.992), amount2.multipliedBy(0.992), address, deadline).send({
@@ -442,6 +466,23 @@ export default {
       } catch (error) {
         this.getTokenBalance(target, i)
       }
+    },
+    // approve
+    async approve(token) {
+      const address = this.$store.state.publicAddress
+      if (address) {
+        const approveName = token + 'Approve' // 允许的token所对应的标识名
+        const tokeninfo = this[token]
+        const amount = new BigNumber(tokeninfo.amount + 10000).multipliedBy(1e18)
+        const approveContract = await getFarmContract.getapproveContract(tokeninfo.addr)
+        approveContract.methods.approve(this.routerAddr, amount).send({
+          from: address
+        }).then(() => {
+          this[approveName] = false // approve成功，将xxxApprove置为false
+        }).catch(() => {
+          this[approveName] = true
+        })
+      }
     }
   },
   created() {
@@ -457,18 +498,30 @@ export default {
   },
   watch: {
     // addliquidity  input1和input2
-    "input1.amount" (newVal, oldVal) {
+    async "input1.amount" (newVal, oldVal) {
       const address = this.$store.state.publicAddress
-      if (newVal !== oldVal && this.input1.addr && this.input2.addr && address) {
-        const input1 = this.input1
-        const input2 = this.input2
-        // 交易的币不含bnb时
-        console.log(input1, input2)
+      if (newVal !== oldVal && address && this.input1.name !== 'BNB') {
+        const tokenAddr = this.input1.addr
+        const allowanceContract = await getFarmContract.getAllowanceContract(tokenAddr)
+        const allowance = await allowanceContract.methods.allowance(address, this.routerAddr).call()
+        if (allowance < newVal*1e18) {
+          this.input1Approve = true
+        } else {
+          this.input1Approve = false
+        }
       }
     },
-    "input2.amount" (newVal, oldVal) {
-      if (newVal !== oldVal) {
-        
+    async "input2.amount" (newVal, oldVal) {
+      const address = this.$store.state.publicAddress
+      if (newVal !== oldVal && address && this.input2.name !== 'BNB') {
+        const tokenAddr = this.input2.addr
+        const allowanceContract = await getFarmContract.getAllowanceContract(tokenAddr)
+        const allowance = await allowanceContract.methods.allowance(address, this.routerAddr).call()
+        if (allowance < newVal*1e18) {
+          this.input2Approve = true
+        } else {
+          this.input2Approve = false
+        }
       }
     },
     // swap的 from和to 的amount       from/in  to/out
