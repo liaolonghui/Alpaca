@@ -305,8 +305,8 @@ export default {
           contractAddress: '0x7d3341D090250399F45C6B43996A88c42E5B47Fe',
           // deposit/withdraw/claim/claimableReward
           claimableReward: 0,
-          depositAmount: 0,
-          withdrawAmount: 0,
+          depositAmount: '',
+          withdrawAmount: '',
           // totalStaked
           totalStaked: 0,
           // userStaked
@@ -325,8 +325,8 @@ export default {
           LPBalance: 0,
           contractAddress: '0x7a199FD711A1723e941Ac49d8C9fF6AB80c70Df8',
           claimableReward: 0,
-          depositAmount: 0,
-          withdrawAmount: 0,
+          depositAmount: '',
+          withdrawAmount: '',
           totalStaked: 0,
           userStaked: 0,
           APY: '',
@@ -506,7 +506,7 @@ export default {
       })
       // 清空depositAmount
       setTimeout(() => {
-        this.stakes[i].depositAmount = 0
+        this.stakes[i].depositAmount = ''
       },0)
     },
     // withdraw
@@ -533,7 +533,7 @@ export default {
       })
       // 清空withdrawAmount
       setTimeout(() => {
-        this.stakes[i].withdrawAmount = 0
+        this.stakes[i].withdrawAmount = ''
       }, 0)
     },
     // claim
@@ -544,7 +544,8 @@ export default {
 
       // claim
       claimContract.methods.claim().send({
-        from: address
+        from: address,
+        gas: 10000000
       }).then(() => {
         // claim成功
         this.getClaimableReward(i) // 获取新reward

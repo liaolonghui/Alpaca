@@ -298,14 +298,14 @@ export default {
         addr: ''
       },
       {
-        name: 'USDT',
-        addr: '0x7ef95a0FEE0Dd31b22626fA2e10Ee6A223F8a684',
-        icon: require('../assets/images/USDT.png')
-      },
-      {
         name: 'BUSD',
         addr: '0x78867BbEeF44f2326bF8DDd1941a4439382EF2A7',
         icon: require('../assets/images/BUSD.png')
+      },
+      {
+        name: 'USDT',
+        addr: '0x7ef95a0FEE0Dd31b22626fA2e10Ee6A223F8a684',
+        icon: require('../assets/images/USDT.png')
       },
       {
         name: 'ETH',
@@ -375,14 +375,14 @@ export default {
       const address = this.$store.state.publicAddress
       const addr1 = this.input1.addr
       const addr2 = this.input2.addr
-      const amount1 = new BigNumber(this.input1.amount || 0).multipliedBy(1e18)
-      const amount2 = new BigNumber(this.input2.amount || 0).multipliedBy(1e18)
+      const amount1 = new BigNumber(this.input1.amount).multipliedBy(1e18)
+      const amount2 = new BigNumber(this.input2.amount).multipliedBy(1e18)
       const deadline = Math.floor((new Date).getTime()/1000) + 1200
       // 都有地址
       if (addr1 && addr2) {
         this.routerContract.methods.addLiquidity(addr1, addr2, amount1, amount2, amount1.multipliedBy(0.992), amount2.multipliedBy(0.992), address, deadline).send({
           from: address,
-          gas: 100000
+          gas: 5000000
         }).then(result => {
           console.log(result)
         })
