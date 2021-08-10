@@ -409,6 +409,7 @@ export default {
           console.log(this.routerContract.methods)
           this.routerContract.methods.addLiquidityETH(addr2, amount2, amount2.multipliedBy(0.992), amount1.multipliedBy(0.992), address, deadline).send({
             from: address,
+            value: amount1,
             gas: 10000000
           }).then(() => {
             this.input1.balance -= this.input1Amount
@@ -421,6 +422,7 @@ export default {
         } else if (addr1 && !addr2) {
           this.routerContract.methods.addLiquidityETH(addr1, amount1, amount1.multipliedBy(0.992), amount2.multipliedBy(0.992), address, deadline).send({
             from: address,
+            value: amount2,
             gas: 10000000
           }).then(() => {
             this.input1.balance -= this.input1Amount
