@@ -43,7 +43,7 @@
               </div>
               <div class="from-input">
                 <input
-                  v-model="from.amount"
+                  v-model="fromAmount"
                   type="number"
                   placeholder="0.0"
                   min="0"
@@ -51,7 +51,7 @@
                 />
                 <span
                   @click="getMax('from')"
-                  v-show="from.amount !== from.balance"
+                  v-show="fromAmount !== from.balance"
                   class="from-max"
                 >Max</span>
                 <!-- token -->
@@ -78,7 +78,7 @@
               </div>
               <div class="to-input">
                 <input
-                  v-model="to.amount"
+                  v-model="toAmount"
                   type="number"
                   placeholder="0.0"
                   min="0"
@@ -93,11 +93,17 @@
               </div>
             </div>
             <!-- swap-button -->
-            <div @click="swap" v-if="from.amount>0 && to.amount>0" class="swap-button btn btn-success btn-block">
+            <div @click="swap" v-if="fromAmount>0 && toAmount>0" class="swap-button btn btn-success btn-block">
               Swap
             </div>
             <div v-else class="swap-button btn btn-default btn-blockbtn-default btn-block" disabled>
-              Enter an amount
+              {{
+                fromAmount>from.balance
+                ?
+                `Insufficient ${from.name} balance`
+                :
+                'Enter an amount'
+              }}
             </div>
           </div>
         </div>
@@ -160,7 +166,7 @@
               </div>
               <div class="from-input">
                 <input
-                  v-model="input1.amount"
+                  v-model="input1Amount"
                   type="number"
                   placeholder="0.0"
                   min="0"
@@ -168,7 +174,7 @@
                 />
                 <span
                   @click="getMax('input1')"
-                  v-show="input1.amount !== input1.balance"
+                  v-show="input1Amount !== input1.balance"
                   class="from-max"
                 >Max</span>
                 <!-- token -->
@@ -195,7 +201,7 @@
               </div>
               <div class="to-input">
                 <input
-                  v-model="input2.amount"
+                  v-model="input2Amount"
                   type="number"
                   placeholder="0.0"
                   min="0"
@@ -203,7 +209,7 @@
                 />
                 <span
                   @click="getMax('input2')"
-                  v-show="input2.amount !== input2.balance"
+                  v-show="input2Amount !== input2.balance"
                   class="to-max"
                 >Max</span>
                 <!-- token -->
@@ -217,14 +223,14 @@
             <!-- approve input1与input2 -->
             <div
               @click="approve('input1')"
-              v-if="input1Approve && input1.name && input1.amount"
+              v-if="input1Approve && input1.name && input1Amount"
               class="swap-button btn btn-success btn-block"
             >
               Approve {{input1.name}}
             </div>
             <div
               @click="approve('input2')"
-              v-if="input2Approve && input2.name && input2.amount"
+              v-if="input2Approve && input2.name && input2Amount"
               class="swap-button btn btn-success btn-block"
             >
               Approve {{input2.name}}
@@ -232,7 +238,7 @@
             <!-- pair-button -->
             <div
               @click="addLiquidity"
-              v-if="!input1Approve && !input2Approve"
+              v-if="!input1Approve && !input2Approve && input1Amount>0 && input2Amount>0"
               class="swap-button btn btn-success btn-block"
             >
               Supply
@@ -334,11 +340,15 @@ export default {
       tokens: tokens,
       searchToken: '', // 用于搜索token
       searchTokenResult: tokens, // 搜索token的结果, 初始化和tokens相同
-      from: {...tokens[0]}, // from默认是BNB
+      from: tokens[0], // from默认是BNB
+      fromAmount: '',
       to: {},
+      toAmount: '',
       tokenTo: '', // 选中的token赋值给谁
-      input1: {...tokens[0]}, // input1默认也是BNB
+      input1: tokens[0], // input1默认也是BNB
+      input1Amount: '',
       input2: {},
+      input2Amount: '',
       // liquidity
       liquidity: [
         {
@@ -375,17 +385,50 @@ export default {
       const address = this.$store.state.publicAddress
       const addr1 = this.input1.addr
       const addr2 = this.input2.addr
-      const amount1 = new BigNumber(this.input1.amount).multipliedBy(1e18)
-      const amount2 = new BigNumber(this.input2.amount).multipliedBy(1e18)
+      const amount1 = new BigNumber(this.input1Amount).multipliedBy(1e18)
+      const amount2 = new BigNumber(this.input2Amount).multipliedBy(1e18)
       const deadline = Math.floor((new Date).getTime()/1000) + 1200
-      // 都有地址
+      // 都有地址 说明不含BNB
       if (addr1 && addr2) {
         this.routerContract.methods.addLiquidity(addr1, addr2, amount1, amount2, amount1.multipliedBy(0.992), amount2.multipliedBy(0.992), address, deadline).send({
           from: address,
-          gas: 5000000
-        }).then(result => {
-          console.log(result)
+          gas: 10000000
+        }).then(() => {
+          this.input1.balance -= this.input1Amount
+          this.input2.balance -= this.input2Amount
+          this.input1Amount = ''
+          this.input2Amount = ''
+          // 每次交易完更新BNB
+          this.getTokenBalance(this.tokens, 0)
         })
+      } else if (this.input1.name && this.input2.name && ((!addr1 && addr2) || (addr1 && !addr2))) {
+        // input1和2都存在，但是其中一个没地址
+        if (!addr1 && addr2) {
+          console.log(this.routerContract.methods)
+          this.routerContract.methods.addLiquidityETH(addr2, amount2, amount2.multipliedBy(0.992), amount1.multipliedBy(0.992), address, deadline).send({
+            from: address,
+            gas: 10000000
+          }).then(() => {
+            this.input1.balance -= this.input1Amount
+            this.input2.balance -= this.input2Amount
+            this.input1Amount = ''
+            this.input2Amount = ''
+            // 每次交易完更新BNB
+            this.getTokenBalance(this.tokens, 0)
+          })
+        } else if (addr1 && !addr2) {
+          this.routerContract.methods.addLiquidityETH(addr1, amount1, amount1.multipliedBy(0.992), amount2.multipliedBy(0.992), address, deadline).send({
+            from: address,
+            gas: 10000000
+          }).then(() => {
+            this.input1.balance -= this.input1Amount
+            this.input2.balance -= this.input2Amount
+            this.input1Amount = ''
+            this.input2Amount = ''
+            // 每次交易完更新BNB
+            this.getTokenBalance(this.tokens, 0)
+          })
+        }
       }
     },
     // swap
@@ -394,7 +437,8 @@ export default {
     },
     // getMax
     getMax (type) {
-      this.$set(this[type], 'amount', this[type].balance)
+      const amountType = type + 'Amount'
+      this[amountType] = this[type].balance
     },
     // 交换 交易的代币 from和to
     exchangeFromAndTo() {
@@ -411,20 +455,16 @@ export default {
     // selectToken
     selectToken (index) {
       // 根据index从searchTokenResult获取到选中的token
-      let token = {...this.searchTokenResult[index]}
+      let token = this.searchTokenResult[index]
       // 将选中的token赋值给对应的对象
       // 如果要赋值的对象 对应的另一个对象 已经选中一样的则 互相交换
-      if (this.tokenTo === 'to' && this.from.name === token.name) {
-        token = this.from // 让token等于from，以此实现交换
+      if (this.tokenTo === 'to' && this.from === token) {
         this.from = this[this.tokenTo]
-      } else if (this.tokenTo === 'from' && this.to.name === token.name) {
-        token = this.to
+      } else if (this.tokenTo === 'from' && this.to === token) {
         this.to = this[this.tokenTo]
-      } else if (this.tokenTo === 'input1' && this.input2.name === token.name) {
-        token = this.input2
+      } else if (this.tokenTo === 'input1' && this.input2 === token) {
         this.input2 = this[this.tokenTo]
-      } else if (this.tokenTo === 'input2' && this.input1.name === token.name) {
-        token = this.input1
+      } else if (this.tokenTo === 'input2' && this.input1 === token) {
         this.input1 = this[this.tokenTo]
       }
       this[this.tokenTo] = token
@@ -440,6 +480,12 @@ export default {
       const tokenAddr = target[i].addr
       const address = this.$store.state.publicAddress
       if (!address) return
+      let balance = await this.getBalance(tokenAddr, address)
+      balance = balance / 1e18
+      this.$set(target[i], 'balance', balance)
+    },
+    // 传入token地址和钱包地址 获取token余额
+    async getBalance(tokenAddr, address) {
       try {
         const result = await $.ajax({
           url: 'https://api-testnet.bscscan.com/api',
@@ -453,18 +499,13 @@ export default {
           }
         })
         if (result.message === 'OK') {
-          const balance = result.result / 1e18
-          this.$set(target[i], 'balance', balance)
-          // i为0时 获取到数据后给from和input1也赋值上
-          if (i === 0 && target === this.tokens) {
-            this.from.balance = balance
-            this.input1.balance = balance
-          }
+          return result.result
         } else {
-          this.getTokenBalance(target, i)
+          // 没获取到就递归获取
+          return await this.getBalance(tokenAddr, address)
         }
-      } catch (error) {
-        this.getTokenBalance(target, i)
+      } catch (err) {
+        return await this.getBalance(tokenAddr, address)
       }
     },
     // approve
@@ -472,8 +513,9 @@ export default {
       const address = this.$store.state.publicAddress
       if (address) {
         const approveName = token + 'Approve' // 允许的token所对应的标识名
+        const amountName = token + 'Amount' // xxxAmount
         const tokeninfo = this[token]
-        const amount = new BigNumber(tokeninfo.amount + 10000).multipliedBy(1e18)
+        const amount = new BigNumber(this[amountName] + 10000).multipliedBy(1e18)
         const approveContract = await getFarmContract.getapproveContract(tokeninfo.addr)
         approveContract.methods.approve(this.routerAddr, amount).send({
           from: address
@@ -482,6 +524,23 @@ export default {
         }).catch(() => {
           this[approveName] = true
         })
+      }
+    },
+    // 判断是否需要approve
+    async judgeApprove(type) {
+      const approveName = type + 'Approve' // 判断的type 所对应的approve标识
+      const amountName = type + 'Amount' // amount的name
+      if (this[type].name === 'BNB') return this[approveName] = false
+      const address = this.$store.state.publicAddress
+      if (address && this[type].addr) {
+        const tokenAddr = this[type].addr
+        const allowanceContract = await getFarmContract.getAllowanceContract(tokenAddr)
+        const allowance = await allowanceContract.methods.allowance(address, this.routerAddr).call()
+        if (allowance < this[amountName]*1e18) {
+          this[approveName] = true
+        } else {
+          this[approveName] = false
+        }
       }
     }
   },
@@ -498,34 +557,28 @@ export default {
   },
   watch: {
     // addliquidity  input1和input2
-    async "input1.amount" (newVal, oldVal) {
-      const address = this.$store.state.publicAddress
-      if (newVal !== oldVal && address && this.input1.name !== 'BNB') {
-        const tokenAddr = this.input1.addr
-        const allowanceContract = await getFarmContract.getAllowanceContract(tokenAddr)
-        const allowance = await allowanceContract.methods.allowance(address, this.routerAddr).call()
-        if (allowance < newVal*1e18) {
-          this.input1Approve = true
-        } else {
-          this.input1Approve = false
-        }
+    async "input1Amount" (newVal, oldVal) {
+      if (newVal !== oldVal) {
+        this.judgeApprove('input1')
       }
     },
-    async "input2.amount" (newVal, oldVal) {
-      const address = this.$store.state.publicAddress
-      if (newVal !== oldVal && address && this.input2.name !== 'BNB') {
-        const tokenAddr = this.input2.addr
-        const allowanceContract = await getFarmContract.getAllowanceContract(tokenAddr)
-        const allowance = await allowanceContract.methods.allowance(address, this.routerAddr).call()
-        if (allowance < newVal*1e18) {
-          this.input2Approve = true
-        } else {
-          this.input2Approve = false
-        }
+    async "input1.name" (newVal, oldVal) {
+      if (newVal !== oldVal) {
+        this.judgeApprove('input1')
+      }
+    },
+    async "input2Amount" (newVal, oldVal) {
+      if (newVal !== oldVal) {
+        this.judgeApprove('input2')
+      }
+    },
+    async "input2.name" (newVal, oldVal) {
+      if (newVal !== oldVal) {
+        this.judgeApprove('input2')
       }
     },
     // swap的 from和to 的amount       from/in  to/out
-    "from.amount" (newVal, oldVal) {
+    "fromAmount" (newVal, oldVal) {
       if (newVal !== oldVal && this.from.name && this.to.name) {
         this.factoryContract.methods.getPair(this.from.addr, this.to.addr).call().then(pairAddr => {
           getPairContract(pairAddr).then((pairContract) => {
@@ -536,7 +589,7 @@ export default {
         })
       }
     },
-    "to.amount" (newVal, oldVal) {
+    "toAmount" (newVal, oldVal) {
       if (newVal !== oldVal) {
         
       }
@@ -544,7 +597,7 @@ export default {
     // address
     "$store.state.publicAddress"(newAddr, oldAddr) {
       if (!newAddr) return 
-      if (newAddr !== oldAddr) {
+      if (newAddr && newAddr !== oldAddr) {
         this.getMyRouterContract()
         this.tokens.map((token, i) => {
           this.getTokenBalance(this.tokens, i)
