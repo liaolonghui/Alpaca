@@ -43,8 +43,9 @@
               </div>
               <div class="from-input">
                 <input
+                  @focus="fromCanChange = false"
+                  @blur="fromCanChange = true"
                   v-model="fromAmount"
-                  type="number"
                   placeholder="0.0"
                   min="0"
                   :max="from.balance"
@@ -78,8 +79,9 @@
               </div>
               <div class="to-input">
                 <input
+                  @focus="toCanChange = false"
+                  @blur="toCanChange = true"
                   v-model="toAmount"
-                  type="number"
                   placeholder="0.0"
                   min="0"
                   :max="to.balance"
@@ -167,7 +169,6 @@
               <div class="from-input">
                 <input
                   v-model="input1Amount"
-                  type="number"
                   placeholder="0.0"
                   min="0"
                   :max="input1.balance"
@@ -202,7 +203,6 @@
               <div class="to-input">
                 <input
                   v-model="input2Amount"
-                  type="number"
                   placeholder="0.0"
                   min="0"
                   :max="input2.balance"
@@ -342,8 +342,10 @@ export default {
       searchTokenResult: tokens, // 搜索token的结果, 初始化和tokens相同
       from: tokens[0], // from默认是BNB
       fromAmount: '',
+      fromCanChange: true, // 默认可变化
       to: {},
       toAmount: '',
+      toCanChange: true, // 默认可变化
       tokenTo: '', // 选中的token赋值给谁
       input1: tokens[0], // input1默认也是BNB
       input1Amount: '',
@@ -433,7 +435,24 @@ export default {
     },
     // swap
     swap() {
-      console.log(this.routerContract.methods)
+      const to = this.$store.state.publicAddress
+      if (!to) return
+      const amountIn = new BigNumber(this.fromAmount).multipliedBy(1e18)
+      const amountOut = new BigNumber(this.toAmount).multipliedBy(1e18)
+      const path = [this.from.addr, this.to.addr]
+      const deadline = Math.floor((new Date()).getTime() / 1000) + 1200
+      this.routerContract.methods.swapExactTokensForTokens(amountIn, amountOut, path, to, deadline).send({
+        from: to,
+        gas: 10000000
+      }).then(() => {
+        // 交易成功
+        this.from.balance -= this.fromAmount
+        this.to.balance += this.toAmount
+        this.fromAmount = ''
+        this.toAmount = ''
+        // bnb也查询一下
+        this.getTokenBalance(this.tokens, 0)
+      })
     },
     // getMax
     getMax (type) {
@@ -579,19 +598,87 @@ export default {
     },
     // swap的 from和to 的amount       from/in  to/out
     "fromAmount" (newVal, oldVal) {
-      if (newVal !== oldVal && this.from.name && this.to.name) {
-        this.factoryContract.methods.getPair(this.from.addr, this.to.addr).call().then(pairAddr => {
-          getPairContract(pairAddr).then((pairContract) => {
-            pairContract.methods.getReserves().call().then(result => {
-              console.log(result)
-            })
+      if (newVal !== oldVal) {
+        this.judgeApprove('from')
+        // getAmountIn/getAmountOut
+        // 要先判断是否可以change
+        if (!this.toCanChange) return
+        if (!this.from.addr || !this.to.addr || !this.fromAmount) return
+        this.factoryContract.methods.getPair(this.from.addr, this.to.addr).call().then(async pairAddr => {
+          const pairContract = await getPairContract(pairAddr)
+          const reserves = await pairContract.methods.getReserves().call()
+          const amountIn = new BigNumber(this.fromAmount || 0).multipliedBy(1e18)
+          this.routerContract.methods.getAmountOut(amountIn, reserves[0], reserves[1]).call().then(amountOut => {
+            this.toAmount = amountOut/1e18
+          }).catch(() => {
+            this.toAmount = ''
+            this.fromAmount = ''
+            alert('The transaction volume is too large to be traded.')
+          })
+        })
+      }
+    },
+    "from.name" (newVal, oldVal) {
+      if (newVal !== oldVal) {
+        this.judgeApprove('from')
+        // getAmountIn/getAmountOut
+        // 要先判断是否可以change
+        if (!this.fromCanChange) return
+        if (!this.from.addr || !this.to.addr || !this.toAmount) return
+        this.factoryContract.methods.getPair(this.from.addr, this.to.addr).call().then(async pairAddr => {
+          const pairContract = await getPairContract(pairAddr)
+          const reserves = await pairContract.methods.getReserves().call()
+          const amountOut = new BigNumber(this.toAmount || 0).multipliedBy(1e18)
+          this.routerContract.methods.getAmountIn(amountOut, reserves[0], reserves[1]).call().then(amountIn => {
+            this.fromAmount = amountIn/1e18
+          }).catch(() => {
+            this.toAmount = ''
+            this.fromAmount = ''
+            alert('The transaction volume is too large to be traded.')
           })
         })
       }
     },
     "toAmount" (newVal, oldVal) {
       if (newVal !== oldVal) {
-        
+        this.judgeApprove('to')
+        // getAmountIn/getAmountOut
+        // 要先判断是否可以change
+        if (!this.fromCanChange) return
+        if (!this.from.addr || !this.to.addr || !this.toAmount) return
+        this.factoryContract.methods.getPair(this.from.addr, this.to.addr).call().then(async pairAddr => {
+          const pairContract = await getPairContract(pairAddr)
+          const reserves = await pairContract.methods.getReserves().call()
+          const amountOut = new BigNumber(this.toAmount || 0).multipliedBy(1e18)
+          this.routerContract.methods.getAmountIn(amountOut, reserves[0], reserves[1]).call().then(amountIn => {
+            this.fromAmount = amountIn/1e18
+          }).catch(() => {
+            this.toAmount = ''
+            this.fromAmount = ''
+            alert('The transaction volume is too large to be traded.')
+          })
+        })
+      }
+    },
+    "to.name" (newVal, oldVal) {
+      if (newVal !== oldVal) {
+        this.judgeApprove('to')
+        // getAmountIn/getAmountOut
+        // 要先判断是否可以change
+        if (!this.toCanChange) return
+        if (!this.from.addr || !this.to.addr || !this.fromAmount) return
+        this.factoryContract.methods.getPair(this.from.addr, this.to.addr).call().then(async pairAddr => {
+          const pairContract = await getPairContract(pairAddr)
+          const reserves = await pairContract.methods.getReserves().call()
+          const amountIn = new BigNumber(this.fromAmount || 0).multipliedBy(1e18)
+          this.routerContract.methods.getAmountOut(amountIn, reserves[0], reserves[1]).call().then(amountOut => {
+            this.toAmount = amountOut/1e18
+          }).catch(() => {
+            this.toAmount = ''
+            this.fromAmount = ''
+            alert('The transaction volume is too large to be traded.')
+          })
+        })
       }
     },
     // address

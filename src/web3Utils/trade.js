@@ -1042,5 +1042,23 @@ export async function getRouterContract() {
   return routerContract
 }
 
-// swapExactETHForTokens
-// addLiquidityETH
+// swapExactETHForTokens   bnb -> 其他
+// swapTokensForExactETH
+// swapExactETHForTokensSupportingFeeOnTransferTokens
+
+// swapExactTokensForETH   其他 -> bnb
+// swapETHForExactTokens
+// swapExactTokensForETHSupportingFeeOnTransferTokens
+
+// swapExactTokensForTokens 其他 -> 其他
+// swapTokensForExactTokens
+// swapExactTokensForTokensSupportingFeeOnTransferTokens
+
+
+// addLiquidity     不涉及bnb
+// addLiquidityETH  涉及bnb
+// removeLiquidity
+// removeLiquidityETH
+// removeLiquidityETHWithPermit
+// removeLiquidityETHSupportingFeeOnTransferTokens
+// removeLiquidityETHWithPermitSupportingFeeOnTransferTokens
