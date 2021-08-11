@@ -95,7 +95,11 @@
               </div>
             </div>
             <!-- swap-button -->
-            <div @click="swap" v-if="fromAmount>0 && toAmount>0" class="swap-button btn btn-success btn-block">
+            <div
+              @click="swap"
+              v-if="fromAmount<=from.balance && fromAmount>0 && this.from.name && this.to.name"
+              class="swap-button btn btn-success btn-block"
+            >
               Swap
             </div>
             <div v-else class="swap-button btn btn-default btn-blockbtn-default btn-block" disabled>
@@ -238,7 +242,17 @@
             <!-- pair-button -->
             <div
               @click="addLiquidity"
-              v-if="!input1Approve && !input2Approve && input1Amount>0 && input2Amount>0"
+              v-if="!input1Approve
+                    &&
+                    !input2Approve
+                    &&
+                    input1Amount>0
+                    &&
+                    input2Amount>0
+                    &&
+                    input1Amount<=input1.balance
+                    &&
+                    input2Amount<=input2.balance"
               class="swap-button btn btn-success btn-block"
             >
               Supply
@@ -301,7 +315,7 @@ export default {
       {
         name: 'BNB',
         icon: require('../assets/images/bnb.png'),
-        addr: ''
+        addr: '0x094616f0bdfb0b526bd735bf66eca0ad254ca81f'
       },
       {
         name: 'BUSD',
@@ -388,11 +402,13 @@ export default {
       const addr1 = this.input1.addr
       const addr2 = this.input2.addr
       const amount1 = new BigNumber(this.input1Amount).multipliedBy(1e18)
+      const amount1Min = amount1.multipliedBy(0.992)
       const amount2 = new BigNumber(this.input2Amount).multipliedBy(1e18)
+      const amount2Min = amount2.multipliedBy(0.992)
       const deadline = Math.floor((new Date).getTime()/1000) + 1200
-      // 都有地址 说明不含BNB
-      if (addr1 && addr2) {
-        this.routerContract.methods.addLiquidity(addr1, addr2, amount1, amount2, amount1.multipliedBy(0.992), amount2.multipliedBy(0.992), address, deadline).send({
+      // 不含BNB
+      if (this.input1.name !== 'BNB' && this.input2.name !== 'BNB') {
+        this.routerContract.methods.addLiquidity(addr1, addr2, amount1, amount2, amount1Min, amount2Min, address, deadline).send({
           from: address,
           gas: 10000000
         }).then(() => {
@@ -403,11 +419,11 @@ export default {
           // 每次交易完更新BNB
           this.getTokenBalance(this.tokens, 0)
         })
-      } else if (this.input1.name && this.input2.name && ((!addr1 && addr2) || (addr1 && !addr2))) {
-        // input1和2都存在，但是其中一个没地址
-        if (!addr1 && addr2) {
+      } else if (this.input1.name && this.input2.name && (this.input1.name === 'BNB' || this.input2.name === 'BNB')) {
+        // input1和2都存在，但是其中一个是BNB
+        if (this.input1.name === 'BNB') {
           console.log(this.routerContract.methods)
-          this.routerContract.methods.addLiquidityETH(addr2, amount2, amount2.multipliedBy(0.992), amount1.multipliedBy(0.992), address, deadline).send({
+          this.routerContract.methods.addLiquidityETH(addr2, amount2, amount2Min, amount1Min, address, deadline).send({
             from: address,
             value: amount1,
             gas: 10000000
@@ -419,8 +435,8 @@ export default {
             // 每次交易完更新BNB
             this.getTokenBalance(this.tokens, 0)
           })
-        } else if (addr1 && !addr2) {
-          this.routerContract.methods.addLiquidityETH(addr1, amount1, amount1.multipliedBy(0.992), amount2.multipliedBy(0.992), address, deadline).send({
+        } else if (this.input2.name === 'BNB') {
+          this.routerContract.methods.addLiquidityETH(addr1, amount1, amount1Min, amount2Min, address, deadline).send({
             from: address,
             value: amount2,
             gas: 10000000
@@ -443,8 +459,25 @@ export default {
       const amountOut = new BigNumber(this.toAmount).multipliedBy(1e18)
       const path = [this.from.addr, this.to.addr]
       const deadline = Math.floor((new Date()).getTime() / 1000) + 1200
-      this.routerContract.methods.swapExactTokensForTokens(amountIn, amountOut, path, to, deadline).send({
+      let methodName = 'swapExactTokensForTokens' // 方法名
+      let props = [ // 参数
+        amountIn,
+        amountOut,
+        path,
+        to,
+        deadline
+      ]
+      let value = 0 // bnb
+      if (this.from.name === 'BNB') {
+        methodName = 'swapExactETHForTokens'
+        value = amountIn
+        props.shift()
+      } else if (this.to.name === 'BNB') {
+        methodName = 'swapExactTokensForETH'
+      }
+      this.routerContract.methods[methodName](...props).send({
         from: to,
+        value: value,
         gas: 10000000
       }).then(() => {
         // 交易成功
@@ -512,7 +545,7 @@ export default {
           url: 'https://api-testnet.bscscan.com/api',
           data: {
             module: 'account',
-            action: tokenAddr ? 'tokenbalance' : 'balance',
+            action: tokenAddr !== '0x094616f0bdfb0b526bd735bf66eca0ad254ca81f' ? 'tokenbalance' : 'balance', // 为bnb地址时则balance
             contractaddress: tokenAddr,
             address: address,
             tag: 'latest',
@@ -605,17 +638,14 @@ export default {
         // getAmountIn/getAmountOut
         // 要先判断是否可以change
         if (!this.toCanChange) return
-        if (!this.from.addr || !this.to.addr || !this.fromAmount) return
+        if (!this.from.name || !this.to.name || !(this.fromAmount > 0)) return
         this.factoryContract.methods.getPair(this.from.addr, this.to.addr).call().then(async pairAddr => {
           const pairContract = await getPairContract(pairAddr)
           const reserves = await pairContract.methods.getReserves().call()
           const amountIn = new BigNumber(this.fromAmount || 0).multipliedBy(1e18)
+          console.log(reserves[0], reserves[1])
           this.routerContract.methods.getAmountOut(amountIn, reserves[0], reserves[1]).call().then(amountOut => {
             this.toAmount = amountOut/1e18
-          }).catch(() => {
-            this.toAmount = ''
-            this.fromAmount = ''
-            alert('The transaction volume is too large to be traded.')
           })
         })
       }
@@ -626,17 +656,13 @@ export default {
         // getAmountIn/getAmountOut
         // 要先判断是否可以change
         if (!this.fromCanChange) return
-        if (!this.from.addr || !this.to.addr || !this.toAmount) return
+        if (!this.from.name || !this.to.name || !(this.toAmount > 0)) return
         this.factoryContract.methods.getPair(this.from.addr, this.to.addr).call().then(async pairAddr => {
           const pairContract = await getPairContract(pairAddr)
           const reserves = await pairContract.methods.getReserves().call()
           const amountOut = new BigNumber(this.toAmount || 0).multipliedBy(1e18)
           this.routerContract.methods.getAmountIn(amountOut, reserves[0], reserves[1]).call().then(amountIn => {
             this.fromAmount = amountIn/1e18
-          }).catch(() => {
-            this.toAmount = ''
-            this.fromAmount = ''
-            alert('The transaction volume is too large to be traded.')
           })
         })
       }
@@ -647,17 +673,13 @@ export default {
         // getAmountIn/getAmountOut
         // 要先判断是否可以change
         if (!this.fromCanChange) return
-        if (!this.from.addr || !this.to.addr || !this.toAmount) return
+        if (!this.from.name || !this.to.name || !(this.toAmount > 0)) return
         this.factoryContract.methods.getPair(this.from.addr, this.to.addr).call().then(async pairAddr => {
           const pairContract = await getPairContract(pairAddr)
           const reserves = await pairContract.methods.getReserves().call()
           const amountOut = new BigNumber(this.toAmount || 0).multipliedBy(1e18)
           this.routerContract.methods.getAmountIn(amountOut, reserves[0], reserves[1]).call().then(amountIn => {
             this.fromAmount = amountIn/1e18
-          }).catch(() => {
-            this.toAmount = ''
-            this.fromAmount = ''
-            alert('The transaction volume is too large to be traded.')
           })
         })
       }
@@ -668,17 +690,13 @@ export default {
         // getAmountIn/getAmountOut
         // 要先判断是否可以change
         if (!this.toCanChange) return
-        if (!this.from.addr || !this.to.addr || !this.fromAmount) return
+        if (!this.from.name || !this.to.name || !(this.fromAmount > 0)) return
         this.factoryContract.methods.getPair(this.from.addr, this.to.addr).call().then(async pairAddr => {
           const pairContract = await getPairContract(pairAddr)
           const reserves = await pairContract.methods.getReserves().call()
           const amountIn = new BigNumber(this.fromAmount || 0).multipliedBy(1e18)
           this.routerContract.methods.getAmountOut(amountIn, reserves[0], reserves[1]).call().then(amountOut => {
             this.toAmount = amountOut/1e18
-          }).catch(() => {
-            this.toAmount = ''
-            this.fromAmount = ''
-            alert('The transaction volume is too large to be traded.')
           })
         })
       }
