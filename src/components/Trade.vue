@@ -453,7 +453,8 @@ export default {
       const to = this.$store.state.publicAddress
       if (!to) return
       const amountIn = new BigNumber(this.fromAmount).multipliedBy(1e18)
-      const amountOutMin = new BigNumber(this.toAmount).multipliedBy(1e18).multipliedBy(0.992)
+      // 转bignumber时最多只能有15位小数
+      const amountOutMin = new BigNumber(new Number(this.toAmount).toFixed(15)).multipliedBy(1e18).multipliedBy(0.992)
       const path = [this.from.addr, this.to.addr]
       const deadline = Math.floor((new Date()).getTime() / 1000) + 1200
       let methodName = 'swapExactTokensForTokens' // 方法名
@@ -475,8 +476,6 @@ export default {
       } else if (this.to.name === 'BNB') {
         methodName = 'swapExactTokensForETH'
       }
-      console.log(this.fromAmount)
-      console.log(props)
       this.routerContract.methods[methodName](...props).send(sendObj).then(() => {
         // 交易成功
         this.from.balance -= this.fromAmount
