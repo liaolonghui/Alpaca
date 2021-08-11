@@ -643,9 +643,15 @@ export default {
           const pairContract = await getPairContract(pairAddr)
           const reserves = await pairContract.methods.getReserves().call()
           const amountIn = new BigNumber(this.fromAmount || 0).multipliedBy(1e18)
-          console.log(reserves[0], reserves[1])
+          // pair的顺序是固定的 ascii
+          // 如果from是大的那个(指ascii)则需要把reserves交换一下
+          if (this.from.name > this.to.name) {
+            const temp = reserves[0]
+            reserves[0] = reserves[1]
+            reserves[1] = temp
+          }
           this.routerContract.methods.getAmountOut(amountIn, reserves[0], reserves[1]).call().then(amountOut => {
-            this.toAmount = amountOut/1e18
+            this.toAmount = new Number(amountOut/1e18)
           })
         })
       }
@@ -661,8 +667,15 @@ export default {
           const pairContract = await getPairContract(pairAddr)
           const reserves = await pairContract.methods.getReserves().call()
           const amountOut = new BigNumber(this.toAmount || 0).multipliedBy(1e18)
+          // pair的顺序是固定的 ascii
+          // 如果from是大的那个(指ascii)则需要把reserves交换一下
+          if (this.from.name > this.to.name) {
+            const temp = reserves[0]
+            reserves[0] = reserves[1]
+            reserves[1] = temp
+          }
           this.routerContract.methods.getAmountIn(amountOut, reserves[0], reserves[1]).call().then(amountIn => {
-            this.fromAmount = amountIn/1e18
+            this.fromAmount = new Number(amountIn/1e18)
           })
         })
       }
@@ -678,8 +691,15 @@ export default {
           const pairContract = await getPairContract(pairAddr)
           const reserves = await pairContract.methods.getReserves().call()
           const amountOut = new BigNumber(this.toAmount || 0).multipliedBy(1e18)
+          // pair的顺序是固定的 ascii
+          // 如果from是大的那个(指ascii)则需要把reserves交换一下
+          if (this.from.name > this.to.name) {
+            const temp = reserves[0]
+            reserves[0] = reserves[1]
+            reserves[1] = temp
+          }
           this.routerContract.methods.getAmountIn(amountOut, reserves[0], reserves[1]).call().then(amountIn => {
-            this.fromAmount = amountIn/1e18
+            this.fromAmount = new Number(amountIn/1e18)
           })
         })
       }
@@ -695,8 +715,15 @@ export default {
           const pairContract = await getPairContract(pairAddr)
           const reserves = await pairContract.methods.getReserves().call()
           const amountIn = new BigNumber(this.fromAmount || 0).multipliedBy(1e18)
+          // pair的顺序是固定的 ascii
+          // 如果from是大的那个(指ascii)则需要把reserves交换一下
+          if (this.from.name > this.to.name) {
+            const temp = reserves[0]
+            reserves[0] = reserves[1]
+            reserves[1] = temp
+          }
           this.routerContract.methods.getAmountOut(amountIn, reserves[0], reserves[1]).call().then(amountOut => {
-            this.toAmount = amountOut/1e18
+            this.toAmount = new Number(amountOut/1e18)
           })
         })
       }
