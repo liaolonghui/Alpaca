@@ -290,6 +290,7 @@
 import BigNumber from 'bignumber.js'
 import getFarmContract from '../web3Utils/farm.js'
 import getPairContract from '../web3Utils/pair.js'
+import { toNonExponential } from '../utils/index.js'
 
 export default {
   data () {
@@ -563,7 +564,7 @@ export default {
       const stake = this.stakes[i]
       const claimableRewardContract = await getFarmContract.getclaimableRewardContract(stake.contractAddress)
       claimableRewardContract.methods.claimableReward(address).call().then((reward) => {
-        reward = new BigNumber(reward).div(1e18)
+        reward = toNonExponential(reward / 1e18)
         this.stakes[i].claimableReward = reward
       }).catch(console.error)
     },
@@ -574,7 +575,7 @@ export default {
       const contractAddress = this.stakes[i].contractAddress
       const totalstakedContract = await getFarmContract.getTotalstakedContract(contractAddress)
       totalstakedContract.methods.total_staked_().call().then((totalStaked) => {
-        this.stakes[i].totalStaked = new BigNumber(totalStaked).div(1e18)
+        this.stakes[i].totalStaked = toNonExponential(totalStaked / 1e18)
       }).catch(console.error)
     },
     // 获取user-staked
@@ -584,7 +585,7 @@ export default {
       const contractAddress = this.stakes[i].contractAddress
       const userstakedContract = await getFarmContract.getUserstakedContract(contractAddress)
       userstakedContract.methods.user_staked(address).call().then((userStaked) => {
-        this.stakes[i].userStaked = new BigNumber(userStaked).div(1e18)
+        this.stakes[i].userStaked = toNonExponential(userStaked / 1e18)
       }).catch(console.error)
     },
     // 获取用户钱包LP的余额
@@ -604,7 +605,7 @@ export default {
         }
       })
       if (result.message === 'OK') {
-        this.stakes[i].LPBalance = new BigNumber(result.result).div(1e18)
+        this.stakes[i].LPBalance = toNonExponential(result.result / 1e18)
       }
     },
     // 计算APY

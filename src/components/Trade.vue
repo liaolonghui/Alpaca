@@ -48,7 +48,6 @@
                   v-model="fromAmount"
                   placeholder="0.0"
                   min="0"
-                  :max="from.balance"
                 />
                 <span
                   @click="getMax('from')"
@@ -84,7 +83,6 @@
                   v-model="toAmount"
                   placeholder="0.0"
                   min="0"
-                  :max="to.balance"
                 />
                 <!-- token -->
                 <span @click="showSelectTokenModal('to')" class="token-info">
@@ -97,14 +95,14 @@
             <!-- swap-button -->
             <div
               @click="swap"
-              v-if="fromAmount<=from.balance && fromAmount>0 && this.from.name && this.to.name"
+              v-if="new Number(fromAmount)<=new Number(from.balance) && fromAmount>0 && this.from.name && this.to.name"
               class="swap-button btn btn-success btn-block"
             >
               Swap
             </div>
             <div v-else class="swap-button btn btn-default btn-blockbtn-default btn-block" disabled>
               {{
-                fromAmount>from.balance
+                new Number(fromAmount) > new Number(from.balance)
                 ?
                 `Insufficient ${from.name} balance`
                 :
@@ -175,7 +173,6 @@
                   v-model="input1Amount"
                   placeholder="0.0"
                   min="0"
-                  :max="input1.balance"
                 />
                 <span
                   @click="getMax('input1')"
@@ -209,7 +206,6 @@
                   v-model="input2Amount"
                   placeholder="0.0"
                   min="0"
-                  :max="input2.balance"
                 />
                 <span
                   @click="getMax('input2')"
@@ -250,9 +246,9 @@
                     &&
                     input2Amount>0
                     &&
-                    input1Amount<=input1.balance
+                    new Number(input1Amount)<=new Number(input1.balance)
                     &&
-                    input2Amount<=input2.balance"
+                    new Number(input2Amount)<=new Number(input2.balance)"
               class="swap-button btn btn-success btn-block"
             >
               Supply
@@ -308,6 +304,7 @@ import BigNumber from 'bignumber.js'
 import { getRouterContract, getFactoryContract } from '../web3Utils/trade.js'
 import getPairContract from '../web3Utils/pair.js'
 import getFarmContract from '../web3Utils/farm.js'
+import { toNonExponential } from '../utils/index.js'
 
 export default {
   data() {
@@ -456,33 +453,34 @@ export default {
       const to = this.$store.state.publicAddress
       if (!to) return
       const amountIn = new BigNumber(this.fromAmount).multipliedBy(1e18)
-      const amountOut = new BigNumber(this.toAmount).multipliedBy(1e18)
+      const amountOutMin = new BigNumber(this.toAmount).multipliedBy(1e18).multipliedBy(0.992)
       const path = [this.from.addr, this.to.addr]
       const deadline = Math.floor((new Date()).getTime() / 1000) + 1200
       let methodName = 'swapExactTokensForTokens' // 方法名
       let props = [ // 参数
         amountIn,
-        amountOut,
+        amountOutMin,
         path,
         to,
         deadline
       ]
-      let value = 0 // bnb
+      let sendObj = { // send发送的对象
+        from: to,
+        gas: 10000000
+      }
       if (this.from.name === 'BNB') {
         methodName = 'swapExactETHForTokens'
-        value = amountIn
+        sendObj.value = amountIn // 如果是bnb->其他，就要添加value
         props.shift()
       } else if (this.to.name === 'BNB') {
         methodName = 'swapExactTokensForETH'
       }
-      this.routerContract.methods[methodName](...props).send({
-        from: to,
-        value: value,
-        gas: 10000000
-      }).then(() => {
+      console.log(this.fromAmount)
+      console.log(props)
+      this.routerContract.methods[methodName](...props).send(sendObj).then(() => {
         // 交易成功
         this.from.balance -= this.fromAmount
-        this.to.balance += this.toAmount
+        this.to.balance = new Number(this.to.balance) + new Number(this.toAmount)
         this.fromAmount = ''
         this.toAmount = ''
         // bnb也查询一下
@@ -496,6 +494,8 @@ export default {
     },
     // 交换 交易的代币 from和to
     exchangeFromAndTo() {
+      this.fromAmount = ''
+      this.toAmount = ''
       const token = this.from
       this.from = this.to
       this.to = token
@@ -512,16 +512,26 @@ export default {
       let token = this.searchTokenResult[index]
       // 将选中的token赋值给对应的对象
       // 如果要赋值的对象 对应的另一个对象 已经选中一样的则 互相交换
+      // 如果是交换则要把值重置为空
       if (this.tokenTo === 'to' && this.from === token) {
         this.from = this[this.tokenTo]
+        this.fromAmount = ''
+        this.toAmount = ''
       } else if (this.tokenTo === 'from' && this.to === token) {
         this.to = this[this.tokenTo]
+        this.fromAmount = ''
+        this.toAmount = ''
       } else if (this.tokenTo === 'input1' && this.input2 === token) {
         this.input2 = this[this.tokenTo]
+        this.input1Amount = ''
+        this.input2Amount = ''
       } else if (this.tokenTo === 'input2' && this.input1 === token) {
         this.input1 = this[this.tokenTo]
+        this.input1Amount = ''
+        this.input2Amount = ''
       }
       this[this.tokenTo] = token
+      this.input2CanChange = true
       $('#tokenModal').modal('hide')
     },
     // getRouterContract
@@ -535,11 +545,13 @@ export default {
       const address = this.$store.state.publicAddress
       if (!address) return
       let balance = await this.getBalance(tokenAddr, address)
-      balance = balance / 1e18
+      balance = toNonExponential(balance / 1e18)
       this.$set(target[i], 'balance', balance)
     },
     // 传入token地址和钱包地址 获取token余额
-    async getBalance(tokenAddr, address) {
+    async getBalance(tokenAddr, address, num = 1) {
+      // 发请求查询余额，如果出错会递归查询，但查询次数过多（超过4次）就停止
+      if (num > 4) return
       try {
         const result = await $.ajax({
           url: 'https://api-testnet.bscscan.com/api',
@@ -556,10 +568,10 @@ export default {
           return result.result
         } else {
           // 没获取到就递归获取
-          return await this.getBalance(tokenAddr, address)
+          return await this.getBalance(tokenAddr, address, ++num)
         }
       } catch (err) {
-        return await this.getBalance(tokenAddr, address)
+        return await this.getBalance(tokenAddr, address, ++num)
       }
     },
     // approve
@@ -651,7 +663,7 @@ export default {
             reserves[1] = temp
           }
           this.routerContract.methods.getAmountOut(amountIn, reserves[0], reserves[1]).call().then(amountOut => {
-            this.toAmount = new Number(amountOut/1e18)
+            this.toAmount = toNonExponential(amountOut/1e18)
           })
         })
       }
@@ -675,7 +687,7 @@ export default {
             reserves[1] = temp
           }
           this.routerContract.methods.getAmountIn(amountOut, reserves[0], reserves[1]).call().then(amountIn => {
-            this.fromAmount = new Number(amountIn/1e18)
+            this.fromAmount = toNonExponential(amountIn/1e18)
           })
         })
       }
@@ -699,7 +711,7 @@ export default {
             reserves[1] = temp
           }
           this.routerContract.methods.getAmountIn(amountOut, reserves[0], reserves[1]).call().then(amountIn => {
-            this.fromAmount = new Number(amountIn/1e18)
+            this.fromAmount = toNonExponential(amountIn/1e18)
           })
         })
       }
@@ -723,7 +735,7 @@ export default {
             reserves[1] = temp
           }
           this.routerContract.methods.getAmountOut(amountIn, reserves[0], reserves[1]).call().then(amountOut => {
-            this.toAmount = new Number(amountOut/1e18)
+            this.toAmount = toNonExponential(amountOut/1e18)
           })
         })
       }
