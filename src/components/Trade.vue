@@ -620,6 +620,41 @@ export default {
           this[approveName] = false
         }
       }
+    },
+    // 计算amount  from/to
+    computedAmount(token) {
+      let ByToken = ''
+      let methodName = ''
+      if (token === 'from') {
+        ByToken = 'to'
+        methodName = 'getAmountIn'
+      } else if (token === 'to') {
+        ByToken = 'from'
+        methodName = 'getAmountOut'
+      }
+      const tokenCanChange = token + 'CanChange'
+      const tokenAmount = token + 'Amount'
+      const ByTokenAmount = ByToken + 'Amount'
+      // 要先判断是否可以change
+      if (!this[tokenCanChange]) return
+      if (!this[token].name || !this[ByToken].name || !(this[ByTokenAmount] > 0)) {
+        return this[tokenAmount] = ''
+      }
+      this.factoryContract.methods.getPair(this[ByToken].addr, this[token].addr).call().then(async pairAddr => {
+        const pairContract = await getPairContract(pairAddr)
+        const reserves = await pairContract.methods.getReserves().call()
+        const amountBy = new BigNumber(this[ByTokenAmount] || 0).multipliedBy(1e18)
+        // pair的顺序是固定的 ascii
+        // 如果from是大的那个(指ascii)则需要把reserves交换一下
+        if (this.from.name > this.to.name) {
+          const temp = reserves[0]
+          reserves[0] = reserves[1]
+          reserves[1] = temp
+        }
+        this.routerContract.methods[methodName](amountBy, reserves[0], reserves[1]).call().then(amount => {
+          this[tokenAmount] = toNonExponential(amount/1e18)
+        })
+      })
     }
   },
   created() {
@@ -638,6 +673,8 @@ export default {
     async "input1Amount" (newVal, oldVal) {
       if (newVal !== oldVal) {
         this.judgeApprove('input1')
+        // 注：在计算前，先要判断这个pair币是不是存在
+        // pair存在则继续，否则提醒用户pair由他首创
       }
     },
     async "input1.name" (newVal, oldVal) {
@@ -660,104 +697,28 @@ export default {
       if (newVal !== oldVal) {
         this.judgeApprove('from')
         // getAmountIn/getAmountOut
-        // 要先判断是否可以change
-        if (!this.toCanChange) return
-        if (!this.from.name || !this.to.name || !(this.fromAmount > 0)) {
-          return this.toAmount = ''
-        }
-        this.factoryContract.methods.getPair(this.from.addr, this.to.addr).call().then(async pairAddr => {
-          const pairContract = await getPairContract(pairAddr)
-          const reserves = await pairContract.methods.getReserves().call()
-          const amountIn = new BigNumber(this.fromAmount || 0).multipliedBy(1e18)
-          // pair的顺序是固定的 ascii
-          // 如果from是大的那个(指ascii)则需要把reserves交换一下
-          if (this.from.name > this.to.name) {
-            const temp = reserves[0]
-            reserves[0] = reserves[1]
-            reserves[1] = temp
-          }
-          this.routerContract.methods.getAmountOut(amountIn, reserves[0], reserves[1]).call().then(amountOut => {
-            this.toAmount = toNonExponential(amountOut/1e18)
-          })
-        })
+        this.computedAmount('to') // 传入要计算的
       }
     },
     "from.name" (newVal, oldVal) {
       if (newVal !== oldVal) {
         this.judgeApprove('from')
         // getAmountIn/getAmountOut
-        // 要先判断是否可以change
-        if (!this.fromCanChange) return
-        if (!this.from.name || !this.to.name || !(this.toAmount > 0)) {
-          return this.fromAmount = ''
-        }
-        this.factoryContract.methods.getPair(this.from.addr, this.to.addr).call().then(async pairAddr => {
-          const pairContract = await getPairContract(pairAddr)
-          const reserves = await pairContract.methods.getReserves().call()
-          const amountOut = new BigNumber(this.toAmount || 0).multipliedBy(1e18)
-          // pair的顺序是固定的 ascii
-          // 如果from是大的那个(指ascii)则需要把reserves交换一下
-          if (this.from.name > this.to.name) {
-            const temp = reserves[0]
-            reserves[0] = reserves[1]
-            reserves[1] = temp
-          }
-          this.routerContract.methods.getAmountIn(amountOut, reserves[0], reserves[1]).call().then(amountIn => {
-            this.fromAmount = toNonExponential(amountIn/1e18)
-          })
-        })
+        this.computedAmount('from') // 传入要计算的
       }
     },
     "toAmount" (newVal, oldVal) {
       if (newVal !== oldVal) {
         this.judgeApprove('to')
         // getAmountIn/getAmountOut
-        // 要先判断是否可以change
-        if (!this.fromCanChange) return
-        if (!this.from.name || !this.to.name || !(this.toAmount > 0)) {
-          return this.fromAmount = ''
-        }
-        this.factoryContract.methods.getPair(this.from.addr, this.to.addr).call().then(async pairAddr => {
-          const pairContract = await getPairContract(pairAddr)
-          const reserves = await pairContract.methods.getReserves().call()
-          const amountOut = new BigNumber(this.toAmount || 0).multipliedBy(1e18)
-          // pair的顺序是固定的 ascii
-          // 如果from是大的那个(指ascii)则需要把reserves交换一下
-          if (this.from.name > this.to.name) {
-            const temp = reserves[0]
-            reserves[0] = reserves[1]
-            reserves[1] = temp
-          }
-          this.routerContract.methods.getAmountIn(amountOut, reserves[0], reserves[1]).call().then(amountIn => {
-            this.fromAmount = toNonExponential(amountIn/1e18)
-          })
-        })
+        this.computedAmount('from') // 传入要计算的
       }
     },
     "to.name" (newVal, oldVal) {
       if (newVal !== oldVal) {
         this.judgeApprove('to')
         // getAmountIn/getAmountOut
-        // 要先判断是否可以change
-        if (!this.toCanChange) return
-        if (!this.from.name || !this.to.name || !(this.fromAmount > 0)) {
-          return this.toAmount = ''
-        }
-        this.factoryContract.methods.getPair(this.from.addr, this.to.addr).call().then(async pairAddr => {
-          const pairContract = await getPairContract(pairAddr)
-          const reserves = await pairContract.methods.getReserves().call()
-          const amountIn = new BigNumber(this.fromAmount || 0).multipliedBy(1e18)
-          // pair的顺序是固定的 ascii
-          // 如果from是大的那个(指ascii)则需要把reserves交换一下
-          if (this.from.name > this.to.name) {
-            const temp = reserves[0]
-            reserves[0] = reserves[1]
-            reserves[1] = temp
-          }
-          this.routerContract.methods.getAmountOut(amountIn, reserves[0], reserves[1]).call().then(amountOut => {
-            this.toAmount = toNonExponential(amountOut/1e18)
-          })
-        })
+        this.computedAmount('to') // 传入要计算的
       }
     },
     // address

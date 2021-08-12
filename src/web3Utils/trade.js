@@ -1062,3 +1062,9 @@ export async function getRouterContract() {
 // removeLiquidityETHWithPermit
 // removeLiquidityETHSupportingFeeOnTransferTokens
 // removeLiquidityETHWithPermitSupportingFeeOnTransferTokens
+
+
+// addliquidity的pair不存在则
+// You are the first liquidity provider.
+// The ratio of tokens you add will set the price of this pool.
+// Once you are happy with the rate click supply to review.
