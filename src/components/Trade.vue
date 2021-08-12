@@ -109,7 +109,7 @@
             <!-- swap-button -->
             <div
               @click="swap"
-              v-if="new Number(fromAmount)<=new Number(from.balance) && fromAmount>0 && this.from.name && this.to.name"
+              v-if="new Number(fromAmount)<=new Number(from.balance) && fromAmount>0 && toAmount>0 && this.from.name && this.to.name"
               class="swap-button btn btn-success btn-block"
             >
               Swap
@@ -170,6 +170,12 @@
             </div>
           </div>
           <div class="add-liquidity-content">
+            <!-- 如果pair不存在提示用户 -->
+            <div v-if="!hasPair" class="not-pair">
+              <p>You are the first liquidity provider.</p>
+              <p>The ratio of tokens you add will set the price of this pool.</p>
+              <p>Once you are happy with the rate click supply to review.</p>
+            </div>
             <!-- input1 -->
             <!-- 类名就不改了，和swap共用一部分样式 -->
             <div class="swap-from">
@@ -187,6 +193,8 @@
                   v-model="input1Amount"
                   placeholder="0.0"
                   min="0"
+                  @focus="input1CanChange = false"
+                  @blur="input1CanChange = true"
                 />
                 <span
                   @click="getMax('input1')"
@@ -220,6 +228,8 @@
                   v-model="input2Amount"
                   placeholder="0.0"
                   min="0"
+                  @focus="input2CanChange = false"
+                  @blur="input2CanChange = true"
                 />
                 <span
                   @click="getMax('input2')"
@@ -272,7 +282,13 @@
               class="swap-button btn btn-default btn-blockbtn-default btn-block"
               disabled
             >
-              Invalid pair
+              {{
+                (new Number(input1Amount)>=new Number(input1.balance)) || (new Number(input2Amount)>=new Number(input2.balance))
+                ?
+                'Insufficient balance'
+                :
+                'Enter an amount'
+              }}
             </div>
           </div>
         </div>
@@ -374,8 +390,10 @@ export default {
       tokenTo: '', // 选中的token赋值给谁
       input1: tokens[0], // input1默认也是BNB
       input1Amount: '',
+      input1CanChange: true, // 默认可变
       input2: {},
       input2Amount: '',
+      input2CanChange: true, // 默认可变
       // liquidity
       liquidity: [
         {
@@ -403,63 +421,66 @@ export default {
       fromApprove: true,
       toApprove: true,
       input1Approve: true,
-      input2Approve: true
+      input2Approve: true,
+      // 标识addliquidity的pair是否已存在
+      hasPair: true
     }
   },
   methods: {
     // addliquidity
     addLiquidity() {
       const address = this.$store.state.publicAddress
+      const name1 = this.input1.name
+      const name2 = this.input2.name
       const addr1 = this.input1.addr
       const addr2 = this.input2.addr
-      const amount1 = new BigNumber(this.input1Amount).multipliedBy(1e18)
+      const amount1 = new BigNumber(Number(this.input1Amount).toFixed(15)).multipliedBy(1e18)
       const amount1Min = amount1.multipliedBy(0.992)
-      const amount2 = new BigNumber(this.input2Amount).multipliedBy(1e18)
+      const amount2 = new BigNumber(Number(this.input2Amount).toFixed(15)).multipliedBy(1e18)
       const amount2Min = amount2.multipliedBy(0.992)
       const deadline = Math.floor((new Date).getTime()/1000) + 1200
+      // 保存引用（balance/amount）用于交易成功后修改余额等
+      const input1 = this.input1
+      const input2 = this.input2
+      const input1Amount = this.input1Amount
+      const input2Amount = this.input2Amount
       // 不含BNB
-      if (this.input1.name !== 'BNB' && this.input2.name !== 'BNB') {
+      if (name1 !== 'BNB' && name2 !== 'BNB') {
         this.routerContract.methods.addLiquidity(addr1, addr2, amount1, amount2, amount1Min, amount2Min, address, deadline).send({
           from: address,
           gas: 10000000
         }).then(() => {
-          this.input1.balance -= this.input1Amount
-          this.input2.balance -= this.input2Amount
-          this.input1Amount = ''
-          this.input2Amount = ''
-          // 每次交易完更新BNB
-          this.getTokenBalance(this.tokens, 0)
+          this.afterAddLiquidity(input1, input2, input1Amount, input2Amount)
         })
-      } else if (this.input1.name && this.input2.name && (this.input1.name === 'BNB' || this.input2.name === 'BNB')) {
+      } else if (name1 && name2 && (name1 === 'BNB' || name2 === 'BNB')) {
         // input1和2都存在，但是其中一个是BNB
-        if (this.input1.name === 'BNB') {
+        if (name1 === 'BNB') {
           this.routerContract.methods.addLiquidityETH(addr2, amount2, amount2Min, amount1Min, address, deadline).send({
             from: address,
             value: amount1,
             gas: 10000000
           }).then(() => {
-            this.input1.balance -= this.input1Amount
-            this.input2.balance -= this.input2Amount
-            this.input1Amount = ''
-            this.input2Amount = ''
-            // 每次交易完更新BNB
-            this.getTokenBalance(this.tokens, 0)
+            this.afterAddLiquidity(input1, input2, input1Amount, input2Amount)
           })
-        } else if (this.input2.name === 'BNB') {
+        } else if (name2 === 'BNB') {
           this.routerContract.methods.addLiquidityETH(addr1, amount1, amount1Min, amount2Min, address, deadline).send({
             from: address,
             value: amount2,
             gas: 10000000
           }).then(() => {
-            this.input1.balance -= this.input1Amount
-            this.input2.balance -= this.input2Amount
-            this.input1Amount = ''
-            this.input2Amount = ''
-            // 每次交易完更新BNB
-            this.getTokenBalance(this.tokens, 0)
+            this.afterAddLiquidity(input1, input2, input1Amount, input2Amount)
           })
         }
       }
+    },
+    afterAddLiquidity(input1, input2, input1Amount, input2Amount) {
+      input1.balance -= input1Amount
+      input2.balance -= input2Amount
+      this.input1Amount = ''
+      this.input2Amount = ''
+      this.hasPair = true
+      // 每次交易完更新BNB
+      this.getTokenBalance(this.tokens, 0)
     },
     // swap
     swap() {
@@ -467,10 +488,16 @@ export default {
       if (!to) return
       const amountIn = new BigNumber(this.fromAmount).multipliedBy(1e18)
       // 转bignumber时最多只能有15位小数
-      const amountOutMin = new BigNumber(new Number(this.toAmount).toFixed(15)).multipliedBy(1e18).multipliedBy(0.992)
+      const amountOutMin = new BigNumber(Number(this.toAmount).toFixed(15)).multipliedBy(1e18).multipliedBy(0.992)
       const path = [this.from.addr, this.to.addr]
       const deadline = Math.floor((new Date()).getTime() / 1000) + 1200
-      let methodName = 'swapExactTokensForTokens' // 方法名
+      // 保存引用，方便交易成功后修改信息
+      const fromToken = this.from
+      const toToken = this.to
+      const fromAmount = this.fromAmount
+      const toAmount = this.toAmount
+      // 方法名
+      let methodName = 'swapExactTokensForTokens'
       let props = [ // 参数
         amountIn,
         amountOutMin,
@@ -491,8 +518,8 @@ export default {
       }
       this.routerContract.methods[methodName](...props).send(sendObj).then(() => {
         // 交易成功
-        this.from.balance -= this.fromAmount
-        this.to.balance = new Number(this.to.balance) + new Number(this.toAmount)
+        fromToken.balance -= fromAmount
+        toToken.balance = Number(toToken.balance) + Number(toAmount)
         this.fromAmount = ''
         this.toAmount = ''
         // bnb也查询一下
@@ -622,7 +649,7 @@ export default {
       }
     },
     // 计算amount  from/to
-    computedAmount(token) {
+    computedFromTo(token) {
       let ByToken = ''
       let methodName = ''
       if (token === 'from') {
@@ -652,8 +679,41 @@ export default {
           reserves[1] = temp
         }
         this.routerContract.methods[methodName](amountBy, reserves[0], reserves[1]).call().then(amount => {
-          this[tokenAmount] = toNonExponential(amount/1e18)
+          this[tokenAmount] = toNonExponential(amount / 1e18)
         })
+      }).catch(() => {
+        this[tokenAmount] = ''
+      })
+    },
+    // 计算input1/input2
+    computedAddAmount(token) {
+      let ByToken = ''
+      if (token === 'input1') {
+        ByToken = 'input2'
+      } else if (token === 'input2') {
+        ByToken = 'input1'
+      }
+      const tokenCanChange = token + 'CanChange'
+      const tokenAmount = token + 'Amount'
+      const ByTokenAmount = ByToken + 'Amount'
+      // 要先判断是否可以change
+      if (!this[tokenCanChange]) return
+      if (!this[token].name || !this[ByToken].name || !(this[ByTokenAmount] > 0)) {
+        return this[tokenAmount] = ''
+      }
+      this.factoryContract.methods.getPair(this[ByToken].addr, this[token].addr).call().then(async pairAddr => {
+        const pairContract = await getPairContract(pairAddr)
+        const reserves = await pairContract.methods.getReserves().call()
+        const amountBy = new BigNumber(this[ByTokenAmount] || 0).multipliedBy(1e18)
+        // pair的顺序是固定的 ascii
+        const ratio = reserves[0]/reserves[1]
+        if (this[token].name > this[ByToken].name) {
+          // 如果要计算的token更大，即排在后面。
+          this[tokenAmount] = toNonExponential((amountBy / ratio) / 1e18)
+        } else if (this[token].name < this[ByToken].name) {
+          // 如果要计算的token更小，即排在前面
+          this[tokenAmount] = toNonExponential((amountBy * ratio) / 1e18)
+        }
       })
     }
   },
@@ -670,26 +730,46 @@ export default {
   },
   watch: {
     // addliquidity  input1和input2
-    async "input1Amount" (newVal, oldVal) {
+    "input1Amount" (newVal, oldVal) {
       if (newVal !== oldVal) {
         this.judgeApprove('input1')
-        // 注：在计算前，先要判断这个pair币是不是存在
+        // 计算
+        this.computedAddAmount('input2')
+      }
+    },
+    "input1.name" (newVal, oldVal) {
+      if (newVal !== oldVal) {
+        this.judgeApprove('input1')
+        // 注：切换币后，先要判断这个pair币是不是存在
         // pair存在则继续，否则提醒用户pair由他首创
+        if (!this.input1.addr || !this.input2.addr) return
+        this.factoryContract.methods.getPair(this.input1.addr, this.input2.addr).call().then(pairAddr => {
+          if (pairAddr === '0x0000000000000000000000000000000000000000') return this.hasPair = false
+          // 存在则继续计算
+          this.hasPair = true
+          this.computedAddAmount('input1')
+        })
       }
     },
-    async "input1.name" (newVal, oldVal) {
-      if (newVal !== oldVal) {
-        this.judgeApprove('input1')
-      }
-    },
-    async "input2Amount" (newVal, oldVal) {
-      if (newVal !== oldVal) {
-        this.judgeApprove('input2')
-      }
-    },
-    async "input2.name" (newVal, oldVal) {
+    "input2Amount" (newVal, oldVal) {
       if (newVal !== oldVal) {
         this.judgeApprove('input2')
+        // 计算
+        this.computedAddAmount('input1')
+      }
+    },
+    "input2.name" (newVal, oldVal) {
+      if (newVal !== oldVal) {
+        this.judgeApprove('input2')
+        // 注：切换币后，先要判断这个pair币是不是存在
+        // pair存在则继续，否则提醒用户pair由他首创
+        if (!this.input1.addr || !this.input2.addr) return
+        this.factoryContract.methods.getPair(this.input1.addr, this.input2.addr).call().then(pairAddr => {
+          if (pairAddr === '0x0000000000000000000000000000000000000000') return this.hasPair = false
+          // 存在则继续计算
+          this.hasPair = true
+          this.computedAddAmount('input2')
+        })
       }
     },
     // swap的 from和to 的amount       from/in  to/out
@@ -697,28 +777,28 @@ export default {
       if (newVal !== oldVal) {
         this.judgeApprove('from')
         // getAmountIn/getAmountOut
-        this.computedAmount('to') // 传入要计算的
+        this.computedFromTo('to') // 传入要计算的
       }
     },
     "from.name" (newVal, oldVal) {
       if (newVal !== oldVal) {
         this.judgeApprove('from')
         // getAmountIn/getAmountOut
-        this.computedAmount('from') // 传入要计算的
+        this.computedFromTo('from') // 传入要计算的
       }
     },
     "toAmount" (newVal, oldVal) {
       if (newVal !== oldVal) {
         this.judgeApprove('to')
         // getAmountIn/getAmountOut
-        this.computedAmount('from') // 传入要计算的
+        this.computedFromTo('from') // 传入要计算的
       }
     },
     "to.name" (newVal, oldVal) {
       if (newVal !== oldVal) {
         this.judgeApprove('to')
         // getAmountIn/getAmountOut
-        this.computedAmount('to') // 传入要计算的
+        this.computedFromTo('to') // 传入要计算的
       }
     },
     // address
@@ -1048,6 +1128,14 @@ export default {
   font-weight: 600;
   background-color: #f4f4f4;
   border-radius: 50%;
+}
+.add-liquidity-content .not-pair {
+  padding: 15px;
+  margin-bottom: 20px;
+  font-weight: 500;
+  color: #452a7a;
+  border: 1px solid #ddd;
+  border-radius: 15px;
 }
 @media screen and (max-width: 768px) {
   .add-liquidity-content input {
