@@ -92,6 +92,20 @@
                 </span>
               </div>
             </div>
+            <!-- Price -->
+            <div v-if="from.name && to.name && fromAmount && toAmount" class="swap-price">
+              <div>Price</div>
+              <div class="from-to-price">
+                {{ (fromAmount/toAmount).toFixed(12) }} {{ from.name }} per {{ to.name }}
+              </div>
+            </div>
+            <!-- Minimum received -->
+            <div v-if="from.name && to.name && fromAmount && toAmount" class="Minimum-received">
+              <div>Minimum received</div>
+              <div>
+                <span>{{ (toAmount * 0.992).toFixed(12) }} {{ to.name }}</span>
+              </div>
+            </div>
             <!-- swap-button -->
             <div
               @click="swap"
@@ -419,7 +433,6 @@ export default {
       } else if (this.input1.name && this.input2.name && (this.input1.name === 'BNB' || this.input2.name === 'BNB')) {
         // input1和2都存在，但是其中一个是BNB
         if (this.input1.name === 'BNB') {
-          console.log(this.routerContract.methods)
           this.routerContract.methods.addLiquidityETH(addr2, amount2, amount2Min, amount1Min, address, deadline).send({
             from: address,
             value: amount1,
@@ -649,7 +662,9 @@ export default {
         // getAmountIn/getAmountOut
         // 要先判断是否可以change
         if (!this.toCanChange) return
-        if (!this.from.name || !this.to.name || !(this.fromAmount > 0)) return
+        if (!this.from.name || !this.to.name || !(this.fromAmount > 0)) {
+          return this.toAmount = ''
+        }
         this.factoryContract.methods.getPair(this.from.addr, this.to.addr).call().then(async pairAddr => {
           const pairContract = await getPairContract(pairAddr)
           const reserves = await pairContract.methods.getReserves().call()
@@ -673,7 +688,9 @@ export default {
         // getAmountIn/getAmountOut
         // 要先判断是否可以change
         if (!this.fromCanChange) return
-        if (!this.from.name || !this.to.name || !(this.toAmount > 0)) return
+        if (!this.from.name || !this.to.name || !(this.toAmount > 0)) {
+          return this.fromAmount = ''
+        }
         this.factoryContract.methods.getPair(this.from.addr, this.to.addr).call().then(async pairAddr => {
           const pairContract = await getPairContract(pairAddr)
           const reserves = await pairContract.methods.getReserves().call()
@@ -697,7 +714,9 @@ export default {
         // getAmountIn/getAmountOut
         // 要先判断是否可以change
         if (!this.fromCanChange) return
-        if (!this.from.name || !this.to.name || !(this.toAmount > 0)) return
+        if (!this.from.name || !this.to.name || !(this.toAmount > 0)) {
+          return this.fromAmount = ''
+        }
         this.factoryContract.methods.getPair(this.from.addr, this.to.addr).call().then(async pairAddr => {
           const pairContract = await getPairContract(pairAddr)
           const reserves = await pairContract.methods.getReserves().call()
@@ -721,7 +740,9 @@ export default {
         // getAmountIn/getAmountOut
         // 要先判断是否可以change
         if (!this.toCanChange) return
-        if (!this.from.name || !this.to.name || !(this.fromAmount > 0)) return
+        if (!this.from.name || !this.to.name || !(this.fromAmount > 0)) {
+          return this.toAmount = ''
+        }
         this.factoryContract.methods.getPair(this.from.addr, this.to.addr).call().then(async pairAddr => {
           const pairContract = await getPairContract(pairAddr)
           const reserves = await pairContract.methods.getReserves().call()
@@ -922,6 +943,22 @@ export default {
   padding: 10PX 0;
   background-color: rgb(238, 234, 244);
   border-radius: 15px;
+}
+.swap-content .swap-price {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 10px 5px 10px;
+  font-weight: 520;
+  color: #452a7a;
+}
+.swap-content .Minimum-received {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 10px;
+  font-weight: 520;
+  color: #452a7a;
 }
 .from-max,
 .to-max {
