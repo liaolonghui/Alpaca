@@ -106,6 +106,14 @@
                 <span>{{ (toAmount * 0.992).toFixed(12) }} {{ to.name }}</span>
               </div>
             </div>
+            <!-- approve -->
+            <div
+              @click="approve('from')"
+              v-if="fromApprove && from.name && fromAmount"
+              class="swap-button btn btn-success btn-block"
+            >
+              Approve {{from.name}}
+            </div>
             <!-- swap-button -->
             <div
               @click="swap"
@@ -417,9 +425,8 @@ export default {
       ],
       // routerAddr
       routerAddr: '0xeaBa760F2f0F68981C9D9816741616277c7AbC3f',
-      // 标识是否需要approve
+      // 标识是否需要approve   to应该无需approve
       fromApprove: true,
-      toApprove: true,
       input1Approve: true,
       input2Approve: true,
       // 标识addliquidity的pair是否已存在
@@ -789,14 +796,14 @@ export default {
     },
     "toAmount" (newVal, oldVal) {
       if (newVal !== oldVal) {
-        this.judgeApprove('to')
+        // to不需要approve
         // getAmountIn/getAmountOut
         this.computedFromTo('from') // 传入要计算的
       }
     },
     "to.name" (newVal, oldVal) {
       if (newVal !== oldVal) {
-        this.judgeApprove('to')
+        // to不需要approve
         // getAmountIn/getAmountOut
         this.computedFromTo('to') // 传入要计算的
       }
