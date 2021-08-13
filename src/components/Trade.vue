@@ -148,20 +148,37 @@
           </div>
           <div class="liquidity-content">
             <h4>Your Liquidity</h4>
-            <!-- liquidity -->
+            <!-- your-liquidity -->
             <div class="your-liquidity">
-              <div v-for="item in liquidity" :key="item.name" class="liquidity-item">
-                <div class="liquidity-info">
-                  <div class="liquidity-img">
-                    <img :src="item.icon1" />
-                    <img :src="item.icon2" />
+              <div v-for="item in liquidity" :key="item.name">
+                <div class="liquidity-item">
+                  <div class="liquidity-top" @click="showOrHideLiquidity">
+                    <div class="liquidity-info">
+                      <div class="liquidity-img">
+                        <img :src="item.icon1" />
+                        <img :src="item.icon2" />
+                      </div>
+                      <div class="liquidity-name">
+                        {{ item.name }}
+                      </div>
+                    </div>
+                    <div class="liquidity-i">
+                      <i class="iconfont icon-expand-more"></i>
+                    </div>
                   </div>
-                  <div class="liquidity-name">
-                    {{ item.name }}
+                  <!-- liquidity-detail -->
+                  <div class="liquidity-detail">
+                    <div class="liquidity-btn-box">
+                      <!-- add -->
+                      <div @click="(e) => toAddLiquidity(e, item.name)" class="btn btn-primary btn-lg liquidity-btn">
+                        Add
+                      </div>
+                      <!-- remove -->
+                      <div @click="(e) => toRemoveLiquidity(e, item.name)" class="btn btn-primary btn-lg liquidity-btn">
+                        Remove
+                      </div>
+                    </div>
                   </div>
-                </div>
-                <div class="liquidity-i">
-                  <i class="iconfont icon-expand-more"></i>
                 </div>
               </div>
             </div>
@@ -441,9 +458,9 @@ export default {
       const name2 = this.input2.name
       const addr1 = this.input1.addr
       const addr2 = this.input2.addr
-      const amount1 = new BigNumber(Number(this.input1Amount).toFixed(15)).multipliedBy(1e18)
+      const amount1 = new BigNumber(Number(this.input1Amount) * 1e18)
       const amount1Min = amount1.multipliedBy(0.992)
-      const amount2 = new BigNumber(Number(this.input2Amount).toFixed(15)).multipliedBy(1e18)
+      const amount2 = new BigNumber(Number(this.input2Amount) * 1e18)
       const amount2Min = amount2.multipliedBy(0.992)
       const deadline = Math.floor((new Date).getTime()/1000) + 1200
       // 保存引用（balance/amount）用于交易成功后修改余额等
@@ -493,9 +510,9 @@ export default {
     swap() {
       const to = this.$store.state.publicAddress
       if (!to) return
-      const amountIn = new BigNumber(this.fromAmount).multipliedBy(1e18)
+      const amountIn = new BigNumber(this.fromAmount * 1e18)
       // 转bignumber时最多只能有15位小数
-      const amountOutMin = new BigNumber(Number(this.toAmount).toFixed(15)).multipliedBy(1e18).multipliedBy(0.992)
+      const amountOutMin = new BigNumber(Number(this.toAmount) * 1e18).multipliedBy(0.992)
       const path = [this.from.addr, this.to.addr]
       const deadline = Math.floor((new Date()).getTime() / 1000) + 1200
       // 保存引用，方便交易成功后修改信息
@@ -654,6 +671,30 @@ export default {
           this[approveName] = false
         }
       }
+    },
+    // showOrHideLiquidity
+    showOrHideLiquidity(e) {
+      $(e.currentTarget).find('.liquidity-i>i').toggleClass('icon-expand-more')
+      $(e.currentTarget).find('.liquidity-i>i').toggleClass('icon-expandless')
+      $(e.currentTarget).parent().find('.liquidity-detail').slideToggle()
+    },
+    // toAddLiquidity
+    toAddLiquidity(e, liquidityName) {
+      e.stopPropagation()
+      this.tradeType = 'addLiquidity'
+      const nameArr = liquidityName.split('/')
+      const totalTokens = this.tokens.concat(this.otherTokens)
+      this.input1 = totalTokens.find(token => {
+        return token.name === nameArr[0]
+      })
+      this.input2 = totalTokens.find(token => {
+        return token.name === nameArr[1]
+      })
+    },
+    // toRemoveLiquidity
+    toRemoveLiquidity(e, liquidityName) {
+      e.stopPropagation()
+      alert('还未完成')
     },
     // 计算amount  from/to
     computedFromTo(token) {
@@ -944,7 +985,7 @@ export default {
 }
 .swap-content input {
   width: 50%;
-  font-size: 15px;
+  font-size: 18px;
   font-weight: 540;
   border: none;
   outline: none;
@@ -1052,8 +1093,6 @@ export default {
   padding-top: 10px;
 }
 .your-liquidity .liquidity-item {
-  display: flex;
-  justify-content: space-between;
   padding: 10px 15px;
   margin-top: 10px;
   border: 1px solid transparent;
@@ -1062,6 +1101,24 @@ export default {
 }
 .your-liquidity .liquidity-item:hover {
   border-color: #ccc;
+}
+.your-liquidity .liquidity-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.your-liquidity .liquidity-detail {
+  display: none;
+  padding-top: 20px;
+}
+.your-liquidity .liquidity-btn-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.your-liquidity .liquidity-btn {
+  width: 48%;
+  border-radius: 15px;
 }
 .your-liquidity .liquidity-img>img {
   width: 24px;
