@@ -342,6 +342,10 @@
                 <div class="token-info">
                   <img :src="token.icon" alt="">
                   <span>{{ token.name }}</span>
+                  <!-- 如果tokens中有则显示remove, 没有则显示add -->
+                  <span @click="(e) => addOrRemoveToken(e, token)" class="add-remove-token" v-if="token.type == 'other'">
+                    ({{ tokens.indexOf(token) >= 0 ? 'Remove' : 'Add' }})
+                  </span>
                 </div>
                 <div class="trade-token-balance">
                   {{ token.balance>=0 ? token.balance : '-' }}
@@ -364,6 +368,8 @@ import { toNonExponential } from '../utils/index.js'
 
 export default {
   data() {
+    const memo = JSON.parse(localStorage.getItem('tokenArr')) || []
+    // 把memo中保存的添加到tokens中
     const tokens = [
       {
         name: 'BNB',
@@ -400,7 +406,17 @@ export default {
         addr: '0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd',
         icon: require('../assets/images/bnb.png')
       }
-    ]
+    ].concat(memo)
+    // 把memo中存在的从othertokens中去除
+    const nameArr = memo.map(m => m.name)
+    const otherTokens = [
+      {
+        name: 'work',
+        type: 'other',
+        addr: '0xDE259d3beCAdc21C1D8d33442aa68f43AB7327f5',
+        icon: require('../assets/images/defaultTokenIcon.svg')
+      }
+    ].filter(t => !(nameArr.includes(t.name)))
 
     return {
       tradeType: 'swap',
@@ -434,13 +450,7 @@ export default {
         }
       ],
       // otherTokens 其他token(可供用户自己添加)
-      otherTokens: [
-        {
-          name: 'work',
-          addr: '0xDE259d3beCAdc21C1D8d33442aa68f43AB7327f5',
-          icon: require('../assets/images/defaultTokenIcon.svg')
-        }
-      ],
+      otherTokens: otherTokens,
       // routerAddr
       routerAddr: '0xeaBa760F2f0F68981C9D9816741616277c7AbC3f',
       // 标识是否需要approve   to应该无需approve
@@ -452,6 +462,20 @@ export default {
     }
   },
   methods: {
+    // addOrRemoveToken
+    addOrRemoveToken(e, token) {
+      e.stopPropagation()
+      const index = this.tokens.indexOf(token)
+      let memo = JSON.parse(localStorage.getItem('tokenArr')) || []
+      if (index >= 0) {
+        this.tokens.splice(index, 1)
+        memo = memo.filter(m => m.name !== token.name)
+      } else {
+        this.tokens.push(token)
+        memo.push(token)
+      }
+      localStorage.setItem('tokenArr', JSON.stringify(memo))
+    },
     // addliquidity
     addLiquidity() {
       const address = this.$store.state.publicAddress
@@ -1253,7 +1277,7 @@ export default {
   border: none;
   cursor: pointer;
 }
-#tokenModal .token-item:hover {
+#tokenModal .token-item .add-remove-token:hover {
   color: #31c77f;
 }
 #tokenModal .token-item img {
