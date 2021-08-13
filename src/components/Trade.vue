@@ -3,7 +3,7 @@
     <div class="trade">
       <div class="trade-nav">
         <span
-          @click="tradeType = 'swap'"
+          @click="toSwap"
           :class="[tradeType === 'swap' ? 'active' : '']"
         >Swap</span>
         <!-- liquidity和addLiquidity时都会active -->
@@ -96,7 +96,8 @@
             <div v-if="from.name && to.name && fromAmount && toAmount" class="swap-price">
               <div>Price</div>
               <div class="from-to-price">
-                {{ (fromAmount/toAmount).toFixed(12) }} {{ from.name }} per {{ to.name }}
+                <p>{{ (fromAmount/toAmount).toFixed(12) }} {{ from.name }} per {{ to.name }}</p>
+                <p>{{ (toAmount/fromAmount).toFixed(12) }} {{ to.name }} per {{ from.name }}</p>
               </div>
             </div>
             <!-- Minimum received -->
@@ -142,7 +143,7 @@
             </div>
             <!-- add liquidity -->
             <div
-              @click="tradeType = 'addLiquidity'"
+              @click="toAddLiquidityfromliquidity"
               class="add-liquidity-btn btn btn-success btn-md"
             >Add Liquidity</div>
           </div>
@@ -672,6 +673,22 @@ export default {
         }
       }
     },
+    // toSwap
+    toSwap() {
+      this.tradeType = 'swap'
+      this.from = this.tokens[0]
+      this.fromAmount = ''
+      this.to = {}
+      this.toAmount = ''
+    },
+    // toAddLiquidityfromliquidity
+    toAddLiquidityfromliquidity() {
+      this.tradeType = 'addLiquidity'
+      this.input1 = this.tokens[0]
+      this.input1Amount = ''
+      this.input2 = {}
+      this.input2Amount = ''
+    },
     // showOrHideLiquidity
     showOrHideLiquidity(e) {
       $(e.currentTarget).find('.liquidity-i>i').toggleClass('icon-expand-more')
@@ -690,6 +707,8 @@ export default {
       this.input2 = totalTokens.find(token => {
         return token.name === nameArr[1]
       })
+      this.input1Amount = ''
+      this.input2Amount = ''
     },
     // toRemoveLiquidity
     toRemoveLiquidity(e, liquidityName) {
@@ -910,7 +929,7 @@ export default {
   user-select: none;
 }
 .trade-content {
-  margin-top: 100px;
+  margin-top: 80px;
 }
 @media screen and (min-width: 968px){
   .trade {
@@ -929,7 +948,7 @@ export default {
     justify-content: flex-start;
   }
   .trade-content {
-    margin-top: 80px;
+    margin-top: 65px;
   }
   .trade div.swap,
   .trade div.liquidity,
@@ -1040,12 +1059,17 @@ export default {
   padding: 15px 10px 5px 10px;
   font-weight: 520;
   color: #452a7a;
+  border-bottom: 1px solid #ccc;
+}
+.swap-price .from-to-price p {
+  margin: 0;
+  text-align: right;
 }
 .swap-content .Minimum-received {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 10px;
+  padding: 5px 10px;
   font-weight: 520;
   color: #452a7a;
 }
