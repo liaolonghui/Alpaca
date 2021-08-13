@@ -537,7 +537,7 @@ export default {
       if (!to) return
       const amountIn = new BigNumber(this.fromAmount * 1e18)
       // 转bignumber时最多只能有15位小数
-      const amountOutMin = new BigNumber(Number(this.toAmount) * 1e18).multipliedBy(0.992)
+      const amountOutMin = new BigNumber(Number(this.toAmount) * 1e18 * 0.992)
       const path = [this.from.addr, this.to.addr]
       const deadline = Math.floor((new Date()).getTime() / 1000) + 1200
       // 保存引用，方便交易成功后修改信息
