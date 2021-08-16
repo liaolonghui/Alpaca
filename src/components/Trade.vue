@@ -50,6 +50,7 @@
                   min="0"
                 />
                 <span
+                  v-if="from.name"
                   @click="getMax('from')"
                   v-show="fromAmount !== from.balance"
                   class="from-max"
@@ -175,7 +176,7 @@
                         Add
                       </div>
                       <!-- remove -->
-                      <div @click="(e) => toRemoveLiquidity(e, item.name)" class="btn btn-primary btn-lg liquidity-btn">
+                      <div @click="(e) => toRemoveLiquidity(e, item)" class="btn btn-primary btn-lg liquidity-btn">
                         Remove
                       </div>
                     </div>
@@ -223,6 +224,7 @@
                   @blur="input1CanChange = true"
                 />
                 <span
+                  v-if="input1.name"
                   @click="getMax('input1')"
                   v-show="input1Amount !== input1.balance"
                   class="from-max"
@@ -258,6 +260,7 @@
                   @blur="input2CanChange = true"
                 />
                 <span
+                  v-if="input2.name"
                   @click="getMax('input2')"
                   v-show="input2Amount !== input2.balance"
                   class="to-max"
@@ -356,6 +359,109 @@
         </div><!-- /.modal-content -->
       </div><!-- /.modal -->
     </div>
+    <!-- removeLiquidity -->
+    <!-- 模态框（Modal） -->
+    <div class="modal fade" id="removeLModal" tabindex="-1" role="dialog" aria-labelledby="removeLModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title text-center" id="myModalLabel">Remove Liquidity</h4>
+                </div>
+                <div class="modal-body">
+                  <div class="remove-liquidity-header">
+                    <div class="top">
+                      <span>Amount</span>
+                      <span @click="changeRemoveMethod" class="change-remove-method">
+                        {{ removeMethod === 'Detailed' ? 'Simple' : 'Detailed' }}
+                      </span>
+                    </div>
+                    <div class="remove-percentage">
+                      <span>{{ removePercentage }}%</span>
+                    </div>
+                    <div v-if="removeMethod === 'Simple'" class="remove-range-box">
+                      <input
+                        size="28"
+                        type="range"
+                        step="1"
+                        min="0"
+                        max="100"
+                        v-model="removePercentage"
+                        class="remove-liquidity-range"
+                      />
+                    </div>
+                    <div v-if="removeMethod === 'Simple'" class="remove-liquidity-btns">
+                      <div @click="removePercentage = 25" class="btn btn-success">
+                        25%
+                      </div>
+                      <div @click="removePercentage = 50" class="btn btn-success">
+                        50%
+                      </div>
+                      <div @click="removePercentage = 75" class="btn btn-success">
+                        75%
+                      </div>
+                      <div @click="removePercentage = 100" class="btn btn-success">
+                        Max
+                      </div>
+                    </div>
+                  </div>
+                  <!-- input输入模式 -->
+                  <div class="detailed-remove-method" v-if="removeMethod === 'Detailed'">
+                    <div>
+                      <input
+                        v-model="liquidityAmount"
+                        @focus="liquidityAmountCanChange = false"
+                        @blur="liquidityAmountCanChange = true"
+                        type="number"
+                      />
+                    </div>
+                    <div>
+                      <div class="balance">
+                        <span class="hidden-xs">Balance：</span>
+                        <span class="num">{{ removeLiquidityBalance }}</span>
+                      </div>
+                      <div class="info">
+                        <img :src="removeLiquidityInfo.icon1" alt="">
+                        <img :src="removeLiquidityInfo.icon2" alt="">
+                        <span>{{ removeLiquidityInfo.name }}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- icon -->
+                  <div class="text-center">
+                    <i class="iconfont icon-bottom"></i>
+                  </div>
+                  <div v-if="removeLiquidityInfo.name" class="remove-liquidity-detail">
+                    <!-- tokenA -->
+                    <div class="token">
+                      <span>{{ removeAmountA || '-' }}</span>
+                      <div>
+                        <img :src="removeLiquidityInfo.icon1" alt="tokenA">
+                        <span>{{ removeLiquidityInfo.name.split('/')[0] }}</span>
+                      </div>
+                    </div>
+                    <!-- tokenB -->
+                    <div class="token">
+                      <span>{{ removeAmountB || '-' }}</span>
+                      <div>
+                        <img :src="removeLiquidityInfo.icon2" alt="tokenB">
+                        <span>{{ removeLiquidityInfo.name.split('/')[1] }}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- price -->
+                </div>
+                <div class="modal-footer">
+                    <div class="btn btn-success">
+                      Approve
+                    </div>
+                    <div @click="removeLiquidity" class="btn btn-success">
+                      Remove
+                    </div>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal -->
+    </div>
   </div>
 </template>
 
@@ -436,19 +542,8 @@ export default {
       input2: {},
       input2Amount: '',
       input2CanChange: true, // 默认可变
-      // liquidity
-      liquidity: [
-        {
-          name: 'BNB/work',
-          icon1: require('../assets/images/bnb.png'),
-          icon2: require('../assets/images/cake.svg')
-        },
-        {
-          name: 'BUSD/USDT',
-          icon1: require('../assets/images/cake.svg'),
-          icon2: require('../assets/images/cake.svg')
-        }
-      ],
+      // liquidity 用户拥有的所有pair
+      liquidity: [],
       // otherTokens 其他token(可供用户自己添加)
       otherTokens: otherTokens,
       // routerAddr
@@ -458,20 +553,36 @@ export default {
       input1Approve: true,
       input2Approve: true,
       // 标识addliquidity的pair是否已存在
-      hasPair: true
+      hasPair: true,
+      // removeliquidity的方式
+      removeMethod: 'Simple',
+      // removePercentage 删除liquidity的百分比
+      removePercentage: 0,
+      removeLiquidityInfo: {},
+      removeLiquidityBalance: '',
+      removePairAddr: '',
+      removeAddrA: '',
+      removeAddrB: '',
+      liquidityAmount: 0,
+      liquidityAmountCanChange: true,
+      removeAmountA: 0,
+      removeAmountB: 0,
     }
   },
   methods: {
-    // addOrRemoveToken
+    // addOrRemoveToken 添加/删除不在默认列表中的token
     addOrRemoveToken(e, token) {
       e.stopPropagation()
       const index = this.tokens.indexOf(token)
+      const indexInOthers = this.otherTokens.indexOf(token)
       let memo = JSON.parse(localStorage.getItem('tokenArr')) || []
       if (index >= 0) {
+        this.otherTokens.push(token)
         this.tokens.splice(index, 1)
         memo = memo.filter(m => m.name !== token.name)
       } else {
         this.tokens.push(token)
+        this.otherTokens.splice(indexInOthers, 1)
         memo.push(token)
       }
       localStorage.setItem('tokenArr', JSON.stringify(memo))
@@ -531,6 +642,39 @@ export default {
       // 每次交易完更新BNB
       this.getTokenBalance(this.tokens, 0)
     },
+    // removeLiquidity
+    removeLiquidity() {
+      const to = this.$store.state.publicAddress
+      if (!to) return
+      const addrA = this.removeAddrA
+      const addrB = this.removeAddrB
+      const liquidityAmount = new BigNumber(this.liquidityAmount * 1e18)
+      const removeAmountAMin = new BigNumber(this.removeAmountA * 1e18 * 0.992)
+      const removeAmountBMin = new BigNumber(this.removeAmountB * 1e18 * 0.992) // 如果是ETH则amountETHMin
+      const deadline = Math.floor((new Date).getTime()/1000) + 1200
+      // 判断是否有bnb
+      const arr = this.removeLiquidityInfo.name.split('/')
+      if (arr[0] == 'BNB') {
+
+      } else if (arr[1] == 'BNB') {
+
+      } else {
+        this.routerContract.methods.removeLiquidity(addrA, addrB, liquidityAmount, removeAmountAMin, removeAmountBMin, to, deadline).send({
+          from: to,
+          gas: 5000000
+        }).then((amountA, amountB) => {
+          console.log(amountA, amountB)
+        })
+      }
+    },
+    // changeRemoveMethod 改变删除liquidity的方法
+    changeRemoveMethod() {
+      if (this.removeMethod === 'Detailed') {
+        this.removeMethod = 'Simple'
+      } else {
+        this.removeMethod = 'Detailed'
+      }
+    },
     // swap
     swap() {
       const to = this.$store.state.publicAddress
@@ -575,7 +719,7 @@ export default {
         this.getTokenBalance(this.tokens, 0)
       })
     },
-    // getMax
+    // getMax 将amount设为balance一样
     getMax (type) {
       const amountType = type + 'Amount'
       this[amountType] = this[type].balance
@@ -588,13 +732,13 @@ export default {
       this.from = this.to
       this.to = token
     },
-    // showSelectTokenModal
+    // showSelectTokenModal 显示选择币的对话框
     showSelectTokenModal (type) {
       this.tokenTo = type
       this.searchToken = '' // 每次打开时将用于搜索的字符串置为空串
       $('#tokenModal').modal('show')
     },
-    // selectToken
+    // selectToken 选择要交易的币
     selectToken (index) {
       // 根据index从searchTokenResult获取到选中的token
       let token = this.searchTokenResult[index]
@@ -622,7 +766,7 @@ export default {
       this.input2CanChange = true
       $('#tokenModal').modal('hide')
     },
-    // getRouterContract
+    // getRouterContract 获取要用到的合约
     async getMyRouterContract () {
       this.routerContract = await getRouterContract()
       this.factoryContract = await getFactoryContract()
@@ -697,7 +841,7 @@ export default {
         }
       }
     },
-    // toSwap
+    // toSwap 跳转到swap页
     toSwap() {
       this.tradeType = 'swap'
       this.from = this.tokens[0]
@@ -705,7 +849,7 @@ export default {
       this.to = {}
       this.toAmount = ''
     },
-    // toAddLiquidityfromliquidity
+    // toAddLiquidityfromliquidity 从liquidity跳转到addliquidity
     toAddLiquidityfromliquidity() {
       this.tradeType = 'addLiquidity'
       this.input1 = this.tokens[0]
@@ -713,13 +857,13 @@ export default {
       this.input2 = {}
       this.input2Amount = ''
     },
-    // showOrHideLiquidity
+    // showOrHideLiquidity 显示/隐藏liquidity的信息
     showOrHideLiquidity(e) {
       $(e.currentTarget).find('.liquidity-i>i').toggleClass('icon-expand-more')
       $(e.currentTarget).find('.liquidity-i>i').toggleClass('icon-expandless')
       $(e.currentTarget).parent().find('.liquidity-detail').slideToggle()
     },
-    // toAddLiquidity
+    // toAddLiquidity 跳转到addliquidity
     toAddLiquidity(e, liquidityName) {
       e.stopPropagation()
       this.tradeType = 'addLiquidity'
@@ -734,10 +878,21 @@ export default {
       this.input1Amount = ''
       this.input2Amount = ''
     },
-    // toRemoveLiquidity
-    toRemoveLiquidity(e, liquidityName) {
+    // toRemoveLiquidity 显示removeliquidity对话框
+    async toRemoveLiquidity(e, liquidity) {
       e.stopPropagation()
-      alert('还未完成')
+      this.removeLiquidityInfo = liquidity
+      this.removeMethod = 'Simple'
+      this.removePercentage = 0
+      const ABTokensArr = this.removeLiquidityInfo.name.split('/')
+      const allTokens = this.tokens.concat(this.otherTokens)
+      this.removeAddrA = allTokens.find(token => token.name == ABTokensArr[0]).addr
+      this.removeAddrB = allTokens.find(token => token.name == ABTokensArr[1]).addr
+      this.removePairAddr = liquidity.addr
+      const pairContract = await getPairContract(liquidity.addr)
+      const userAddr = this.$store.state.publicAddress
+      this.removeLiquidityBalance = toNonExponential((await pairContract.methods.balanceOf(userAddr).call()) / 1e18)
+      $('#removeLModal').modal('show')
     },
     // 计算amount  from/to
     computedFromTo(token) {
@@ -811,13 +966,52 @@ export default {
   created() {
     this.getMyRouterContract()
   },
-  mounted() {
+  async mounted() {
     this.tokens.map((token, i) => {
       this.getTokenBalance(this.tokens, i)
     })
     this.otherTokens.map((token, i) => {
       this.getTokenBalance(this.otherTokens, i)
     })
+    // 查一下用户有多少种pair
+    const userAddr = this.$store.state.publicAddress
+    if (!userAddr) return
+    this.factoryContract = await getFactoryContract() // factory合约
+    const allPair = []
+    const allTokens = this.tokens.concat(this.otherTokens)
+    for (let i=0; i<allTokens.length; i++) {
+      for (let j=i+1; j<allTokens.length; j++) {
+        const pairAddr = await this.factoryContract.methods.getPair(allTokens[i].addr, allTokens[j].addr).call()
+        if (pairAddr !== '0x0000000000000000000000000000000000000000') {
+          let pairName = ''
+          let icon1 = ''
+          let icon2 = ''
+          if (allTokens[i].name > allTokens[j].name) {
+            pairName = allTokens[j].name + '/' + allTokens[i].name
+            icon1 = allTokens[j].icon
+            icon2 = allTokens[i].icon
+          } else {
+            pairName = allTokens[i].name + '/' + allTokens[j].name
+            icon1 = allTokens[i].icon
+            icon2 = allTokens[j].icon
+          }
+          allPair.push({
+            name: pairName,
+            addr: pairAddr,
+            icon1,
+            icon2
+          })
+        }
+      }
+    }
+    // 查询用户有哪些pair
+    allPair.forEach(async pair => {
+      const pairContract = await getPairContract(pair.addr)
+      if (await pairContract.methods.balanceOf(userAddr).call() > 0) {
+        // 大于0说明有
+        this.liquidity.push(pair)
+      }
+    });
   },
   watch: {
     // addliquidity  input1和input2
@@ -890,6 +1084,44 @@ export default {
         // to不需要approve
         // getAmountIn/getAmountOut
         this.computedFromTo('to') // 传入要计算的
+      }
+    },
+    // removePercentage
+    async removePercentage(newPercentage, oldPercentage) {
+      if (newPercentage !== oldPercentage) {
+        const userAddr = this.$store.state.publicAddress
+        if (!userAddr) return
+        const pairAddr = this.removePairAddr
+        const pairContract = await getPairContract(pairAddr)
+        // 先获取pair的余额
+        const userPair = await pairContract.methods.balanceOf(userAddr).call()
+        // pair总量
+        const totalPair = await pairContract.methods.totalSupply().call()
+        const reserves = await pairContract.methods.getReserves().call()
+        // pair的顺序是固定的 ascii
+        // ....获取liquidityAmount  removeAmountA  removeAmountB
+        this.removeAmountA = toNonExponential(reserves[0]/1e18 * (userPair/totalPair) * (newPercentage/100))
+        this.removeAmountB = toNonExponential(reserves[1]/1e18 * (userPair/totalPair) * (newPercentage/100))
+        if (this.liquidityAmountCanChange) {
+          this.liquidityAmount = userPair/1e18 * (newPercentage/100)
+        }
+      }
+    },
+    // liquidityAmount
+    async liquidityAmount(newVal, oldVal) {
+      if (this.removeMethod !== 'Detailed') return
+      if (newVal !== oldVal) {
+        const userAddr = this.$store.state.publicAddress
+        if (!userAddr) return
+        const pairAddr = this.removePairAddr
+        const pairContract = await getPairContract(pairAddr)
+        // 先获取pair的余额
+        const userPair = await pairContract.methods.balanceOf(userAddr).call()
+        let percentage = ((newVal * 1e18) / userPair) * 100
+        if (percentage > 100 || percentage < 0) {
+          percentage = 0
+        }
+        this.removePercentage = percentage
       }
     },
     // address
@@ -1342,5 +1574,136 @@ export default {
 }
 .btn-block+.btn-block {
   margin-top: 10px !important;
+}
+/* remove-liquidity */
+#removeLModal .remove-liquidity-header,
+#removeLModal .remove-liquidity-detail {
+  margin: 20px 10px;
+  padding: 15px 25px;
+  color: #452a7a;
+  border: 1px solid #ccc;
+  border-radius: 15px;
+}
+#removeLModal .remove-liquidity-header>.top {
+  padding: 5px 0;
+}
+#removeLModal .remove-percentage {
+  font-size: 30px;
+  font-weight: 520;
+  padding: 15px 0;
+}
+#removeLModal .change-remove-method {
+  float: right;
+  font-size: 15px;
+  color: #31c77f;
+  cursor: pointer;
+}
+#removeLModal .remove-liquidity-range {
+  width: 90%;
+  height: 2px;
+  margin: 15px;
+  background-image: linear-gradient(to right, #ccc, #454545);
+  border-radius: 10px;
+  appearance: none;
+  cursor: pointer;
+}
+#removeLModal .remove-liquidity-btns {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 10px 0;
+}
+#removeLModal .remove-liquidity-btns>.btn {
+  border-radius: 15px;
+}
+#removeLModal .remove-liquidity-detail {
+  font-size: 20px;
+}
+#removeLModal .remove-liquidity-detail .token {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+}
+#removeLModal .remove-liquidity-detail img {
+  width: 24px;
+  height: 24px;
+  vertical-align: -4px;
+  margin-right: 5px;
+}
+#removeLModal .modal-footer {
+  display: flex;
+  justify-content: space-around;
+}
+#removeLModal .modal-footer>.btn {
+  padding: 10px 30px;
+  border-radius: 15px;
+}
+#removeLModal .detailed-remove-method {
+  display: flex;
+  justify-content: space-between;
+  padding: 30px 25px;
+  margin: 15px 10px;
+  border: 1px solid #ccc;
+  border-radius: 15px;
+}
+#removeLModal .detailed-remove-method input {
+  width: 95%;
+  padding: 15px 5px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  outline: none;
+}
+#removeLModal .detailed-remove-method input:focus {
+  box-shadow: 0 0 5px #aaa;
+}
+#removeLModal .detailed-remove-method .balance {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  border-bottom: 1px solid #ccc;
+}
+#removeLModal .detailed-remove-method .num {
+  display: block;
+  width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#removeLModal .detailed-remove-method .info {
+  display: inline-block;
+  width: 100%;
+  padding-top: 5px;
+  text-align: right;
+}
+#removeLModal .detailed-remove-method .info>span {
+  margin-left: 5px;
+}
+#removeLModal .detailed-remove-method img {
+  width: 24px;
+  height: 24px;
+  vertical-align: -7px;
+}
+@media screen and (min-width: 768px) {
+  #removeLModal .modal-dialog {
+    width: 500px;
+  }
+}
+@media screen and (max-width: 768px) {
+  #removeLModal .remove-liquidity-header {
+    padding: 15px;
+    margin: 15px 5px;
+  }
+  #removeLModal .remove-liquidity-detail,
+  #removeLModal .detailed-remove-method {
+    padding: 15px 8px;
+    margin: 5px;
+  }
+  #removeLModal .remove-liquidity-detail {
+    font-size: 16px;
+  }
+  #removeLModal .remove-liquidity-detail img {
+    vertical-align: -5px;
+  }
 }
 </style>
