@@ -4,26 +4,27 @@ import Home from '../views/Home.vue'
 import App from '../views/App.vue'
 import Documentation from '../views/Documentation.vue'
 // App的子页面
-import Lend from '../components/Lend.vue'
-import Graze from '../components/Graze.vue'
-import Farm from '../components/Farm.vue'
-import Trade from '../components/Trade.vue'
-import Collection from '../components/Collection.vue'
+const Lend = () => import(/* webpackChunkName: "lend" */ '../components/Lend.vue')
 // deposit和withdraw（lend的子功能）
-import Deposit from '../components/Lend/Deposit.vue'
-import Withdraw from '../components/Lend/Withdraw.vue'
+const Deposit = () =>  import(/* webpackChunkName: "lend" */ '../components/Lend/Deposit.vue')
+const Withdraw = () => import(/* webpackChunkName: "lend" */ '../components/Lend/Withdraw.vue')
 
+const Graze = () => import(/* webpackChunkName: "graze" */ '../components/Graze.vue')
+const Farm = () => import(/* webpackChunkName: "farm" */ '../components/Farm.vue')
+const Trade = () => import(/* webpackChunkName: "trade" */ '../components/Trade.vue')
+
+const Collection = () => import(/* webpackChunkName: "collection" */ '../components/Collection.vue')
 // collection
-import VisitCollection from '../components/Collection/VisitCollection.vue'
-import EditCollection from '../components/Collection/EditCollection.vue'
-import Royalties from '../components/Collection/Royalties.vue'
-import ItemsCollection from '../components/Collection/ItemsCollection.vue'
-import AddItem from '../components/Collection/AddItem.vue'
-import VisitItem from '../components/Collection/VisitItem.vue'
-import EditItem from '../components/Collection/EditItem.vue'
-import SellItem from '../components/Collection/SellItem.vue'
-import Account from '../components/Collection/Account.vue' // Account
-import SellBundle from '../components/Collection/SellBundle.vue' // SellBundle
+const VisitCollection = () => import(/* webpackChunkName: "collection" */ '../components/Collection/VisitCollection.vue')
+const EditCollection = () => import(/* webpackChunkName: "collection" */ '../components/Collection/EditCollection.vue')
+const Royalties = () => import(/* webpackChunkName: "collection" */ '../components/Collection/Royalties.vue')
+const ItemsCollection = () => import(/* webpackChunkName: "items" */ '../components/Collection/ItemsCollection.vue')
+const AddItem = () => import(/* webpackChunkName: "items" */ '../components/Collection/AddItem.vue')
+const VisitItem = () => import(/* webpackChunkName: "items" */ '../components/Collection/VisitItem.vue')
+const EditItem = () => import(/* webpackChunkName: "items" */ '../components/Collection/EditItem.vue')
+const SellItem = () => import(/* webpackChunkName: "sell-items" */ '../components/Collection/SellItem.vue')
+const SellBundle = () => import(/* webpackChunkName: "sell-items" */ '../components/Collection/SellBundle.vue') // SellBundle 
+const Account = () => import(/* webpackChunkName: "account" */ '../components/Collection/Account.vue') // Account
 
 
 Vue.use(VueRouter)

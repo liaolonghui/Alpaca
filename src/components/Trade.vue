@@ -816,7 +816,7 @@ export default {
         // bnb
         if (tokenAddr === '0x094616f0bdfb0b526bd735bf66eca0ad254ca81f') {
           const web3 = new Web3(await getProvider())
-          const balance = await web3.eth.getBalance(tokenAddr, address, ++num)
+          const balance = await web3.eth.getBalance(address)
           if (balance>=0) {
             return balance
           } else {
@@ -1012,6 +1012,14 @@ export default {
     this.otherTokens.map((token, i) => {
       this.getTokenBalance(this.otherTokens, i)
     })
+    this.timer = setInterval(() => {
+      this.tokens.map((token, i) => {
+        this.getTokenBalance(this.tokens, i)
+      })
+      this.otherTokens.map((token, i) => {
+        this.getTokenBalance(this.otherTokens, i)
+      })
+    }, 10000);
     // 查一下用户有多少种pair
     const userAddr = this.$store.state.publicAddress
     if (!userAddr) return
@@ -1051,6 +1059,10 @@ export default {
         this.liquidity.push(pair)
       }
     });
+  },
+  unmounted() {
+    clearInterval(this.timer)
+    this.timer = null
   },
   watch: {
     // addliquidity  input1和input2

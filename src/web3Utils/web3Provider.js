@@ -1,3 +1,5 @@
+import Web3 from 'web3'
+
 async function getProvider() {
   let web3Provider
   if (window.ethereum) {
@@ -12,7 +14,7 @@ async function getProvider() {
   } else if (window.web3) {   // 老版 MetaMask Legacy dapp browsers...
     web3Provider = window.web3.currentProvider;
   } else {
-    web3Provider = new Web3.providers.HttpProvider("https://data-seed-prebsc-1-s1.binance.org:8545")
+    web3Provider = new Web3.providers.HttpProvider("http://127.0.0.1:8545")
   }
   return web3Provider
 }
