@@ -585,8 +585,6 @@ export default {
       const balance = await pairContract.methods.balanceOf(address).call()
       if (balance>=0) {
         this.stakes[i].LPBalance = toNonExponential(balance / 1e18)
-      } else {
-        this.getLPBalance(i)
       }
     },
     // 计算APY

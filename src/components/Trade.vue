@@ -808,17 +808,19 @@ export default {
       this.$set(target[i], 'balance', balance)
     },
     // 传入token地址和钱包地址 获取token余额
-    async getBalance(tokenAddr, address) {
-      // 发请求查询余额，如果出错会递归查询
+    async getBalance(tokenAddr, address, num=1) {
+      // 发请求查询余额，如果出错会递归查询 最多2次
+      if (num > 2) return
+      if (!tokenAddr || !address) return
       try {
         // bnb
         if (tokenAddr === '0x094616f0bdfb0b526bd735bf66eca0ad254ca81f') {
           const web3 = new Web3(await getProvider())
-          const balance = await web3.eth.getBalance(address)
+          const balance = await web3.eth.getBalance(tokenAddr, address, ++num)
           if (balance>=0) {
             return balance
           } else {
-            return await this.getBalance(tokenAddr, address)
+            return await this.getBalance(tokenAddr, address, ++num)
           }
         }
         // 非bnb
@@ -827,10 +829,10 @@ export default {
         if (balance >= 0) {
           return balance
         } else {
-          return await this.getBalance(tokenAddr, address)
+          return await this.getBalance(tokenAddr, address, ++num)
         }
       } catch (err) {
-        return await this.getBalance(tokenAddr, address)
+        return await this.getBalance(tokenAddr, address, ++num)
       }
     },
     // approve
