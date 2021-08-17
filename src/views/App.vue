@@ -198,15 +198,22 @@ export default {
       const web3Provider = await getProvider()
       const web3 = new Web3(web3Provider)
 
-      // changeNetwork
-      this.changeNetwork(web3) // 切换网络
-      
-      // 获取钱包余额
+      // 为了防止账户切换，这里重新获取一下address
       const that = this
-      web3.eth.getBalance(address, function(error, balance) {
-        if (error) return
-        balance = new BigNumber(balance).div(1e18)
-        that.$store.dispatch('savaBalance', balance)
+      web3.eth.getAccounts((err, accounts) => {
+        if (!err) {
+          that.$store.dispatch('saveAddress', accounts[0])
+          localStorage.setItem('addr', accounts[0])
+          // changeNetwork
+          this.changeNetwork(web3) // 切换网络
+          address = accounts[0]
+          // 获取钱包余额
+          web3.eth.getBalance(address, function(error, balance) {
+            if (error) return
+            balance = new BigNumber(balance).div(1e18)
+            that.$store.dispatch('savaBalance', balance)
+          })
+        }
       })
     },
     // 显示setDialog

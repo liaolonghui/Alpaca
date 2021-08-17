@@ -593,19 +593,23 @@ export default {
       const pairAddr = this.stakes[i].pairAddress
       const address = this.$store.state.publicAddress
       if (!address) return
-      const result = await $.ajax({
-        url: 'https://api-testnet.bscscan.com/api',
-        data: {
-          module: 'account',
-          action: 'tokenbalance',
-          contractaddress: pairAddr,
-          address: address,
-          tag: 'latest',
-          apikey: '44MDXAAGI9M1INP37QDYBZBYBUDQBXAPCD'
-        }
-      })
-      if (result.message === 'OK') {
-        this.stakes[i].LPBalance = toNonExponential(result.result / 1e18)
+      // const result = await $.ajax({
+      //   url: 'https://api-testnet.bscscan.com/api',
+      //   data: {
+      //     module: 'account',
+      //     action: 'tokenbalance',
+      //     contractaddress: pairAddr,
+      //     address: address,
+      //     tag: 'latest',
+      //     apikey: '44MDXAAGI9M1INP37QDYBZBYBUDQBXAPCD'
+      //   }
+      // })
+      const pairContract = await getPairContract(pairAddr)
+      const balance = await pairContract.methods.balanceOf(address).call()
+      if (balance>=0) {
+        this.stakes[i].LPBalance = toNonExponential(balance / 1e18)
+      } else {
+        this.getLPBalance(i)
       }
     },
     // 计算APY

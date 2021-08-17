@@ -822,29 +822,37 @@ export default {
       this.$set(target[i], 'balance', balance)
     },
     // 传入token地址和钱包地址 获取token余额
-    async getBalance(tokenAddr, address, num = 1) {
-      // 发请求查询余额，如果出错会递归查询，但查询次数过多（超过4次）就停止
-      if (num > 4) return
+    async getBalance(tokenAddr, address) {
+      // 发请求查询余额，如果出错会递归查询
       try {
-        const result = await $.ajax({
-          url: 'https://api-testnet.bscscan.com/api',
-          data: {
-            module: 'account',
-            action: tokenAddr !== '0x094616f0bdfb0b526bd735bf66eca0ad254ca81f' ? 'tokenbalance' : 'balance', // 为bnb地址时则balance
-            contractaddress: tokenAddr,
-            address: address,
-            tag: 'latest',
-            apikey: '44MDXAAGI9M1INP37QDYBZBYBUDQBXAPCD'
+        // bnb
+        if (tokenAddr === '0x094616f0bdfb0b526bd735bf66eca0ad254ca81f') {
+          const result = await $.ajax({
+            url: 'https://api-testnet.bscscan.com/api',
+            data: {
+              module: 'account',
+              action: 'balance', // 为bnb地址时则balance
+              address: address,
+              tag: 'latest',
+              apikey: '44MDXAAGI9M1INP37QDYBZBYBUDQBXAPCD'
+            }
+          })
+          if (result.message = 'OK') {
+            return result.result
+          } else {
+            return await this.getBalance(tokenAddr, address)
           }
-        })
-        if (result.message === 'OK') {
-          return result.result
+        }
+        // 非bnb
+        const pairContract = await getPairContract(tokenAddr)
+        const balance = await pairContract.methods.balanceOf(address).call()
+        if (balance >= 0) {
+          return balance
         } else {
-          // 没获取到就递归获取
-          return await this.getBalance(tokenAddr, address, ++num)
+          return await this.getBalance(tokenAddr, address)
         }
       } catch (err) {
-        return await this.getBalance(tokenAddr, address, ++num)
+        return await this.getBalance(tokenAddr, address)
       }
     },
     // approve
