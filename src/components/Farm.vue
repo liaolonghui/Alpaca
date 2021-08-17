@@ -1,25 +1,7 @@
 <template>
   <div class="farm">
     <header class="farm-header">
-      <!-- Your Positions -->
-      <h2>Your Positions</h2>
       <div class="your-position">
-        <div>
-          <div
-            @click="positionType = 'Active'"
-            :class="[positionType==='Active' ? 'btn-active' : 'btn-not-active']"
-            class="btn btn-lg"
-          >
-            Active Positions
-          </div>
-          <div
-            @click="positionType = 'Liquidated'"
-            :class="[positionType==='Liquidated' ? 'btn-active' : 'btn-not-active']"
-            class="btn btn-lg"
-          >
-            Liquidated Positions
-          </div>
-        </div>
         <!-- earn -->
         <div class="earn-box">
           <div>
@@ -36,10 +18,6 @@
               claim
             </div>
           </div>
-        </div>
-        <!-- positions -->
-        <div class="positions-content">
-          {{positionType}}
         </div>
       </div>
     </header>
@@ -295,7 +273,6 @@ import { toNonExponential } from '../utils/index.js'
 export default {
   data () {
     return {
-      positionType: 'Active',
       stakes: [
         {
           name: 'BNB-Work-Stake',
@@ -714,7 +691,7 @@ export default {
   background-color: #fff;
   border-radius: 20px;
   box-shadow: 0 0 5px #ccc;
-  min-height: 300px;
+  min-height: 160px;
 }
 .farm-header>h2 {
   font-weight: 700;

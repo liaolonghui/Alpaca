@@ -478,6 +478,8 @@
 
 <script>
 import BigNumber from 'bignumber.js'
+import Web3 from 'web3'
+import getProvider from '../web3Utils/web3Provider.js'
 import { getRouterContract, getFactoryContract } from '../web3Utils/trade.js'
 import getPairContract from '../web3Utils/pair.js'
 import getFarmContract from '../web3Utils/farm.js'
@@ -578,7 +580,7 @@ export default {
       liquidityAmountCanChange: true,
       removeAmountA: 0,
       removeAmountB: 0,
-      liquidityApprove: false // 准许删除
+      liquidityApprove: true // 删除
     }
   },
   methods: {
@@ -811,18 +813,10 @@ export default {
       try {
         // bnb
         if (tokenAddr === '0x094616f0bdfb0b526bd735bf66eca0ad254ca81f') {
-          const result = await $.ajax({
-            url: 'https://api-testnet.bscscan.com/api',
-            data: {
-              module: 'account',
-              action: 'balance', // 为bnb地址时则balance
-              address: address,
-              tag: 'latest',
-              apikey: '44MDXAAGI9M1INP37QDYBZBYBUDQBXAPCD'
-            }
-          })
-          if (result.message = 'OK') {
-            return result.result
+          const web3 = new Web3(await getProvider())
+          const balance = await web3.eth.getBalance(address)
+          if (balance>=0) {
+            return balance
           } else {
             return await this.getBalance(tokenAddr, address)
           }
