@@ -453,14 +453,14 @@
                 </div>
                 <div class="modal-footer">
                     <!-- approve -->
-                    <div v-if="!removeApprove && liquidityAmount>0" @click="approveRemove" class="btn btn-success">
+                    <div v-if="liquidityApprove && liquidityAmount>0" @click="approve('removeLiquidityInfo')" class="btn btn-success">
                       Approve
                     </div>
                     <div v-else class="btn btn-default" disabled>
                       Approve
                     </div>
                     <!-- remove -->
-                    <div v-if="liquidityAmount>0 && removeApprove" @click="removeLiquidity" class="btn btn-success">
+                    <div v-if="liquidityAmount>0 && !liquidityApprove" @click="removeLiquidity" class="btn btn-success">
                       Remove
                     </div>
                     <div v-else-if="liquidityAmount<=0" class="btn btn-default" disabled>
@@ -578,7 +578,7 @@ export default {
       liquidityAmountCanChange: true,
       removeAmountA: 0,
       removeAmountB: 0,
-      removeApprove: false // 准许删除
+      liquidityApprove: false // 准许删除
     }
   },
   methods: {
@@ -654,22 +654,6 @@ export default {
       // 每次交易完更新BNB
       this.getTokenBalance(this.tokens, 0)
     },
-    // approveRemove 允许删除
-    async approveRemove() {
-      const address = this.$store.state.publicAddress
-      if (address) {
-        const tokeninfo = this.removeLiquidityInfo
-        const amount = new BigNumber(this.liquidityAmount * 1e18)
-        const approveContract = await getFarmContract.getapproveContract(tokeninfo.addr)
-        approveContract.methods.approve(this.routerAddr, amount).send({
-          from: address
-        }).then(() => {
-          this.removeApprove = true // approve成功
-        }).catch(() => {
-          this.removeApprove = false
-        })
-      }
-    },
     // removeLiquidity
     removeLiquidity() {
       const to = this.$store.state.publicAddress
@@ -688,7 +672,7 @@ export default {
           gas: 5000000
         }).then((amountA, amountB) => {
           console.log(amountA, amountB)
-          this.removeApprove = false
+          this.liquidityAmount = 0
         })
       } else if (arr[1] == 'BNB') {
         this.routerContract.methods.removeLiquidityETH(addrA, liquidityAmount, removeAmountAMin, removeAmountBMin, to, deadline).send({
@@ -696,7 +680,7 @@ export default {
           gas: 5000000
         }).then((amountA, amountB) => {
           console.log(amountA, amountB)
-          this.removeApprove = false
+          this.liquidityAmount = 0
         })
       } else {
         this.routerContract.methods.removeLiquidity(addrA, addrB, liquidityAmount, removeAmountAMin, removeAmountBMin, to, deadline).send({
@@ -704,7 +688,7 @@ export default {
           gas: 5000000
         }).then((amountA, amountB) => {
           console.log(amountA, amountB)
-          this.removeApprove = false
+          this.liquidityAmount = 0
         })
       }
     },
@@ -859,14 +843,18 @@ export default {
     async approve(token) {
       const address = this.$store.state.publicAddress
       if (address) {
+        const tokeninfo = this[token]
+        if (token == 'removeLiquidityInfo') {
+          token = 'liquidity'
+        }
         const approveName = token + 'Approve' // 允许的token所对应的标识名
         const amountName = token + 'Amount' // xxxAmount
-        const tokeninfo = this[token]
         const amount = new BigNumber((this[amountName] + 10000) * 1e18)
         const approveContract = await getFarmContract.getapproveContract(tokeninfo.addr)
         approveContract.methods.approve(this.routerAddr, amount).send({
           from: address
-        }).then(() => {
+        }).then((result) => {
+          console.log(result)
           this[approveName] = false // approve成功，将xxxApprove置为false
         }).catch(() => {
           this[approveName] = true
@@ -875,8 +863,14 @@ export default {
     },
     // 判断是否需要approve
     async judgeApprove(type) {
+      if (type == 'removeLiquidityInfo') {
+        type = 'liquidity'
+      }
       const approveName = type + 'Approve' // 判断的type 所对应的approve标识
       const amountName = type + 'Amount' // amount的name
+      if (type == 'liquidity') {
+        type = 'removeLiquidityInfo'
+      }
       if (this[type].name === 'BNB') return this[approveName] = false
       const address = this.$store.state.publicAddress
       if (address && this[type].addr) {
@@ -1160,6 +1154,7 @@ export default {
     async liquidityAmount(newVal, oldVal) {
       if (this.removeMethod !== 'Detailed') return
       if (newVal !== oldVal) {
+        this.judgeApprove('removeLiquidityInfo')
         const userAddr = this.$store.state.publicAddress
         if (!userAddr) return
         const pairAddr = this.removePairAddr
