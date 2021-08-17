@@ -452,10 +452,21 @@
                   <!-- price -->
                 </div>
                 <div class="modal-footer">
-                    <div class="btn btn-success">
+                    <!-- approve -->
+                    <div v-if="!removeApprove && liquidityAmount>0" @click="approveRemove" class="btn btn-success">
                       Approve
                     </div>
-                    <div @click="removeLiquidity" class="btn btn-success">
+                    <div v-else class="btn btn-default" disabled>
+                      Approve
+                    </div>
+                    <!-- remove -->
+                    <div v-if="liquidityAmount>0 && removeApprove" @click="removeLiquidity" class="btn btn-success">
+                      Remove
+                    </div>
+                    <div v-else-if="liquidityAmount<=0" class="btn btn-default" disabled>
+                      Enter an amount
+                    </div>
+                    <div v-else class="btn btn-default" disabled>
                       Remove
                     </div>
                 </div>
@@ -567,6 +578,7 @@ export default {
       liquidityAmountCanChange: true,
       removeAmountA: 0,
       removeAmountB: 0,
+      removeApprove: false // 准许删除
     }
   },
   methods: {
@@ -642,6 +654,22 @@ export default {
       // 每次交易完更新BNB
       this.getTokenBalance(this.tokens, 0)
     },
+    // approveRemove 允许删除
+    async approveRemove() {
+      const address = this.$store.state.publicAddress
+      if (address) {
+        const tokeninfo = this.removeLiquidityInfo
+        const amount = new BigNumber(this.liquidityAmount * 1e18)
+        const approveContract = await getFarmContract.getapproveContract(tokeninfo.addr)
+        approveContract.methods.approve(this.routerAddr, amount).send({
+          from: address
+        }).then(() => {
+          this.removeApprove = true // approve成功
+        }).catch(() => {
+          this.removeApprove = false
+        })
+      }
+    },
     // removeLiquidity
     removeLiquidity() {
       const to = this.$store.state.publicAddress
@@ -655,15 +683,28 @@ export default {
       // 判断是否有bnb
       const arr = this.removeLiquidityInfo.name.split('/')
       if (arr[0] == 'BNB') {
-
+        this.routerContract.methods.removeLiquidityETH(addrB, liquidityAmount, removeAmountBMin, removeAmountAMin, to, deadline).send({
+          from: to,
+          gas: 5000000
+        }).then((amountA, amountB) => {
+          console.log(amountA, amountB)
+          this.removeApprove = false
+        })
       } else if (arr[1] == 'BNB') {
-
+        this.routerContract.methods.removeLiquidityETH(addrA, liquidityAmount, removeAmountAMin, removeAmountBMin, to, deadline).send({
+          from: to,
+          gas: 5000000
+        }).then((amountA, amountB) => {
+          console.log(amountA, amountB)
+          this.removeApprove = false
+        })
       } else {
         this.routerContract.methods.removeLiquidity(addrA, addrB, liquidityAmount, removeAmountAMin, removeAmountBMin, to, deadline).send({
           from: to,
           gas: 5000000
         }).then((amountA, amountB) => {
           console.log(amountA, amountB)
+          this.removeApprove = false
         })
       }
     },
@@ -813,7 +854,7 @@ export default {
         const approveName = token + 'Approve' // 允许的token所对应的标识名
         const amountName = token + 'Amount' // xxxAmount
         const tokeninfo = this[token]
-        const amount = new BigNumber(this[amountName] + 10000).multipliedBy(1e18)
+        const amount = new BigNumber((this[amountName] + 10000) * 1e18)
         const approveContract = await getFarmContract.getapproveContract(tokeninfo.addr)
         approveContract.methods.approve(this.routerAddr, amount).send({
           from: address

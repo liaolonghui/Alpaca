@@ -1058,6 +1058,7 @@ export async function getRouterContract() {
 // addLiquidity     不涉及bnb
 // addLiquidityETH  涉及bnb
 // removeLiquidity
+// removeLiquidityWithPermit
 // removeLiquidityETH
 // removeLiquidityETHWithPermit
 // removeLiquidityETHSupportingFeeOnTransferTokens
