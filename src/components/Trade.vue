@@ -1140,6 +1140,7 @@ export default {
     // removePercentage
     async removePercentage(newPercentage, oldPercentage) {
       if (newPercentage !== oldPercentage) {
+        this.judgeApprove('removeLiquidityInfo')
         const userAddr = this.$store.state.publicAddress
         if (!userAddr) return
         const pairAddr = this.removePairAddr
