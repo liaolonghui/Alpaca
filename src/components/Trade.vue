@@ -845,7 +845,7 @@ export default {
         }
         const approveName = token + 'Approve' // 允许的token所对应的标识名
         const amountName = token + 'Amount' // xxxAmount
-        const amount = new BigNumber((this[amountName] + 10000) * 1e18)
+        const amount = new BigNumber((Number(this[amountName]) + 10000) * 1e18 )
         const approveContract = await getFarmContract.getapproveContract(tokeninfo.addr)
         approveContract.methods.approve(this.routerAddr, amount).send({
           from: address

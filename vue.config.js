@@ -7,7 +7,8 @@ if (process.env.NODE_ENV === 'production') {
         'vue': 'Vue',
         'vue-router': 'VueRouter',
         'vuex': 'Vuex',
-        'web3': 'Web3'
+        'web3': 'Web3',
+        'bignumber.js': 'BigNumber'
     }
 }
 

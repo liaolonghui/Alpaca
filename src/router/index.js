@@ -1,8 +1,8 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Home from '../views/Home.vue'
-import App from '../views/App.vue'
-import Documentation from '../views/Documentation.vue'
+const Home = () => import(/* webpackChunkName: "Home" */ '../views/Home.vue')
+const App = () => import(/* webpackChunkName: "App" */ '../views/App.vue')
+const Documentation = () => import(/* webpackChunkName: "documentation" */ '../views/Documentation.vue')
 // App的子页面
 const Lend = () => import(/* webpackChunkName: "lend" */ '../components/Lend.vue')
 // deposit和withdraw（lend的子功能）
