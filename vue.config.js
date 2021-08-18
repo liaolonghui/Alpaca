@@ -1,7 +1,9 @@
 const webpack = require("webpack");
 
-const externalsConfig = () => {
-    return {
+let externalsConfig = {}
+
+if (process.env.NODE_ENV === 'production') {
+    externalsConfig = {
         'vue': 'Vue',
         'vue-router': 'VueRouter',
         'vuex': 'Vuex',
@@ -11,6 +13,7 @@ const externalsConfig = () => {
 
 module.exports = {
     configureWebpack: {
+        externals: externalsConfig,
         plugins: [
             new webpack.ProvidePlugin({
                 $: "jquery",
@@ -20,7 +23,6 @@ module.exports = {
                 Popper: ["popper.js", "default"]
             })
         ],
-        externals: process.env.NODE_ENV === 'production' ? externalsConfig : {},
     },
     chainWebpack: config => {
         config
@@ -31,16 +33,3 @@ module.exports = {
         })
     }
 };
-
-// modules.exports = {
-// 	...
-// 	configureWebpack: {
-// 		...
-// 		externals: {
-// 			'vue': 'Vue',
-// 			'vue-router': 'VueRouter',
-// 			'vuex':'Vuex',
-// 			"element-ui": "ELEMENT"
-// 		}	
-// 	}
-// }
