@@ -1,6 +1,17 @@
-import Web3 from 'web3'
+async function getProvider(walletName) {
 
-async function getProvider() {
+  // 如果是BC 币安链钱包
+  if (walletName == 'BC') {
+    if (window.BinanceChain) {
+      try {
+        await window.BinanceChain.request({ method: 'eth_accounts' })
+      } catch (err) {
+        console.warn("User denied account access")
+      }
+      return window.BinanceChain
+    }
+  }
+
   let web3Provider
   if (window.ethereum) {
     web3Provider = window.ethereum;
@@ -14,7 +25,7 @@ async function getProvider() {
   } else if (window.web3) {   // 老版 MetaMask Legacy dapp browsers...
     web3Provider = window.web3.currentProvider;
   } else {
-    web3Provider = new Web3.providers.HttpProvider("http://127.0.0.1:8545")
+    web3Provider = 'https://data-seed-prebsc-1-s1.binance.org:8545'
   }
   return web3Provider
 }

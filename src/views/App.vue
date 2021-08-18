@@ -125,10 +125,18 @@
             <h4 class="modal-title" id="myModalLabel">连接钱包</h4>
           </div>
           <div class="modal-body">
+            <!-- metamask -->
             <div @click="connectWallet" class="connect-item">
               <div>MetaMask</div>
               <div>
                 <img src="../assets/images/metamask.png" width="24" height="24" />
+              </div>
+            </div>
+            <!-- 币安链钱包 -->
+            <div @click="connectWallet('BC')" class="connect-item">
+              <div>Binance Chain Wallet</div>
+              <div>
+                <img src="../assets/images/bcw.svg" width="24" height="24" />
               </div>
             </div>
           </div>
@@ -142,6 +150,7 @@
 </template>
 
 <script>
+import Vue from 'vue'
 import BigNumber from 'bignumber.js'
 import Web3 from 'web3'
 import getProvider from '../web3Utils/web3Provider.js'
@@ -171,8 +180,10 @@ export default {
       $('#connectModal').modal('show')
     },
     // 连接钱包
-    async connectWallet() {
-      const web3Provider = await getProvider()
+    async connectWallet(walletName) {
+      Vue.prototype.walletName = walletName
+      localStorage.setItem('walletName', walletName)
+      const web3Provider = await getProvider(walletName)
       const web3 = new Web3(web3Provider)
       
       const that = this
@@ -195,7 +206,7 @@ export default {
     },
     // 获取钱包余额
     async getBalance(address) {
-      const web3Provider = await getProvider()
+      const web3Provider = await getProvider(Vue.prototype.walletName || '')
       const web3 = new Web3(web3Provider)
 
       // 为了防止账户切换，这里重新获取一下address
@@ -223,6 +234,7 @@ export default {
     },
     // changeNetwork
     async changeNetwork(web3) {
+      if (this.walletName == 'BC') return
       // 是正确的网络则不用切换
       if (await web3.eth.getChainId() === 97) return
 

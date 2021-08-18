@@ -815,7 +815,7 @@ export default {
       try {
         // bnb
         if (tokenAddr === '0x094616f0bdfb0b526bd735bf66eca0ad254ca81f') {
-          const web3 = new Web3(await getProvider())
+          const web3 = new Web3(await getProvider(this.walletName || ''))
           const balance = await web3.eth.getBalance(address)
           if (balance>=0) {
             return balance

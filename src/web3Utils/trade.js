@@ -1,3 +1,4 @@
+import Vue from 'vue'
 import Web3 from 'web3'
 import getProvider from './web3Provider'
 
@@ -9,7 +10,7 @@ const router_address = '0xeaBa760F2f0F68981C9D9816741616277c7AbC3f'
 
 // factory
 export async function getFactoryContract() {
-    const web3 = new Web3(await getProvider())
+    const web3 = new Web3(await getProvider(Vue.prototype.walletName || ''))
     const factoryABI = [
         {
             "inputs": [
@@ -42,7 +43,7 @@ export async function getFactoryContract() {
 
 // router
 export async function getRouterContract() {
-  const web3 = new Web3(await getProvider())
+  const web3 = new Web3(await getProvider(Vue.prototype.walletName || ''))
 
   const routerABI = [
     {

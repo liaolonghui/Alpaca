@@ -1,8 +1,9 @@
+import Vue from 'vue'
 import Web3 from 'web3'
 import getProvider from './web3Provider'
 
 async function getdepositContract(ContractAddress) {
-  const web3 = new Web3(await getProvider())
+  const web3 = new Web3(await getProvider(Vue.prototype.walletName||''))
   // deposit
   // 智能合约的abi，abi是由编译器生成的
   const depositABI = [{
@@ -18,7 +19,7 @@ async function getdepositContract(ContractAddress) {
 }
 
 async function getapproveContract(ContractAddress) {
-  const web3 = new Web3(await getProvider())
+  const web3 = new Web3(await getProvider(Vue.prototype.walletName || ''))
   const approveABI = [{
     "stateMutability": "nonpayable", 
     "type": "function", 
@@ -32,7 +33,7 @@ async function getapproveContract(ContractAddress) {
 }
 
 async function getwithdrawContract(ContractAddress) {
-  const web3 = new Web3(await getProvider())
+  const web3 = new Web3(await getProvider(Vue.prototype.walletName || ''))
   // withdraw
   const withdrawABI = [
     {
@@ -54,7 +55,7 @@ async function getwithdrawContract(ContractAddress) {
 }
 
 async function getclaimableRewardContract(ContractAddress) {
-  const web3 = new Web3(await getProvider())
+  const web3 = new Web3(await getProvider(Vue.prototype.walletName || ''))
   // claimableReward
   const claimableRewardABI = [
     {
@@ -82,7 +83,7 @@ async function getclaimableRewardContract(ContractAddress) {
 }
 
 async function getclaimContract(ContractAddress) {
-  const web3 = new Web3(await getProvider())
+  const web3 = new Web3(await getProvider(Vue.prototype.walletName || ''))
   // claim
   const claimABI = [
     {
@@ -98,7 +99,7 @@ async function getclaimContract(ContractAddress) {
 }
 
 async function getTotalstakedContract(ContractAddress) {
-  const web3 = new Web3(await getProvider())
+  const web3 = new Web3(await getProvider(Vue.prototype.walletName || ''))
   // total_staked
   const totalstakedABI = [
     {
@@ -120,7 +121,7 @@ async function getTotalstakedContract(ContractAddress) {
 }
 
 async function getUserstakedContract(ContractAddress) {
-  const web3 = new Web3(await getProvider())
+  const web3 = new Web3(await getProvider(Vue.prototype.walletName || ''))
   // total_staked
   const userstakedABI = [
     {
@@ -149,7 +150,7 @@ async function getUserstakedContract(ContractAddress) {
 
 // allowance
 async function getAllowanceContract(ContractAddress) {
-  const web3 = new Web3(await getProvider())
+  const web3 = new Web3(await getProvider(Vue.prototype.walletName || ''))
   // total_staked
   const allowanceABI = [
     {

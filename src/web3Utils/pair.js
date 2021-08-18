@@ -1,9 +1,10 @@
+import Vue from 'vue'
 import Web3 from 'web3'
 import getProvider from './web3Provider'
 
 
 async function getPairContract(contractAddress) {
-  const web3 = new Web3(await getProvider())
+  const web3 = new Web3(await getProvider(Vue.prototype.walletName || ''))
   const getReservesABI = [
     { 
       "constant": true, 

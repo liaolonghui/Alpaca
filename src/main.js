@@ -17,6 +17,8 @@ import store from './store'
 
 $(function () { $("[data-toggle='tooltip']").tooltip() })
 
+Vue.prototype.walletName = 'BC'
+
 Vue.config.productionTip = false
 
 new Vue({
