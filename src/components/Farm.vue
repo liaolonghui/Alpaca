@@ -942,6 +942,9 @@ export default {
 #transactionModal .view-transaction a {
   color: #31C77F;
 }
+#transactionModal .view-transaction a:hover {
+  text-decoration: underline;
+}
 #transactionModal .view-transaction svg {
   width: 20px;
   height: 20px;

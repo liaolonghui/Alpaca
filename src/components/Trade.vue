@@ -185,7 +185,7 @@
                       </p>
                       <p>
                         <span>Your pool share:</span>
-                        <span>{{ ((item.balance/item.total) * 100).toFixed(2) }}%</span>
+                        <span>{{ Math.floor(((item.balance/item.total) * 100) * 100) / 100 }}%</span>
                       </p>
                     </div>
                     <div class="liquidity-btn-box">
@@ -360,13 +360,13 @@
             </p>
             <p>
               <span>Your pool share:</span>
-              <span>{{ ((addLiquidityInfo.balance/addLiquidityInfo.total) * 100).toFixed(2) }}%</span>
+              <span>{{ Math.floor(((addLiquidityInfo.balance/addLiquidityInfo.total) * 100) * 100) / 100 }}%</span>
             </p>
           </div>
         </div>
       </div>
     </div>
-    <!-- select token -->
+    <!-- select token 选择币种 -->
     <div class="modal fade" id="tokenModal" tabindex="-1" role="dialog" aria-labelledby="tokenModalLabel" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
@@ -402,7 +402,7 @@
         </div><!-- /.modal-content -->
       </div><!-- /.modal -->
     </div>
-    <!-- removeLiquidity -->
+    <!-- removeLiquidity 删除liquidity -->
     <!-- 模态框（Modal） -->
     <div class="modal fade" id="removeLModal" tabindex="-1" role="dialog" aria-labelledby="removeLModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -516,6 +516,54 @@
             </div><!-- /.modal-content -->
         </div><!-- /.modal -->
     </div>
+    <!-- 交易时给用户一些信息，比如transactionHash -->
+    <div class="modal fade" id="transactionModal" tabindex="-1" role="dialog" aria-labelledby="transactionModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title text-center">
+                      <!-- wait -->
+                      <span v-if="transactionState == 'wait'">Waiting for confirmation</span>
+                      <!-- success -->
+                      <span v-if="transactionState == 'success'">Success</span>
+                      <!-- error -->
+                      <span v-if="transactionState == 'error'">Error</span>
+                    </h4>
+                </div>
+                <div class="modal-body text-center">
+                  <!-- wait -->
+                  <div v-if="transactionState == 'wait'">
+                    <img class="transaction-loading" src="../assets/images/blue-loader.svg" />
+                    <p>{{ transactionInfo }}</p>
+                    <p>Confirm this transaction in your wallet.</p>
+                  </div>
+                  <!-- success -->
+                  <div v-if="transactionState == 'success'">
+                    <h4>Transaction completed</h4>
+                    <p class="see-transaction">
+                      <a @click="(e) => e.stopPropagation()" target="_blank" :href="`https://testnet.bscscan.com/tx/${transactionHash}`">
+                        View Transaction
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18 19H6C5.45 19 5 18.55 5 18V6C5 5.45 5.45 5 6 5H11C11.55 5 12 4.55 12 4C12 3.45 11.55 3 11 3H5C3.89 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V13C21 12.45 20.55 12 20 12C19.45 12 19 12.45 19 13V18C19 18.55 18.55 19 18 19ZM14 4C14 4.55 14.45 5 15 5H17.59L8.46 14.13C8.07 14.52 8.07 15.15 8.46 15.54C8.85 15.93 9.48 15.93 9.87 15.54L19 6.41V9C19 9.55 19.45 10 20 10C20.55 10 21 9.55 21 9V4C21 3.45 20.55 3 20 3H15C14.45 3 14 3.45 14 4Z"></path></svg>
+                      </a>
+                    </p>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="97" height="97" viewBox="0 0 24 24" fill="none" stroke="#1FC7D4" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="16 12 12 8 8 12"></polyline><line x1="12" y1="16" x2="12" y2="8"></line></svg>
+                    <div @click="hideTransactionModal" class="btn btn-info btn-block">
+                      Close
+                    </div>
+                  </div>
+                  <!-- error -->
+                  <div v-if="transactionState == 'error'">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ED4B9E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="stroke-width: 1.5;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                    <p>Transaction rejected.</p>
+                    <div @click="hideTransactionModal" class="btn btn-info btn-block">
+                      Dismiss
+                    </div>
+                  </div>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal -->
+    </div>
   </div>
 </template>
 
@@ -625,10 +673,17 @@ export default {
       liquidityAmountCanChange: true,
       removeAmountA: 0,
       removeAmountB: 0,
-      liquidityApprove: true // 删除
+      liquidityApprove: true, // 删除
+      transactionState: 'wait', // 交易状态
+      transactionInfo: '', // 交易信息
+      transactionHash: '' // transactionHash
     }
   },
   methods: {
+    // 隐藏交易信息对话框
+    hideTransactionModal() {
+      $('#transactionModal').modal('hide')
+    },
     // addOrRemoveToken 添加/删除不在默认列表中的token
     addOrRemoveToken(e, token) {
       e.stopPropagation()
@@ -648,14 +703,17 @@ export default {
     },
     // addliquidity
     addLiquidity() {
+      this.transactionState = 'wait'
+      this.transactionInfo = `Supplying ${this.input1Amount} ${this.input1.name} and ${this.input2Amount} ${this.input2.name}`
+      $('#transactionModal').modal('show')
       const address = this.$store.state.publicAddress
       const name1 = this.input1.name
       const name2 = this.input2.name
       const addr1 = this.input1.addr
       const addr2 = this.input2.addr
-      const amount1 = new BigNumber(Number(this.input1Amount) * 1e18)
+      const amount1 = new BigNumber(Number(this.input1Amount).toFixed(15) * 1e18)
       const amount1Min = amount1.multipliedBy(0.992)
-      const amount2 = new BigNumber(Number(this.input2Amount) * 1e18)
+      const amount2 = new BigNumber(Number(this.input2Amount).toFixed(15) * 1e18)
       const amount2Min = amount2.multipliedBy(0.992)
       const deadline = Math.floor((new Date).getTime()/1000) + 1200
       // 保存引用（balance/amount）用于交易成功后修改余额等
@@ -668,8 +726,12 @@ export default {
         this.routerContract.methods.addLiquidity(addr1, addr2, amount1, amount2, amount1Min, amount2Min, address, deadline).send({
           from: address,
           gas: 1000000
-        }).then(() => {
+        }).then((result) => {
+          this.transactionHash = result.transactionHash
           this.afterAddLiquidity(input1, input2, input1Amount, input2Amount)
+        }).catch(() => {
+          // 交易状态
+          this.transactionState = 'error'
         })
       } else if (name1 && name2 && (name1 === 'BNB' || name2 === 'BNB')) {
         // input1和2都存在，但是其中一个是BNB
@@ -678,21 +740,31 @@ export default {
             from: address,
             value: amount1,
             gas: 1000000
-          }).then(() => {
+          }).then((result) => {
+            this.transactionHash = result.transactionHash
             this.afterAddLiquidity(input1, input2, input1Amount, input2Amount)
+          }).catch(() => {
+            // 交易状态
+            this.transactionState = 'error'
           })
         } else if (name2 === 'BNB') {
           this.routerContract.methods.addLiquidityETH(addr1, amount1, amount1Min, amount2Min, address, deadline).send({
             from: address,
             value: amount2,
             gas: 1000000
-          }).then(() => {
+          }).then((result) => {
+            this.transactionHash = result.transactionHash
             this.afterAddLiquidity(input1, input2, input1Amount, input2Amount)
+          }).catch(() => {
+            // 交易状态
+            this.transactionState = 'error'
           })
         }
       }
     },
     afterAddLiquidity(input1, input2, input1Amount, input2Amount) {
+      // 交易状态
+      this.transactionState = 'success'
       input1.balance -= input1Amount
       input2.balance -= input2Amount
       this.input1Amount = ''
@@ -707,6 +779,10 @@ export default {
     removeLiquidity() {
       const to = this.$store.state.publicAddress
       if (!to) return
+      const arr = this.removeLiquidityInfo.name.split('/') // 名字数组
+      this.transactionState = 'wait'
+      $('#transactionModal').modal('show')
+      this.transactionInfo = `Removing ${this.removeAmountA} ${arr[0]} and ${this.removeAmountB} ${arr[1]}`
       const addrA = this.removeAddrA
       const addrB = this.removeAddrB
       const liquidityAmount = new BigNumber(this.liquidityAmount * 1e18)
@@ -714,31 +790,40 @@ export default {
       const removeAmountBMin = new BigNumber(this.removeAmountB * 1e18 * 0.992) // 如果是ETH则amountETHMin
       const deadline = Math.floor((new Date).getTime()/1000) + 1200
       // 判断是否有bnb
-      const arr = this.removeLiquidityInfo.name.split('/')
       if (arr[0] == 'BNB') {
         this.routerContract.methods.removeLiquidityETH(addrB, liquidityAmount, removeAmountBMin, removeAmountAMin, to, deadline).send({
           from: to,
           gas: 1000000
-        }).then(() => {
+        }).then((result) => {
+          this.transactionHash = result.transactionHash
           this.afterRemoveLiquidity()
+        }).catch(() => {
+          this.transactionState = 'error'
         })
       } else if (arr[1] == 'BNB') {
         this.routerContract.methods.removeLiquidityETH(addrA, liquidityAmount, removeAmountAMin, removeAmountBMin, to, deadline).send({
           from: to,
           gas: 1000000
-        }).then(() => {
+        }).then((result) => {
+          this.transactionHash = result.transactionHash
           this.afterRemoveLiquidity()
+        }).catch(() => {
+          this.transactionState = 'error'
         })
       } else {
         this.routerContract.methods.removeLiquidity(addrA, addrB, liquidityAmount, removeAmountAMin, removeAmountBMin, to, deadline).send({
           from: to,
           gas: 1000000
-        }).then(() => {
+        }).then((result) => {
+          this.transactionHash = result.transactionHash
           this.afterRemoveLiquidity()
+        }).catch(() => {
+          this.transactionState = 'error'
         })
       }
     },
     async afterRemoveLiquidity() {
+      this.transactionState = 'success' // 交易状态
       this.liquidityAmount = 0
       this.removePercentage = 0
       const pairContract = await getPairContract(this.removePairAddr)
@@ -758,6 +843,9 @@ export default {
     swap() {
       const to = this.$store.state.publicAddress
       if (!to) return
+      this.transactionState = 'wait'
+      $('#transactionModal').modal('show')
+      this.transactionInfo = `Swapping ${this.fromAmount} ${this.from.name} for ${this.toAmount} ${this.to.name}`
       const amountIn = new BigNumber(this.fromAmount * 1e18)
       // 转bignumber时最多只能有15位小数
       const amountOutMin = new BigNumber(Number(this.toAmount) * 1e18 * 0.992)
@@ -788,7 +876,9 @@ export default {
       } else if (this.to.name === 'BNB') {
         methodName = 'swapExactTokensForETH'
       }
-      this.routerContract.methods[methodName](...props).send(sendObj).then(() => {
+      this.routerContract.methods[methodName](...props).send(sendObj).then((result) => {
+        this.transactionHash = result.transactionHash
+        this.transactionState = 'success' // 交易状态
         // 交易成功
         fromToken.balance -= fromAmount
         toToken.balance = Number(toToken.balance) + Number(toAmount)
@@ -796,6 +886,8 @@ export default {
         this.toAmount = ''
         // bnb也查询一下
         this.getTokenBalance(this.tokens, 0)
+      }).catch(() => {
+        this.transactionState = 'error' // 交易状态
       })
     },
     // getMax 将amount设为balance一样
@@ -1843,7 +1935,7 @@ export default {
   height: 24px;
   vertical-align: -7px;
 }
-@media screen and (min-width: 768px) {
+@media screen and (min-width: 500px) {
   #removeLModal .modal-dialog {
     width: 500px;
   }
@@ -1920,5 +2012,48 @@ export default {
   height: 18px;
   margin-left: 3px;
   vertical-align: -4px;
+}
+#transactionModal .modal-dialog {
+  width: 400px;
+  font-weight: 530;
+}
+@media screen and (max-width: 400px) {
+  #transactionModal .modal-dialog {
+    width: 95%;
+  }
+}
+#transactionModal svg {
+  margin: 15px 0;
+}
+#transactionModal img {
+  margin: 25px 0;
+}
+@keyframes transaction-rotate {
+  50% {
+    transform: rotate(180deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+#transactionModal .transaction-loading {
+  animation: transaction-rotate 2s linear infinite;
+}
+#transactionModal .see-transaction {
+  font-size: 16px;
+  font-weight: 540;
+}
+#transactionModal .see-transaction a {
+  color: #31C77F;
+}
+#transactionModal .see-transaction a:hover {
+  text-decoration: underline;
+}
+#transactionModal .see-transaction svg {
+  width: 20px;
+  height: 20px;
+  margin: 5px 0;
+  fill: #31C77F;
+  vertical-align: -9px;
 }
 </style>
