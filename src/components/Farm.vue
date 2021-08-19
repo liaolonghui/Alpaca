@@ -436,9 +436,9 @@ export default {
       const address = this.$store.state.publicAddress // 用户地址
       let amount
       if (this.operation === 'deposit') {
-        amount = new BigNumber(stake.depositAmount + 10000).multipliedBy(1e18)
+        amount = new BigNumber(stake.depositAmount + 10000000000000000).multipliedBy(1e18)
       } else if (this.operation === 'withdraw') {
-        amount = new BigNumber(stake.withdrawAmount + 10000).multipliedBy(1e18)
+        amount = new BigNumber(stake.withdrawAmount + 10000000000000000).multipliedBy(1e18)
       }
       const approveContract = await getFarmContract.getapproveContract(stake.pairAddress)
       approveContract.methods.approve(stake.contractAddress, amount).send({

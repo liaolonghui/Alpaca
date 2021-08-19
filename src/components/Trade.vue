@@ -151,7 +151,7 @@
           <div class="liquidity-content">
             <h4>Your Liquidity</h4>
             <!-- your-liquidity -->
-            <div class="your-liquidity">
+            <div v-if="hasLiquidity" class="your-liquidity">
               <div v-for="item in liquidity" :key="item.name">
                 <div class="liquidity-item">
                   <div class="liquidity-top" @click="showOrHideLiquidity">
@@ -170,6 +170,24 @@
                   </div>
                   <!-- liquidity-detail -->
                   <div class="liquidity-detail">
+                    <div class="liquidity-info">
+                      <p>
+                        <span>Pooled BNB:</span>
+                        <span>{{ Number(item.token1).toFixed(6) }}<img :src="item.icon1" width="24" height="24"></span>
+                      </p>
+                      <p>
+                        <span>Pooled work:</span>
+                        <span>{{ Number(item.token2).toFixed(6) }}<img :src="item.icon2" width="24" height="24"></span>
+                      </p>
+                      <p>
+                        <span>Your pool tokens:</span>
+                        <span>{{ Number(item.balance).toFixed(6) }}</span>
+                      </p>
+                      <p>
+                        <span>Your pool share:</span>
+                        <span>{{ ((item.balance/item.total) * 100).toFixed(2) }}%</span>
+                      </p>
+                    </div>
                     <div class="liquidity-btn-box">
                       <!-- add -->
                       <div @click="(e) => toAddLiquidity(e, item.name)" class="btn btn-primary btn-lg liquidity-btn">
@@ -183,6 +201,9 @@
                   </div>
                 </div>
               </div>
+            </div>
+            <div v-else>
+              <img class="loading" src="../assets/images/blue-loader.svg">
             </div>
           </div>
         </div>
@@ -557,6 +578,7 @@ export default {
       input2CanChange: true, // 默认可变
       // liquidity 用户拥有的所有pair
       liquidity: [],
+      hasLiquidity: false,
       // otherTokens 其他token(可供用户自己添加)
       otherTokens: otherTokens,
       // routerAddr
@@ -655,6 +677,8 @@ export default {
       this.hasPair = true
       // 每次交易完更新BNB
       this.getTokenBalance(this.tokens, 0)
+      // 重新搜索pair
+      this.searchUserPair()
     },
     // removeLiquidity
     removeLiquidity() {
@@ -675,6 +699,7 @@ export default {
         }).then((amountA, amountB) => {
           console.log(amountA, amountB)
           this.liquidityAmount = 0
+          this.searchUserPair()
         })
       } else if (arr[1] == 'BNB') {
         this.routerContract.methods.removeLiquidityETH(addrA, liquidityAmount, removeAmountAMin, removeAmountBMin, to, deadline).send({
@@ -683,6 +708,7 @@ export default {
         }).then((amountA, amountB) => {
           console.log(amountA, amountB)
           this.liquidityAmount = 0
+          this.searchUserPair()
         })
       } else {
         this.routerContract.methods.removeLiquidity(addrA, addrB, liquidityAmount, removeAmountAMin, removeAmountBMin, to, deadline).send({
@@ -691,6 +717,7 @@ export default {
         }).then((amountA, amountB) => {
           console.log(amountA, amountB)
           this.liquidityAmount = 0
+          this.searchUserPair()
         })
       }
     },
@@ -845,7 +872,7 @@ export default {
         }
         const approveName = token + 'Approve' // 允许的token所对应的标识名
         const amountName = token + 'Amount' // xxxAmount
-        const amount = new BigNumber((Number(this[amountName]) + 10000) * 1e18 )
+        const amount = new BigNumber((Number(this[amountName]) + 10000000000000000) * 1e18 )
         const approveContract = await getFarmContract.getapproveContract(tokeninfo.addr)
         approveContract.methods.approve(this.routerAddr, amount).send({
           from: address
@@ -1000,12 +1027,67 @@ export default {
           this[tokenAmount] = toNonExponential((amountBy * ratio) / 1e18)
         }
       })
+    },
+    // 搜索用户有多少种pair
+    async searchUserPair() {
+      const userAddr = this.$store.state.publicAddress
+      if (!userAddr) return this.hasLiquidity = true
+      this.hasLiquidity = false
+      this.factoryContract = await getFactoryContract() // factory合约
+      const allPair = []
+      const allTokens = this.tokens.concat(this.otherTokens)
+      for (let i=0; i<allTokens.length; i++) {
+        for (let j=i+1; j<allTokens.length; j++) {
+          const pairAddr = await this.factoryContract.methods.getPair(allTokens[i].addr, allTokens[j].addr).call()
+          if (pairAddr !== '0x0000000000000000000000000000000000000000') {
+            let pairName = ''
+            let icon1 = ''
+            let icon2 = ''
+            if (allTokens[i].name > allTokens[j].name) {
+              pairName = allTokens[j].name + '/' + allTokens[i].name
+              icon1 = allTokens[j].icon
+              icon2 = allTokens[i].icon
+            } else {
+              pairName = allTokens[i].name + '/' + allTokens[j].name
+              icon1 = allTokens[i].icon
+              icon2 = allTokens[j].icon
+            }
+            allPair.push({
+              name: pairName,
+              addr: pairAddr,
+              icon1,
+              icon2
+            })
+          }
+        }
+      }
+      // 查询用户有哪些pair
+      allPair.forEach(async pair => {
+        const pairContract = await getPairContract(pair.addr)
+        const total = await pairContract.methods.totalSupply().call()
+        const balance = await pairContract.methods.balanceOf(userAddr).call()
+        const reserves = await pairContract.methods.getReserves().call()
+        if (balance > 0) {
+          // 大于0说明有
+          this.liquidity.push({
+            name: pair.name,
+            addr: pair.addr,
+            icon1: pair.icon1,
+            icon2: pair.icon2,
+            token1: toNonExponential((reserves[0] * (balance / total)) / 1e18) ,
+            token2: toNonExponential((reserves[1] * (balance / total)) / 1e18),
+            balance: toNonExponential(balance/1e18),
+            total: toNonExponential(total/1e18)
+          })
+        }
+      });
+      this.hasLiquidity = true
     }
   },
   created() {
     this.getMyRouterContract()
   },
-  async mounted() {
+  mounted() {
     this.tokens.map((token, i) => {
       this.getTokenBalance(this.tokens, i)
     })
@@ -1021,44 +1103,7 @@ export default {
       })
     }, 10000);
     // 查一下用户有多少种pair
-    const userAddr = this.$store.state.publicAddress
-    if (!userAddr) return
-    this.factoryContract = await getFactoryContract() // factory合约
-    const allPair = []
-    const allTokens = this.tokens.concat(this.otherTokens)
-    for (let i=0; i<allTokens.length; i++) {
-      for (let j=i+1; j<allTokens.length; j++) {
-        const pairAddr = await this.factoryContract.methods.getPair(allTokens[i].addr, allTokens[j].addr).call()
-        if (pairAddr !== '0x0000000000000000000000000000000000000000') {
-          let pairName = ''
-          let icon1 = ''
-          let icon2 = ''
-          if (allTokens[i].name > allTokens[j].name) {
-            pairName = allTokens[j].name + '/' + allTokens[i].name
-            icon1 = allTokens[j].icon
-            icon2 = allTokens[i].icon
-          } else {
-            pairName = allTokens[i].name + '/' + allTokens[j].name
-            icon1 = allTokens[i].icon
-            icon2 = allTokens[j].icon
-          }
-          allPair.push({
-            name: pairName,
-            addr: pairAddr,
-            icon1,
-            icon2
-          })
-        }
-      }
-    }
-    // 查询用户有哪些pair
-    allPair.forEach(async pair => {
-      const pairContract = await getPairContract(pair.addr)
-      if (await pairContract.methods.balanceOf(userAddr).call() > 0) {
-        // 大于0说明有
-        this.liquidity.push(pair)
-      }
-    });
+    this.searchUserPair()
   },
   unmounted() {
     clearInterval(this.timer)
@@ -1758,5 +1803,37 @@ export default {
   #removeLModal .remove-liquidity-detail img {
     vertical-align: -5px;
   }
+}
+
+/* 补充 */
+@keyframes rotate-loading {
+  50% {
+    transform: rotate(180edg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+.liquidity-content {
+  min-height: 150px;
+}
+.liquidity-content .loading {
+  display: block;
+  width: 100px;
+  height: 100px;
+  margin: 60px auto;
+  animation: rotate-loading 2s linear infinite;
+}
+.liquidity-content .liquidity-info>p {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 5px;
+  font-size: 15px;
+  font-weight: 520;
+}
+.liquidity-content .liquidity-info>p img {
+  margin-left: 5px;
+  vertical-align: -6px;
 }
 </style>
