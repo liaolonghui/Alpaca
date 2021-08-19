@@ -227,11 +227,17 @@
             <!-- resolve -->
             <div v-else-if="operationState === 'resolve'">
               <h4>Transaction completed</h4>
+              <p class="view-transaction">
+                <a @click="(e) => e.stopPropagation()" target="_blank" :href="`https://testnet.bscscan.com/tx/${transactionHash}`">
+                  View Transaction
+                  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18 19H6C5.45 19 5 18.55 5 18V6C5 5.45 5.45 5 6 5H11C11.55 5 12 4.55 12 4C12 3.45 11.55 3 11 3H5C3.89 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V13C21 12.45 20.55 12 20 12C19.45 12 19 12.45 19 13V18C19 18.55 18.55 19 18 19ZM14 4C14 4.55 14.45 5 15 5H17.59L8.46 14.13C8.07 14.52 8.07 15.15 8.46 15.54C8.85 15.93 9.48 15.93 9.87 15.54L19 6.41V9C19 9.55 19.45 10 20 10C20.55 10 21 9.55 21 9V4C21 3.45 20.55 3 20 3H15C14.45 3 14 3.45 14 4Z"></path></svg>
+                </a>
+              </p>
               <svg xmlns="http://www.w3.org/2000/svg" width="97" height="97" viewBox="0 0 24 24" fill="none" stroke="#1FC7D4" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="16 12 12 8 8 12"></polyline><line x1="12" y1="16" x2="12" y2="8"></line></svg>
               <div @click="hideTransactionDialog" class="btn btn-info btn-md btn-block">Close</div>
             </div>
             <!-- reject -->
-            <div v-else-if="operationState === 'reject'">
+            <div class="reject-box" v-else-if="operationState === 'reject'">
               <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ED4B9E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="stroke-width: 1.5;">
                 <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
                 <line x1="12" y1="9" x2="12" y2="13"></line>
@@ -316,7 +322,8 @@ export default {
       stakeIndex: null, // 对应stake索引
       operation: '', // 交易类型（操作）
       operationState: '', // 状态
-      needApprove: true // 是否需要approve
+      needApprove: true, // 是否需要approve
+      transactionHash: '', // 交易hash
     }
   },
   methods: {
@@ -471,7 +478,8 @@ export default {
       depositContract.methods.deposit(amount).send({
         from: address,
         gas: 1000000
-      }).then(() => {
+      }).then((result) => {
+        this.transactionHash = result.transactionHash // 交易hash
         this.operationState = 'resolve' // 交易成功提交
         this.getClaimableReward(i) // 获取新reward
         this.getTotalStaked(i)
@@ -498,7 +506,8 @@ export default {
       withdrawContract.methods.withdraw(amount).send({
         from: address,
         gas: 1000000
-      }).then(() => {
+      }).then((result) => {
+        this.transactionHash = result.transactionHash // 交易hash
         this.operationState = 'resolve' // 成功提交
         this.getClaimableReward(i) // 获取新reward
         this.getTotalStaked(i)
@@ -516,6 +525,8 @@ export default {
     },
     // claim
     async claim (i) {
+      this.operationState = 'wait' // 状态置为wait
+      $('#transactionModal').modal('show')
       const stake = this.stakes[i]
       const address = this.$store.state.publicAddress // 用户地址
       const claimContract = await getFarmContract.getclaimContract(stake.contractAddress)
@@ -524,12 +535,16 @@ export default {
       claimContract.methods.claim().send({
         from: address,
         gas: 1000000
-      }).then(() => {
+      }).then((result) => {
+        this.transactionHash = result.transactionHash // 交易hash
         // claim成功
         this.getClaimableReward(i) // 获取新reward
         this.getTotalStaked(i)
         this.getUserStaked(i)
-      }).catch(console.error)
+        this.operationState = 'resolve'
+      }).catch(() => {
+        this.operationState = 'reject'
+      })
 
       // 若通过模态框claim，要把模态框隐藏起来
       $('#claimModal').modal('hide')
@@ -913,7 +928,26 @@ export default {
   margin-top: 50px;
 }
 #transactionModal svg {
+  margin: 5px 0 25px 0;
+}
+#transactionModal .reject-box svg {
   margin: 25px 0;
+}
+
+#transactionModal .view-transaction {
+  margin-top: 15px;
+  font-size: 18px;
+  font-weight: 530;
+}
+#transactionModal .view-transaction a {
+  color: #31C77F;
+}
+#transactionModal .view-transaction svg {
+  width: 20px;
+  height: 20px;
+  margin: 5px 0;
+  fill: #31C77F;
+  vertical-align: -8px;
 }
 
 @media screen and (min-width: 1050px) {

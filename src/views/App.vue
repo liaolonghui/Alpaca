@@ -132,7 +132,7 @@
                 <img src="../assets/images/metamask.png" width="24" height="24" />
               </div>
             </div>
-            <!-- 币安链钱包 -->
+            <!-- 币安链钱包 有bug没解决不推荐用 -->
             <div @click="connectWallet('BC')" class="connect-item">
               <div>Binance Chain Wallet</div>
               <div>
@@ -181,9 +181,9 @@ export default {
     },
     // 连接钱包
     async connectWallet(walletName) {
-      Vue.prototype.walletName = walletName
-      localStorage.setItem('walletName', walletName)
-      const web3Provider = await getProvider(walletName)
+      Vue.prototype.walletName = walletName || ''
+      localStorage.setItem('walletName', walletName || '')
+      const web3Provider = await getProvider(walletName || '')
       const web3 = new Web3(web3Provider)
       
       const that = this

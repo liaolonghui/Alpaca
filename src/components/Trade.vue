@@ -720,26 +720,27 @@ export default {
           from: to,
           gas: 1000000
         }).then(() => {
-          this.afterAddLiquidity()
+          this.afterRemoveLiquidity()
         })
       } else if (arr[1] == 'BNB') {
         this.routerContract.methods.removeLiquidityETH(addrA, liquidityAmount, removeAmountAMin, removeAmountBMin, to, deadline).send({
           from: to,
           gas: 1000000
         }).then(() => {
-          this.afterAddLiquidity()
+          this.afterRemoveLiquidity()
         })
       } else {
         this.routerContract.methods.removeLiquidity(addrA, addrB, liquidityAmount, removeAmountAMin, removeAmountBMin, to, deadline).send({
           from: to,
           gas: 1000000
         }).then(() => {
-          this.afterAddLiquidity()
+          this.afterRemoveLiquidity()
         })
       }
     },
     async afterRemoveLiquidity() {
       this.liquidityAmount = 0
+      this.removePercentage = 0
       const pairContract = await getPairContract(this.removePairAddr)
       const userAddr = this.$store.state.publicAddress
       this.removeLiquidityBalance = toNonExponential((await pairContract.methods.balanceOf(userAddr).call()) / 1e18)
@@ -1057,6 +1058,7 @@ export default {
     },
     // 搜索用户有多少种pair
     async searchUserPair() {
+      this.liquidity = []
       const userAddr = this.$store.state.publicAddress
       if (!userAddr) return this.hasLiquidity = true
       this.hasLiquidity = false
@@ -1283,6 +1285,8 @@ export default {
     "$store.state.publicAddress"(newAddr, oldAddr) {
       if (!newAddr) return 
       if (newAddr && newAddr !== oldAddr) {
+        this.SearchPairInfo()
+        this.searchUserPair()
         this.getMyRouterContract()
         this.tokens.map((token, i) => {
           this.getTokenBalance(this.tokens, i)
