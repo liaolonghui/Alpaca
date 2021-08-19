@@ -667,7 +667,7 @@ export default {
       if (name1 !== 'BNB' && name2 !== 'BNB') {
         this.routerContract.methods.addLiquidity(addr1, addr2, amount1, amount2, amount1Min, amount2Min, address, deadline).send({
           from: address,
-          gas: 10000000
+          gas: 1000000
         }).then(() => {
           this.afterAddLiquidity(input1, input2, input1Amount, input2Amount)
         })
@@ -677,7 +677,7 @@ export default {
           this.routerContract.methods.addLiquidityETH(addr2, amount2, amount2Min, amount1Min, address, deadline).send({
             from: address,
             value: amount1,
-            gas: 10000000
+            gas: 1000000
           }).then(() => {
             this.afterAddLiquidity(input1, input2, input1Amount, input2Amount)
           })
@@ -685,7 +685,7 @@ export default {
           this.routerContract.methods.addLiquidityETH(addr1, amount1, amount1Min, amount2Min, address, deadline).send({
             from: address,
             value: amount2,
-            gas: 10000000
+            gas: 1000000
           }).then(() => {
             this.afterAddLiquidity(input1, input2, input1Amount, input2Amount)
           })
@@ -718,21 +718,21 @@ export default {
       if (arr[0] == 'BNB') {
         this.routerContract.methods.removeLiquidityETH(addrB, liquidityAmount, removeAmountBMin, removeAmountAMin, to, deadline).send({
           from: to,
-          gas: 5000000
+          gas: 1000000
         }).then(() => {
           this.afterAddLiquidity()
         })
       } else if (arr[1] == 'BNB') {
         this.routerContract.methods.removeLiquidityETH(addrA, liquidityAmount, removeAmountAMin, removeAmountBMin, to, deadline).send({
           from: to,
-          gas: 5000000
+          gas: 1000000
         }).then(() => {
           this.afterAddLiquidity()
         })
       } else {
         this.routerContract.methods.removeLiquidity(addrA, addrB, liquidityAmount, removeAmountAMin, removeAmountBMin, to, deadline).send({
           from: to,
-          gas: 5000000
+          gas: 1000000
         }).then(() => {
           this.afterAddLiquidity()
         })
@@ -778,7 +778,7 @@ export default {
       ]
       let sendObj = { // send发送的对象
         from: to,
-        gas: 10000000
+        gas: 1000000
       }
       if (this.from.name === 'BNB') {
         methodName = 'swapExactETHForTokens'

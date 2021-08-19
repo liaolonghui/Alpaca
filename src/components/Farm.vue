@@ -443,7 +443,7 @@ export default {
       const approveContract = await getFarmContract.getapproveContract(stake.pairAddress)
       approveContract.methods.approve(stake.contractAddress, amount).send({
         from: address
-      }).then((result) => {
+      }).then(() => {
         this.needApprove = false // approve成功，将needApprove置为false
       }).catch(() => {
         this.needApprove = true
@@ -470,7 +470,7 @@ export default {
       // deposit
       depositContract.methods.deposit(amount).send({
         from: address,
-        gas: 10000000
+        gas: 1000000
       }).then(() => {
         this.operationState = 'resolve' // 交易成功提交
         this.getClaimableReward(i) // 获取新reward
@@ -497,7 +497,7 @@ export default {
 
       withdrawContract.methods.withdraw(amount).send({
         from: address,
-        gas: 10000000
+        gas: 1000000
       }).then(() => {
         this.operationState = 'resolve' // 成功提交
         this.getClaimableReward(i) // 获取新reward
@@ -523,7 +523,7 @@ export default {
       // claim
       claimContract.methods.claim().send({
         from: address,
-        gas: 10000000
+        gas: 1000000
       }).then(() => {
         // claim成功
         this.getClaimableReward(i) // 获取新reward
