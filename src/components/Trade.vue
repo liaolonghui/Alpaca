@@ -207,7 +207,7 @@
             </div>
           </div>
         </div>
-        <!-- add liquidty -->
+        <!-- add liquidity -->
         <div v-else-if="tradeType === 'addLiquidity'" class="add-liquidity">
           <div class="add-liquidity-header">
             <div>
@@ -340,6 +340,28 @@
                 'Enter an amount'
               }}
             </div>
+          </div>
+        </div>
+        <!-- add liquidity info -->
+        <div v-if="tradeType === 'addLiquidity' && addLiquidityInfo.name" class="add-liquidity-info">
+          <div class="liquidity-info">
+            <h5>LP TOKENS IN YOUR WALLET</h5>
+            <p>
+              <span>Pooled BNB:</span>
+              <span>{{ Number(addLiquidityInfo.token1).toFixed(6) }}<img :src="addLiquidityInfo.icon1"></span>
+            </p>
+            <p>
+              <span>Pooled work:</span>
+              <span>{{ Number(addLiquidityInfo.token2).toFixed(6) }}<img :src="addLiquidityInfo.icon2"></span>
+            </p>
+            <p>
+              <span>Your pool tokens:</span>
+              <span>{{ Number(addLiquidityInfo.balance).toFixed(6) }}</span>
+            </p>
+            <p>
+              <span>Your pool share:</span>
+              <span>{{ ((addLiquidityInfo.balance/addLiquidityInfo.total) * 100).toFixed(2) }}%</span>
+            </p>
           </div>
         </div>
       </div>
@@ -587,6 +609,7 @@ export default {
       fromApprove: true,
       input1Approve: true,
       input2Approve: true,
+      addLiquidityInfo: {},
       // 标识addliquidity的pair是否已存在
       hasPair: true,
       // removeliquidity的方式
@@ -696,30 +719,31 @@ export default {
         this.routerContract.methods.removeLiquidityETH(addrB, liquidityAmount, removeAmountBMin, removeAmountAMin, to, deadline).send({
           from: to,
           gas: 5000000
-        }).then((amountA, amountB) => {
-          console.log(amountA, amountB)
-          this.liquidityAmount = 0
-          this.searchUserPair()
+        }).then(() => {
+          this.afterAddLiquidity()
         })
       } else if (arr[1] == 'BNB') {
         this.routerContract.methods.removeLiquidityETH(addrA, liquidityAmount, removeAmountAMin, removeAmountBMin, to, deadline).send({
           from: to,
           gas: 5000000
-        }).then((amountA, amountB) => {
-          console.log(amountA, amountB)
-          this.liquidityAmount = 0
-          this.searchUserPair()
+        }).then(() => {
+          this.afterAddLiquidity()
         })
       } else {
         this.routerContract.methods.removeLiquidity(addrA, addrB, liquidityAmount, removeAmountAMin, removeAmountBMin, to, deadline).send({
           from: to,
           gas: 5000000
-        }).then((amountA, amountB) => {
-          console.log(amountA, amountB)
-          this.liquidityAmount = 0
-          this.searchUserPair()
+        }).then(() => {
+          this.afterAddLiquidity()
         })
       }
+    },
+    async afterRemoveLiquidity() {
+      this.liquidityAmount = 0
+      const pairContract = await getPairContract(this.removePairAddr)
+      const userAddr = this.$store.state.publicAddress
+      this.removeLiquidityBalance = toNonExponential((await pairContract.methods.balanceOf(userAddr).call()) / 1e18)
+      this.searchUserPair()
     },
     // changeRemoveMethod 改变删除liquidity的方法
     changeRemoveMethod() {
@@ -922,6 +946,7 @@ export default {
       this.input1Amount = ''
       this.input2 = {}
       this.input2Amount = ''
+      this.addLiquidityInfo = {}
     },
     // showOrHideLiquidity 显示/隐藏liquidity的信息
     showOrHideLiquidity(e) {
@@ -943,6 +968,8 @@ export default {
       })
       this.input1Amount = ''
       this.input2Amount = ''
+      this.addLiquidityInfo = {}
+      this.SearchPairInfo()
     },
     // toRemoveLiquidity 显示removeliquidity对话框
     async toRemoveLiquidity(e, liquidity) {
@@ -1082,6 +1109,34 @@ export default {
         }
       });
       this.hasLiquidity = true
+    },
+    // SearchPairInfo 在addLiquidity时搜索用户持有的pair信息
+    async SearchPairInfo() {
+      const userAddr = this.$store.state.publicAddress
+      if (this.input1.addr && this.input2.addr && userAddr) {
+        const pairAddr = await this.factoryContract.methods.getPair(this.input1.addr, this.input2.addr).call()
+        const pairContract = await getPairContract(pairAddr)
+        const total = await pairContract.methods.totalSupply().call()
+        const balance = await pairContract.methods.balanceOf(userAddr).call()
+        const reserves = await pairContract.methods.getReserves().call()
+        let name = this.input1.name + '/' + this.input2.name
+        let icon1 = this.input1.icon
+        let icon2 = this.input2.icon
+        if (this.input1.name > this.input2.name) {
+          name = this.input2.name + '/' + this.input1.name
+          icon1 = this.input2.icon
+          icon2 = this.input1.icon
+        }
+        this.addLiquidityInfo = {
+          name,
+          icon1,
+          icon2,
+          token1: toNonExponential((reserves[0] * (balance/total)) / 1e18),
+          token2: toNonExponential((reserves[1] * (balance/total)) / 1e18),
+          balance: toNonExponential(balance/1e18),
+          total: toNonExponential(total/1e18)
+        }
+      }
     }
   },
   created() {
@@ -1120,6 +1175,7 @@ export default {
     },
     "input1.name" (newVal, oldVal) {
       if (newVal !== oldVal) {
+        this.SearchPairInfo()
         this.judgeApprove('input1')
         // 注：切换币后，先要判断这个pair币是不是存在
         // pair存在则继续，否则提醒用户pair由他首创
@@ -1141,6 +1197,7 @@ export default {
     },
     "input2.name" (newVal, oldVal) {
       if (newVal !== oldVal) {
+        this.SearchPairInfo()
         this.judgeApprove('input2')
         // 注：切换币后，先要判断这个pair币是不是存在
         // pair存在则继续，否则提醒用户pair由他首创
@@ -1835,5 +1892,29 @@ export default {
 .liquidity-content .liquidity-info>p img {
   margin-left: 5px;
   vertical-align: -6px;
+}
+.add-liquidity-info {
+  width: 280px;
+  padding: 15px;
+  margin: 20px auto;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  background-color: #fff;
+}
+.add-liquidity-info>.liquidity-info h5 {
+  margin: 5px 0 15px 0;
+  font-weight: 550;
+}
+.add-liquidity-info>.liquidity-info p {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+.add-liquidity-info>.liquidity-info p img {
+  width: 18px;
+  height: 18px;
+  margin-left: 3px;
+  vertical-align: -4px;
 }
 </style>
