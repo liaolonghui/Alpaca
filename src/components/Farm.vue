@@ -290,8 +290,6 @@ export default {
           userStaked: 0,
           // rewardName
           rewardName: 'work coin',
-          // dayNum 平均一天产生
-          dayNum: 250
         },
         {
           name: 'Stable-Stake',
@@ -305,7 +303,6 @@ export default {
           totalStaked: 0,
           userStaked: 0,
           rewardName: 'work coin',
-          dayNum: 500
         }
       ],
       // operation
@@ -460,7 +457,7 @@ export default {
     async deposit () {
       const i = this.stakeIndex
       const stake = this.stakes[i]
-      const amount = new BigNumber(stake.depositAmount).multipliedBy(1e18)
+      const amount = new BigNumber(stake.depositAmount * 1e18)
       const address = this.$store.state.publicAddress // 用户地址
       const depositContract = await getFarmContract.getdepositContract(stake.contractAddress)
 
@@ -489,7 +486,7 @@ export default {
     async withdraw () {
       const i = this.stakeIndex
       const stake = this.stakes[i]
-      const amount = new BigNumber(stake.withdrawAmount).multipliedBy(1e18)
+      const amount = new BigNumber(stake.withdrawAmount * 1e18)
       const address = this.$store.state.publicAddress // 用户地址
       const withdrawContract = await getFarmContract.getwithdrawContract(stake.contractAddress)
 

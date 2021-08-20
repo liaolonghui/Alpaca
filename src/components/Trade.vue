@@ -886,6 +886,7 @@ export default {
         this.toAmount = ''
         // bnb也查询一下
         this.getTokenBalance(this.tokens, 0)
+        this.searchUserPair() // 查询获取一些用户lp信息
       }).catch(() => {
         this.transactionState = 'error' // 交易状态
       })
