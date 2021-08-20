@@ -36,13 +36,6 @@
             <div class="pair-name">
               {{ stake.name }}
             </div>
-            <div class="stake-APY">
-              <p>APY</p>
-              <p class="stake-APY-info" :class="[(stake.totalStaked&&stake.userStaked)?'':'default-grey-mask']">
-                <!-- 计算APY -->
-                {{ stake.APY }}
-              </p>
-            </div>
             <div class="total-staked">
               <p>Total staked</p>
               <p class="total-staked-num" :class="[stake.totalStaked?'':'default-grey-mask']">
@@ -295,8 +288,6 @@ export default {
           totalStaked: 0,
           // userStaked
           userStaked: 0,
-          // apy
-          APY: '',
           // rewardName
           rewardName: 'work coin',
           // dayNum 平均一天产生
@@ -313,7 +304,6 @@ export default {
           withdrawAmount: '',
           totalStaked: 0,
           userStaked: 0,
-          APY: '',
           rewardName: 'work coin',
           dayNum: 500
         }
@@ -602,34 +592,6 @@ export default {
         this.stakes[i].LPBalance = toNonExponential(balance / 1e18)
       }
     },
-    // 计算APY
-    async computedAPY (stake) {
-      const getReservesContract = await getPairContract(stake.pairAddress)
-      const result = await getReservesContract.methods.getReserves().call()
-
-      // dayNum是平均一天的产出
-      const { totalStaked, userStaked, dayNum } = stake
-
-      let lpVal = result[1] / result[0]
-
-      const workgetReservesContract = await getPairContract('0x3Fb6a6DcF90C674E255cBdA0d19a28d01b90D819')
-      const workResult = await workgetReservesContract.methods.getReserves().call()
-      const workVal = workResult[1] / workResult[0] / 1e5
-
-      const userNum = (userStaked / totalStaked) * dayNum
-
-      // 每天挖到的数量 = (我投入的/所有人投入的)*每天能挖到的
-      // APY就是：(每天挖到的数量*其价格 / 我投入的代币数量*其价格) * 365
-
-      let APY = (userNum * workVal) / (userStaked * lpVal) * 365
-      APY = (APY * 100).toFixed(2)
-
-      if (!isNaN(APY)) {
-        stake.APY = APY + '%'
-      } else {
-        stake.APY = ''
-      }
-    }
   },
   computed: {
     // Totalearn总收入
@@ -652,8 +614,6 @@ export default {
         this.getUserStaked(i)
         // LP
         this.getLPBalance(i)
-        // 计算APY
-        this.computedAPY(stake)
       })
     }
   },
@@ -670,8 +630,6 @@ export default {
       this.getUserStaked(i)
       // LP
       this.getLPBalance(i)
-      // 计算APY
-      this.computedAPY(stake)
     })
     // 定时器查询10s
     this._timer = setInterval(() => {
@@ -682,8 +640,6 @@ export default {
         this.getClaimableReward(i)
         // TotalStaked
         this.getTotalStaked(i)
-        // 计算APY
-        this.computedAPY(stake)
       })
     }, 10000)
   },
@@ -1026,7 +982,7 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 15px;
+  margin-top: 10px;
   padding: 5px 10px;
   cursor: pointer;
 }
