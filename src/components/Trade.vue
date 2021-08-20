@@ -151,7 +151,7 @@
           <div class="liquidity-content">
             <h4>Your Liquidity</h4>
             <!-- your-liquidity -->
-            <div v-if="hasLiquidity" class="your-liquidity">
+            <div v-show="hasLiquidity" class="your-liquidity">
               <div v-for="item in liquidity" :key="item.name">
                 <div class="liquidity-item">
                   <div class="liquidity-top" @click="showOrHideLiquidity">
@@ -202,7 +202,7 @@
                 </div>
               </div>
             </div>
-            <div v-else>
+            <div v-show="!hasLiquidity">
               <img class="loading" src="../assets/images/blue-loader.svg">
             </div>
           </div>
