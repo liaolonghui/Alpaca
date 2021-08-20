@@ -1035,6 +1035,7 @@ export default {
     // toAddLiquidityfromliquidity 从liquidity跳转到addliquidity
     toAddLiquidityfromliquidity() {
       this.tradeType = 'addLiquidity'
+      this.hasPair = true
       this.input1 = this.tokens[0]
       this.input1Amount = ''
       this.input2 = {}
@@ -1051,6 +1052,7 @@ export default {
     toAddLiquidity(e, liquidityName) {
       e.stopPropagation()
       this.tradeType = 'addLiquidity'
+      this.hasPair = true
       const nameArr = liquidityName.split('/')
       const totalTokens = this.tokens.concat(this.otherTokens)
       this.input1 = totalTokens.find(token => {
