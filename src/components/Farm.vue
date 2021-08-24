@@ -794,6 +794,7 @@ export default {
   vertical-align: -2px;
 }
 .farm-pool-item .add-to-metamask {
+  height: 38px;
   display: flex;
   justify-content: space-between;
   color: #31C77F;

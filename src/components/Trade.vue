@@ -1108,7 +1108,7 @@ export default {
         const amountBy = new BigNumber(this[ByTokenAmount] || 0).multipliedBy(1e18)
         // pair的顺序是固定的 ascii
         // 如果from是大的那个(指ascii)则需要把reserves交换一下
-        if (this.from.name > this.to.name) {
+        if (parseInt(this.from.addr) > parseInt(this.to.addr)) {
           const temp = reserves[0]
           reserves[0] = reserves[1]
           reserves[1] = temp
@@ -1142,10 +1142,10 @@ export default {
         const amountBy = new BigNumber(this[ByTokenAmount] || 0).multipliedBy(1e18)
         // pair的顺序是固定的 ascii
         const ratio = reserves[0]/reserves[1]
-        if (this[token].name > this[ByToken].name) {
+        if (parseInt(this[token].addr) > parseInt(this[ByToken].addr)) {
           // 如果要计算的token更大，即排在后面。
           this[tokenAmount] = toNonExponential((amountBy / ratio) / 1e18)
-        } else if (this[token].name < this[ByToken].name) {
+        } else if (parseInt(this[token].addr) < parseInt(this[ByToken].addr)) {
           // 如果要计算的token更小，即排在前面
           this[tokenAmount] = toNonExponential((amountBy * ratio) / 1e18)
         }
@@ -1167,7 +1167,7 @@ export default {
             let pairName = ''
             let icon1 = ''
             let icon2 = ''
-            if (allTokens[i].name > allTokens[j].name) {
+            if (parseInt(allTokens[i].addr) > parseInt(allTokens[j].addr)) {
               pairName = allTokens[j].name + '/' + allTokens[i].name
               icon1 = allTokens[j].icon
               icon2 = allTokens[i].icon
