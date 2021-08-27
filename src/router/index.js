@@ -12,6 +12,7 @@ const Withdraw = () => import(/* webpackChunkName: "lend" */ '../components/Lend
 const Graze = () => import(/* webpackChunkName: "graze" */ '../components/Graze.vue')
 const Farm = () => import(/* webpackChunkName: "farm" */ '../components/Farm.vue')
 const Trade = () => import(/* webpackChunkName: "trade" */ '../components/Trade.vue')
+const StableTrade = () => import(/* webpackChunkName: "stableTrade" */ '../components/stableCoinTrade.vue')
 
 const Collection = () => import(/* webpackChunkName: "collection" */ '../components/Collection.vue')
 // collection
@@ -44,6 +45,7 @@ const routes = [
       { path: '/grazing-range', component: Graze },
       { path: '/farm', component: Farm },
       { path: '/trade', component: Trade },
+      { path: '/stable-trade', component: StableTrade },
       { path: '/collection', component: Collection },
       // deposit和withdraw（lend的子功能）
       { path: '/deposit', component: Deposit},

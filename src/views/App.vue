@@ -36,6 +36,7 @@
         <router-link to="/grazing-range" tag="li">Graze</router-link>
         <router-link to="/farm" tag="li">Farm</router-link>
         <router-link to="/trade" tag="li">Trade</router-link>
+        <router-link to="/stable-trade" tag="li">StableTrade</router-link>
         <router-link to="/collection" tag="li">Collection</router-link>
         <hr style="background: #aaa; height: 1px; margin: 0;" />
       </ul>
@@ -49,6 +50,7 @@
           <router-link to="/grazing-range" tag="li">Graze</router-link>
           <router-link to="/farm" tag="li">Farm</router-link>
           <router-link to="/trade" tag="li">Trade</router-link>
+          <router-link to="/stable-trade" tag="li">StableTrade</router-link>
           <router-link to="/collection" tag="li">Collection</router-link>
         </ul>
         <div class="other-nav">
