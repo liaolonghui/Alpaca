@@ -598,6 +598,7 @@
 import BigNumber from 'bignumber.js'
 import Web3 from 'web3'
 import getProvider from '../web3Utils/web3Provider.js'
+import { getStableContract } from '../web3Utils/stableTrade.js'
 import { getRouterContract, getFactoryContract } from '../web3Utils/trade.js'
 import getPairContract from '../web3Utils/pair.js'
 import getFarmContract from '../web3Utils/farm.js'
@@ -701,6 +702,8 @@ export default {
       input1Approve: true,
       input2Approve: true,
       input3Approve: true,
+      // stable_address
+      stable_address: '0xd46BA4A50594d74a8055Bd3bA5EFbDb0e5e5a9D9',
       // 标识addliquidity的pair是否已存在
       hasPair: true,
       // removeliquidity的方式
@@ -1035,7 +1038,7 @@ export default {
         const amountName = token + 'Amount' // xxxAmount
         const amount = new BigNumber((Number(this[amountName]) + 10000000000000000) * 1e18 )
         const approveContract = await getFarmContract.getapproveContract(tokeninfo.addr)
-        approveContract.methods.approve(this.routerAddr, amount).send({
+        approveContract.methods.approve(this.stable_address, amount).send({
           from: address
         }).then((result) => {
           console.log(result)
@@ -1047,6 +1050,7 @@ export default {
     },
     // 判断是否需要approve
     async judgeApprove(type) {
+      // 如果是删除liquidity
       if (type == 'removeLiquidityInfo') {
         type = 'liquidity'
       }
@@ -1060,7 +1064,7 @@ export default {
       if (address && this[type].addr) {
         const tokenAddr = this[type].addr
         const allowanceContract = await getFarmContract.getAllowanceContract(tokenAddr)
-        const allowance = await allowanceContract.methods.allowance(address, this.routerAddr).call()
+        const allowance = await allowanceContract.methods.allowance(address, this.stable_address).call()
         if (allowance < this[amountName]*1e18) {
           this[approveName] = true
         } else {
@@ -1176,35 +1180,10 @@ export default {
       })
     },
     // 计算input1/input2
-    computedAddAmount(token) {
-      let ByToken = ''
-      if (token === 'input1') {
-        ByToken = 'input2'
-      } else if (token === 'input2') {
-        ByToken = 'input1'
-      }
-      const tokenCanChange = token + 'CanChange'
-      const tokenAmount = token + 'Amount'
-      const ByTokenAmount = ByToken + 'Amount'
-      // 要先判断是否可以change
-      if (!this[tokenCanChange]) return
-      if (!this[token].name || !this[ByToken].name || !(this[ByTokenAmount] > 0)) {
-        return this[tokenAmount] = ''
-      }
-      this.factoryContract.methods.getPair(this[ByToken].addr, this[token].addr).call().then(async pairAddr => {
-        const pairContract = await getPairContract(pairAddr)
-        const reserves = await pairContract.methods.getReserves().call()
-        const amountBy = new BigNumber(this[ByTokenAmount] || 0).multipliedBy(1e18)
-        // pair的顺序是固定的 ascii
-        const ratio = reserves[0]/reserves[1]
-        if (parseInt(this[token].addr) > parseInt(this[ByToken].addr)) {
-          // 如果要计算的token更大，即排在后面。
-          this[tokenAmount] = toNonExponential((amountBy / ratio) / 1e18)
-        } else if (parseInt(this[token].addr) < parseInt(this[ByToken].addr)) {
-          // 如果要计算的token更小，即排在前面
-          this[tokenAmount] = toNonExponential((amountBy * ratio) / 1e18)
-        }
-      })
+    async computedAddAmount(token) {
+      // calc_token_amount
+      const StableContract = await getStableContract('0x7d4b53506c4f7BB44A377146bEfF89A40E9a26B0')
+      
     },
     // 搜索用户有多少种pair
     async searchUserPair() {
@@ -1214,25 +1193,7 @@ export default {
       this.hasLiquidity = false
       const allPair = ['0x7d4b53506c4f7BB44A377146bEfF89A40E9a26B0'] // 所有稳定币的地址数组
       // 查询用户有哪些pair
-      allPair.forEach(async pair => {
-        const pairContract = await getPairContract(pair.addr)
-        const total = await pairContract.methods.totalSupply().call()
-        const balance = await pairContract.methods.balanceOf(userAddr).call()
-        const reserves = await pairContract.methods.getReserves().call()
-        if (balance > 0) {
-          // 大于0说明有
-          this.liquidity.push({
-            name: pair.name,
-            addr: pair.addr,
-            icon1: pair.icon1,
-            icon2: pair.icon2,
-            token1: toNonExponential((reserves[0] * (balance / total)) / 1e18) ,
-            token2: toNonExponential((reserves[1] * (balance / total)) / 1e18),
-            balance: toNonExponential(balance/1e18),
-            total: toNonExponential(total/1e18)
-          })
-        }
-      });
+
       this.hasLiquidity = true
     },
   },
