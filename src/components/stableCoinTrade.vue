@@ -359,7 +359,7 @@
                     &&
                     !input2Approve
                     &&
-                    !inout3Approve
+                    !input3Approve
                     &&
                     input1Amount>0
                     &&
@@ -562,7 +562,6 @@
                   <!-- wait -->
                   <div v-if="transactionState == 'wait'">
                     <img class="transaction-loading" src="../assets/images/blue-loader.svg" />
-                    <p>{{ transactionInfo }}</p>
                     <p>Confirm this transaction in your wallet.</p>
                   </div>
                   <!-- success -->
@@ -668,26 +667,13 @@ export default {
       toAmount: '',
       toCanChange: true, // 默认可变化
       tokenTo: '', // 选中的token赋值给谁
-      input1: {
-        name: 'BUSD',
-        addr: '0x78867BbEeF44f2326bF8DDd1941a4439382EF2A7',
-        icon: require('../assets/images/BUSD.png')
-      }, // 默认BUSD
+      input1: tokens[1], // 默认BUSD
       input1Amount: '',
       input1CanChange: true, // 默认可变
-      input2: {
-        name: 'work',
-        type: 'other',
-        addr: '0xDE259d3beCAdc21C1D8d33442aa68f43AB7327f5',
-        icon: require('../assets/images/defaultTokenIcon.svg')
-      }, // 默认work
+      input2: {},
       input2Amount: '',
       input2CanChange: true,
-      input3: {
-        name: 'USDT',
-        addr: '0x7ef95a0FEE0Dd31b22626fA2e10Ee6A223F8a684',
-        icon: require('../assets/images/USDT.png')
-      }, // 默认BSDT
+      input3: {},
       input3Amount: '',
       input3CanChange: true,
       // liquidity 用户拥有的所有pair
@@ -721,7 +707,6 @@ export default {
       removeAmountB: 0,
       liquidityApprove: true, // 删除
       transactionState: 'wait', // 交易状态
-      transactionInfo: '', // 交易信息
       transactionHash: '' // transactionHash
     }
   },
@@ -748,65 +733,17 @@ export default {
       localStorage.setItem('tokenArr', JSON.stringify(memo))
     },
     // addliquidity
-    addLiquidity() {
+    async addLiquidity() {
       this.transactionState = 'wait'
-      this.transactionInfo = `Supplying ${this.input1Amount} ${this.input1.name} and ${this.input2Amount} ${this.input2.name}`
       $('#transactionModal').modal('show')
       const address = this.$store.state.publicAddress
-      const name1 = this.input1.name
-      const name2 = this.input2.name
-      const addr1 = this.input1.addr
-      const addr2 = this.input2.addr
-      const amount1 = new BigNumber(Number(this.input1Amount).toFixed(15) * 1e18)
-      const amount1Min = amount1.multipliedBy(0.992)
-      const amount2 = new BigNumber(Number(this.input2Amount).toFixed(15) * 1e18)
-      const amount2Min = amount2.multipliedBy(0.992)
-      const deadline = Math.floor((new Date).getTime()/1000) + 1200
-      // 保存引用（balance/amount）用于交易成功后修改余额等
-      const input1 = this.input1
-      const input2 = this.input2
-      const input1Amount = this.input1Amount
-      const input2Amount = this.input2Amount
-      // 不含BNB
-      if (name1 !== 'BNB' && name2 !== 'BNB') {
-        this.routerContract.methods.addLiquidity(addr1, addr2, amount1, amount2, amount1Min, amount2Min, address, deadline).send({
-          from: address,
-          gas: 1000000
-        }).then((result) => {
-          this.transactionHash = result.transactionHash
-          this.afterAddLiquidity(input1, input2, input1Amount, input2Amount)
-        }).catch(() => {
-          // 交易状态
-          this.transactionState = 'error'
-        })
-      } else if (name1 && name2 && (name1 === 'BNB' || name2 === 'BNB')) {
-        // input1和2都存在，但是其中一个是BNB
-        if (name1 === 'BNB') {
-          this.routerContract.methods.addLiquidityETH(addr2, amount2, amount2Min, amount1Min, address, deadline).send({
-            from: address,
-            value: amount1,
-            gas: 1000000
-          }).then((result) => {
-            this.transactionHash = result.transactionHash
-            this.afterAddLiquidity(input1, input2, input1Amount, input2Amount)
-          }).catch(() => {
-            // 交易状态
-            this.transactionState = 'error'
-          })
-        } else if (name2 === 'BNB') {
-          this.routerContract.methods.addLiquidityETH(addr1, amount1, amount1Min, amount2Min, address, deadline).send({
-            from: address,
-            value: amount2,
-            gas: 1000000
-          }).then((result) => {
-            this.transactionHash = result.transactionHash
-            this.afterAddLiquidity(input1, input2, input1Amount, input2Amount)
-          }).catch(() => {
-            // 交易状态
-            this.transactionState = 'error'
-          })
-        }
-      }
+      const StableContract = await getStableContract()
+      const amount1 = new BigNumber(this.input1Amount * 1e18)
+      const amount2 = new BigNumber(this.input2Amount * 1e18)
+      const amount3 = new BigNumber(this.input3Amount * 1e18)
+      console.log(this.input1Amount, this.input2Amount, this.input3Amount)
+      // StableContract.methods.add_liquidity()
+      StableContract.methods.calc_token_amount([amount1, amount2, amount3], true).call().then(console.log)
     },
     afterAddLiquidity(input1, input2, input1Amount, input2Amount) {
       // 交易状态
@@ -825,48 +762,8 @@ export default {
     removeLiquidity() {
       const to = this.$store.state.publicAddress
       if (!to) return
-      const arr = this.removeLiquidityInfo.name.split('/') // 名字数组
       this.transactionState = 'wait'
       $('#transactionModal').modal('show')
-      this.transactionInfo = `Removing ${this.removeAmountA} ${arr[0]} and ${this.removeAmountB} ${arr[1]}`
-      const addrA = this.removeAddrA
-      const addrB = this.removeAddrB
-      const liquidityAmount = new BigNumber(this.liquidityAmount * 1e18)
-      const removeAmountAMin = new BigNumber(this.removeAmountA * 1e18 * 0.992)
-      const removeAmountBMin = new BigNumber(this.removeAmountB * 1e18 * 0.992) // 如果是ETH则amountETHMin
-      const deadline = Math.floor((new Date).getTime()/1000) + 1200
-      // 判断是否有bnb
-      if (arr[0] == 'BNB') {
-        this.routerContract.methods.removeLiquidityETH(addrB, liquidityAmount, removeAmountBMin, removeAmountAMin, to, deadline).send({
-          from: to,
-          gas: 1000000
-        }).then((result) => {
-          this.transactionHash = result.transactionHash
-          this.afterRemoveLiquidity()
-        }).catch(() => {
-          this.transactionState = 'error'
-        })
-      } else if (arr[1] == 'BNB') {
-        this.routerContract.methods.removeLiquidityETH(addrA, liquidityAmount, removeAmountAMin, removeAmountBMin, to, deadline).send({
-          from: to,
-          gas: 1000000
-        }).then((result) => {
-          this.transactionHash = result.transactionHash
-          this.afterRemoveLiquidity()
-        }).catch(() => {
-          this.transactionState = 'error'
-        })
-      } else {
-        this.routerContract.methods.removeLiquidity(addrA, addrB, liquidityAmount, removeAmountAMin, removeAmountBMin, to, deadline).send({
-          from: to,
-          gas: 1000000
-        }).then((result) => {
-          this.transactionHash = result.transactionHash
-          this.afterRemoveLiquidity()
-        }).catch(() => {
-          this.transactionState = 'error'
-        })
-      }
     },
     async afterRemoveLiquidity() {
       this.transactionState = 'success' // 交易状态
@@ -891,7 +788,6 @@ export default {
       if (!to) return
       this.transactionState = 'wait'
       $('#transactionModal').modal('show')
-      this.transactionInfo = `Swapping ${this.fromAmount} ${this.from.name} for ${this.toAmount} ${this.to.name}`
       const amountIn = new BigNumber(this.fromAmount * 1e18)
       // 转bignumber时最多只能有15位小数
       const amountOutMin = new BigNumber(Number(this.toAmount) * 1e18 * 0.992)
@@ -1084,24 +980,11 @@ export default {
     toAddLiquidityfromliquidity() {
       this.tradeType = 'addLiquidity'
       this.hasPair = true
-      this.input1 = {
-        name: 'BUSD',
-        addr: '0x78867BbEeF44f2326bF8DDd1941a4439382EF2A7',
-        icon: require('../assets/images/BUSD.png')
-      }
+      this.input1 = this.tokens[1]
       this.input1Amount = ''
-      this.input2 = {
-        name: 'work',
-        type: 'other',
-        addr: '0xDE259d3beCAdc21C1D8d33442aa68f43AB7327f5',
-        icon: require('../assets/images/defaultTokenIcon.svg')
-      }
+      this.input2 = {}
       this.input2Amount = ''
-      this.input3 = {
-        name: 'USDT',
-        addr: '0x7ef95a0FEE0Dd31b22626fA2e10Ee6A223F8a684',
-        icon: require('../assets/images/USDT.png')
-      }
+      this.input3 = {}
       this.input3Amount = ''
     },
     // showOrHideLiquidity 显示/隐藏liquidity的信息
@@ -1183,7 +1066,13 @@ export default {
     async computedAddAmount(token) {
       // calc_token_amount
       const StableContract = await getStableContract('0x7d4b53506c4f7BB44A377146bEfF89A40E9a26B0')
-      
+      const amount1 = new BigNumber(this.input1Amount).multipliedBy(1e18)
+      const amount2 = new BigNumber(this.input2Amount).multipliedBy(1e18)
+      const amount3 = new BigNumber(this.input3Amount).multipliedBy(1e18)
+      // console.log(amount1, amount2, amount3)
+      // StableContract.methods.calc_token_amount([amount1, amount2, amount3], true).call().then(res => {
+      //   console.log(res)
+      // })
     },
     // 搜索用户有多少种pair
     async searchUserPair() {
@@ -1264,6 +1153,27 @@ export default {
           this.hasPair = true
           this.computedAddAmount('input2')
         })
+      }
+    },
+    "input3Amount" (newVal, oldVal) {
+      if (newVal !== oldVal) {
+        this.judgeApprove('input3')
+        // 计算
+        this.computedAddAmount('input1')
+      }
+    },
+    "input3.name" (newVal, oldVal) {
+      if (newVal !== oldVal) {
+        this.judgeApprove('input3')
+        // // 注：切换币后，先要判断这个pair币是不是存在
+        // // pair存在则继续，否则提醒用户pair由他首创
+        // if (!this.input1.addr || !this.input2.addr) return
+        // this.factoryContract.methods.getPair(this.input1.addr, this.input2.addr).call().then(pairAddr => {
+        //   if (pairAddr === '0x0000000000000000000000000000000000000000') return this.hasPair = false
+        //   // 存在则继续计算
+        //   this.hasPair = true
+        //   this.computedAddAmount('input3')
+        // })
       }
     },
     // swap的 from和to 的amount       from/in  to/out
